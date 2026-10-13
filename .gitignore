@@ -8,6 +8,7 @@ node_modules/
 
 # builds
 dist/
+web-build/
 build/
 .next/
 out/
@@ -15,12 +16,25 @@ out/
 # expo
 .expo/
 .expo-shared/
+expo-env.d.ts
+*.tsbuildinfo
+.kotlin/
+*.orig.*
+.metro-health-check*
+
+# generated native dirs (Continuous Native Generation) — never edit or commit by hand
+/ios
+/android
+
+# signing keys
 *.jks
 *.p8
 *.p12
 *.key
+*.pem
+*.mobileprovision
 
-# runtime output — logs and uploaded product images are never committed,
+# backend runtime output — logs and uploaded product images are never committed,
 # but the directories are tracked via .gitkeep so a fresh clone can write to them
 backend/logs/*
 backend/uploads/*
@@ -31,7 +45,12 @@ backend/uploads/*
 *.db
 *.db-journal
 
-# logs / os
+# logs / debug / os
 *.log
-npm-debug.log*
+npm-debug.*
+yarn-debug.*
+yarn-error.*
 .DS_Store
+
+# example
+example
