@@ -1,0 +1,33 @@
+# deps
+node_modules/
+
+# env — never commit secrets
+.env
+.env.local
+.env*.local
+
+# builds
+dist/
+build/
+.next/
+out/
+
+# expo
+.expo/
+.expo-shared/
+*.jks
+*.p8
+*.p12
+*.key
+
+# uploads (multer) + generated product images
+backend/uploads/
+
+# prisma local dev db
+*.db
+*.db-journal
+
+# logs / os
+*.log
+npm-debug.log*
+.DS_Store
