@@ -20,8 +20,12 @@ out/
 *.p12
 *.key
 
-# uploads (multer) + generated product images
-backend/uploads/
+# runtime output — logs and uploaded product images are never committed,
+# but the directories are tracked via .gitkeep so a fresh clone can write to them
+backend/logs/*
+backend/uploads/*
+!backend/logs/.gitkeep
+!backend/uploads/.gitkeep
 
 # prisma local dev db
 *.db
