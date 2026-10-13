@@ -59,7 +59,6 @@ model User {
   refreshTokens   RefreshToken[]
   deliveryProfile DeliveryPartner?
 
-  @@index([email])
   @@index([role])
   @@map("users")
 }
@@ -91,7 +90,6 @@ model RefreshToken {
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
-  @@index([token])
   @@index([family])
   @@map("refresh_tokens")
 }
@@ -141,7 +139,7 @@ model Product {
 
 model Order {
   id                String               @id @default(uuid())
-  orderNumber       String
+  orderNumber       String               @unique
   customerId        String
   deliveryPartnerId String?
   addressId         String
@@ -162,7 +160,7 @@ model Order {
 
   customer          User                 @relation("CustomerOrders", fields: [customerId], references: [id])
   deliveryPartner   User?                @relation("DeliveryPartnerOrders", fields: [deliveryPartnerId], references: [id])
-  adress            Address              @relation(fields: [addressId], references: [id])
+  address           Address              @relation(fields: [addressId], references: [id])
   items             OrderItem[]
   statusHistory     OrderStatusHistory[]
   tracking          OrderTracking?
@@ -170,7 +168,6 @@ model Order {
   @@index([customerId])
   @@index([deliveryPartnerId])
   @@index([status])
-  @@index([orderNumber])
   @@map("orders")
 }
 
