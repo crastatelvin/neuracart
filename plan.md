@@ -1164,8 +1164,8 @@ All riders: verified, available, bike/scooter/EV, vehicle numbers `KA-01-AB-1001
 | 19 | Eggs (Brown) | Meat | 6 pcs | 60 | 30 | — |
 
 **Demo orders**
-1. Delivered: 3 × Bananas, 1 × Spinach, COD, Home address, ₹220 + ₹40 = ₹260, rider Ravi, delivered yesterday.
-2. Active: 2 × Mangoes, 3 × Apples, COD, Home address, ₹500 + ₹0 = ₹500, status `PREPARING`, so the demo can show the admin assigning a rider.
+1. Delivered: 3 × Bananas, 1 × Spinach, COD, Home address, ₹205 + ₹40 = ₹245, rider Ravi, delivered yesterday.
+2. Active: 2 × Mangoes, 3 × Apples, COD, Home address, ₹1,040 + ₹0 = ₹1,040, status `PREPARING`, so the demo can show the admin assigning a rider.
 
 Product images live in `backend/prisma/seed/assets/` and are copied to `backend/uploads/seed/` on seed, so the demo works offline. Production seed uses optimized WebP.
 
@@ -1678,6 +1678,7 @@ Rules:
 - Never expose `JWT_*`, `RESEND_API_KEY`, `RAZORPAY_KEY_SECRET` to mobile/admin clients.
 - `EXPO_PUBLIC_API_URL` and `NEXT_PUBLIC_API_URL` are the only public vars.
 - Production `CORS_ORIGINS` contains only the real admin/domain origins.
+- In development only, when `RESEND_API_KEY` is empty, OTP responses include `data.devOtp` and no email is sent. This field is never returned in production; it exists so the first login can be tested without an email provider.
 
 ### 12.2 Config and utilities
 

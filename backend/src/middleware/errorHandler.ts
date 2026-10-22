@@ -27,7 +27,7 @@ export const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
     } else {
       logger.warn(err.message, {
         ...requestContext,
-        code: err.code,
+        errorCode: err.code,
         statusCode: err.statusCode,
       });
     }

@@ -7,7 +7,7 @@ LocalMart is a full-stack grocery delivery platform for a single neighbourhood s
 | App | Stack | Status |
 |---|---|---|
 | **Customer mobile** | Expo SDK 57, React Native, NativeWind, Expo Router, Zustand | Scaffold ready; auth/home/cart next |
-| **Backend API** | Node.js, Express 5, TypeScript, Prisma 5.22, PostgreSQL | 11-table schema + migrations ready; API next |
+| **Backend API** | Node.js, Express 5, TypeScript, Prisma 5.22, PostgreSQL | Auth, seed data, and 11-table schema ready; catalog/orders next |
 | **Admin panel** | Next.js, Tailwind CSS, Axios | Not started |
 | **Delivery app** | Expo, React Native, NativeWind | Not started |
 
@@ -102,7 +102,7 @@ On a physical phone, set `EXPO_PUBLIC_API_URL=http://<your-LAN-IP>:8000` in the 
 
 ## Current milestone
 
-**M0 — Foundations.** Repo/docs aligned, PostgreSQL Compose service configured, Prisma schema and migrations ready, backend scripts in place. Next: backend config, middleware, utilities, and auth module.
+**M1 — Auth done.** Backend foundation, aligned Prisma schema, idempotent seed, OTP login, refresh rotation/reuse detection, RBAC middleware, and rider password login are working. Next: products, addresses, orders, and delivery APIs.
 
 ## License
 

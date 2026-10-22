@@ -7,6 +7,7 @@ import express from 'express';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import { env } from './config/env';
+import { authRoutes } from './modules/auth/auth.routes';
 import { errorHandler } from './middleware/errorHandler';
 import { globalRateLimiter } from './middleware/rateLimiter';
 import { notFound } from './middleware/notFound';
@@ -65,6 +66,8 @@ app.use(
   '/uploads',
   express.static(uploadDir, { maxAge: '7d', immutable: true }),
 );
+
+app.use('/api/auth', authRoutes);
 
 app.get('/health', (_req, res) => {
   sendSuccess(res, {
