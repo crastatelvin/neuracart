@@ -1,4 +1,15 @@
-This is an Expo/React Native mobile application. Prioritize mobile-first patterns, performance, and cross-platform compatibility.
+This repository is **LocalMart**, a full-stack grocery delivery platform. The customer Expo app lives at the repo root (`src/app/` routes). The API lives in `backend/` (Express 5 + Prisma 5.22 + PostgreSQL). `admin/` (Next.js) and `delivery/` (Expo) will be added later. The complete specification is `plan.md`; read it before changing architecture, schema, API contracts, or business rules.
+
+Prioritize mobile-first patterns, performance, and cross-platform compatibility.
+
+## Project rules
+
+- **Commit and push after every completed, verified step.** Use conventional commits.
+- Never commit `.env`, secrets, logs, uploads, `node_modules/`, or generated native folders.
+- Run the customer app's `npm run lint` and `npx tsc --noEmit`, plus `npm run typecheck` in `backend/`, before declaring work done.
+- Backend architecture is route → middleware → controller → service → repository → Prisma. Controllers never touch Prisma; repositories never hold business logic.
+- Backend API base is `http://localhost:8000`; customer dev server is `http://localhost:8081`; admin will be `http://localhost:3000`.
+- Update `plan.md` when a product or architecture decision changes.
 
 ## Expo has changed — do not trust your training data
 

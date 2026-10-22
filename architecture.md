@@ -1,6 +1,8 @@
-# LocalCart — System Architecture
+# LocalMart — System Architecture
 
-Extracted as-is from the architecture diagram.
+> The authoritative specification is [`plan.md`](./plan.md). This diagram was extracted from the original design images (where the product was called LocalCart) and is kept as an architecture reference.
+
+Extracted from the architecture diagram.
 
 ```mermaid
 %%{init: {"flowchart": {"wrappingWidth": 460, "nodeSpacing": 35, "rankSpacing": 45, "padding": 12}, "themeVariables": {"fontSize": "15px"}}}%%

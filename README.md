@@ -1,56 +1,109 @@
-# Welcome to your Expo app 👋
+# LocalMart
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+**Your neighbourhood market, delivered.**
 
-## Get started
+LocalMart is a full-stack grocery delivery platform for a single neighbourhood store selling **fruits, vegetables, and meat** in Bengaluru. Four apps work together end to end:
 
-1. Install dependencies
+| App | Stack | Status |
+|---|---|---|
+| **Customer mobile** | Expo SDK 57, React Native, NativeWind, Expo Router, Zustand | Scaffold ready; auth/home/cart next |
+| **Backend API** | Node.js, Express 5, TypeScript, Prisma 5.22, PostgreSQL | 11-table schema + migrations ready; API next |
+| **Admin panel** | Next.js, Tailwind CSS, Axios | Not started |
+| **Delivery app** | Expo, React Native, NativeWind | Not started |
 
-   ```bash
-   npm install
-   ```
+## Documentation
 
-2. Start the app
+- **[`plan.md`](./plan.md)** — the complete A-to-Z product, architecture, schema, API, screen, testing, and deployment plan. This is the single source of truth.
+- **[`architecture.md`](./architecture.md)** — system architecture diagram.
+- **[`docs/source/design-plan.md`](./docs/source/design-plan.md)** — original design-image notes (historical; the product was called LocalCart then).
 
-   ```bash
-   npx expo start
-   ```
+## Repository layout
 
-In the output, you'll find options to open the app in a
+This repo currently uses a **flat layout**, not a workspace monorepo:
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```text
+localmart/
+├── src/                    # Customer Expo app (Expo Router routes in src/app/)
+├── backend/                # Express + Prisma API
+│   ├── prisma/             # schema, migrations, seed
+│   ├── src/                # API source (being built)
+│   ├── logs/               # runtime logs (gitignored)
+│   └── uploads/            # local product images (gitignored)
+├── admin/                  # Next.js admin (to be created)
+├── delivery/               # Expo delivery app (to be created)
+├── plan.md
+├── architecture.md
+└── docker-compose.yml      # local PostgreSQL 18
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Path mapping to the target monorepo described in `plan.md`: `apps/customer` → repo root, `apps/api` → `backend/`, `apps/admin` → `admin/`, `apps/delivery` → `delivery/`.
 
-### Other setup steps
+## Quick start
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+### Prerequisites
 
-## Learn more
+- Node.js 20 LTS + npm
+- Docker (for PostgreSQL)
+- Expo Go on a phone, or an iOS/Android simulator
+- A Resend API key for OTP email (optional until auth is built)
 
-To learn more about developing your project with Expo, look at the following resources:
+### 1. Install
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+npm install
+cd backend && npm install && cd ..
+```
 
-## Join the community
+### 2. Start PostgreSQL
 
-Join our community of developers creating universal apps.
+```bash
+docker compose up -d
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+This starts PostgreSQL 18 with database/user/password all set to `localmart`.
+
+### 3. Configure the API
+
+```bash
+cp backend/.env.example backend/.env
+# edit JWT secrets and RESEND_API_KEY
+```
+
+### 4. Migrate and seed
+
+```bash
+cd backend
+npx prisma generate
+npx prisma migrate dev
+cd ..
+```
+
+Seeding will be added with the backend foundation (`npm run db:seed` in `backend/`).
+
+### 5. Run
+
+```bash
+# Terminal 1 — API (http://localhost:8000)
+cd backend && npm run dev
+
+# Terminal 2 — customer app (http://localhost:8081)
+npm start
+```
+
+On a physical phone, set `EXPO_PUBLIC_API_URL=http://<your-LAN-IP>:8000` in the Expo environment; `localhost` points to the phone itself.
+
+## Working agreement
+
+- **Commit and push after every completed, verified step.** No batching days of work into one commit.
+- Conventional commits: `feat:`, `fix:`, `chore:`, `docs:`, `refactor:`, `test:`.
+- Run `npm run lint`, `npm run typecheck` (customer) and `npm run typecheck` (backend) before committing.
+- Never commit `.env`, secrets, `node_modules/`, logs, or uploads.
+- Update `plan.md` when a decision changes; the plan is the contract.
+
+## Current milestone
+
+**M0 — Foundations.** Repo/docs aligned, PostgreSQL Compose service configured, Prisma schema and migrations ready, backend scripts in place. Next: backend config, middleware, utilities, and auth module.
+
+## License
+
+Private project. See [`LICENSE`](./LICENSE).

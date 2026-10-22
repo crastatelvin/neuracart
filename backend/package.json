@@ -1,10 +1,19 @@
 {
-  "name": "backend",
+  "name": "localmart-api",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "LocalMart backend API — Express, Prisma, PostgreSQL",
+  "main": "dist/app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "ts-node-dev --respawn --transpile-only --exit-child -r tsconfig-paths/register src/app.ts",
+    "build": "tsc",
+    "start": "node dist/app.js",
+    "typecheck": "tsc --noEmit",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy",
+    "prisma:studio": "prisma studio",
+    "db:seed": "ts-node prisma/seed.ts"
   },
   "keywords": [],
   "type": "commonjs",
