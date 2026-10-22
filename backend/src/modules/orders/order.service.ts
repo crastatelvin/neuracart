@@ -127,6 +127,9 @@ async function markDelivered(
   ) {
     throw new AppError('This order is not assigned to you', 403, 'FORBIDDEN');
   }
+  if (order.status === 'DELIVERED') {
+    return serializeOrder(order);
+  }
   if (order.status !== 'OUT_FOR_DELIVERY') {
     throw new AppError(
       `Cannot mark a ${order.status.toLowerCase()} order as delivered`,

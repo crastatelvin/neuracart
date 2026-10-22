@@ -119,6 +119,7 @@ async function upsertUser(input: {
   name: string;
   role: Role;
   password?: string;
+  phone?: string;
 }) {
   return prisma.user.upsert({
     where: { email: input.email },
@@ -126,12 +127,14 @@ async function upsertUser(input: {
       name: input.name,
       role: input.role,
       isActive: true,
+      ...(input.phone ? { phone: input.phone } : {}),
       ...(input.password ? { password: input.password } : {}),
     },
     create: {
       email: input.email,
       name: input.name,
       role: input.role,
+      phone: input.phone ?? null,
       password: input.password ?? null,
       isActive: true,
     },
@@ -311,6 +314,7 @@ async function main(): Promise<void> {
     email: 'customer@localmart.app',
     name: 'Sujan Anand',
     role: Role.CUSTOMER,
+    phone: '+91 98765 43210',
   });
 
   const riders: { userId: string; name: string }[] = [];

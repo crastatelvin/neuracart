@@ -9,6 +9,7 @@ import morgan from 'morgan';
 import { env } from './config/env';
 import { addressRoutes } from './modules/addresses/address.routes';
 import { authRoutes } from './modules/auth/auth.routes';
+import { deliveryRoutes } from './modules/delivery/delivery.routes';
 import { errorHandler } from './middleware/errorHandler';
 import { orderRoutes } from './modules/orders/order.routes';
 import { productRoutes } from './modules/products/product.routes';
@@ -74,6 +75,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/addresses', addressRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/delivery', deliveryRoutes);
 
 app.get('/health', (_req, res) => {
   sendSuccess(res, {

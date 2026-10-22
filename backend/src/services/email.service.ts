@@ -146,3 +146,23 @@ Need help? ${env.SUPPORT_EMAIL}`;
     `,
   });
 }
+
+export async function sendRiderDeclinedEmail(input: {
+  to: string;
+  orderNumber: string;
+  riderName: string;
+}): Promise<void> {
+  await sendEmail({
+    to: input.to,
+    subject: `LocalMart ${input.orderNumber}: rider declined`,
+    text: `Rider ${input.riderName} declined order ${input.orderNumber}. The order is back in the preparing queue and needs another rider.`,
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#14532d">
+        <h1 style="font-size:24px;margin:0 0 8px">Rider declined an assignment</h1>
+        <p>Order <strong>${input.orderNumber}</strong> needs another rider.</p>
+        <p>${input.riderName} declined the assignment. The order is back in the preparing queue.</p>
+        <p style="color:#6b7280;font-size:13px">Open the LocalMart admin panel to reassign it.</p>
+      </div>
+    `,
+  });
+}

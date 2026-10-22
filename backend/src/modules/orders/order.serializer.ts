@@ -3,6 +3,18 @@ import { API_CATEGORY, API_ORDER_STATUS, API_PAYMENT_METHOD, API_PAYMENT_STATUS 
 import { absoluteAssetUrl } from '../../utils/url';
 import { env } from '../../config/env';
 
+export const ASSIGNMENT_ACCEPTED_NOTE = 'Rider accepted the assignment';
+
+export function isAssignmentAccepted(order: OrderWithRelations): boolean {
+  if (!order.deliveryPartnerId) return false;
+  return order.statusHistory.some(
+    (entry) =>
+      entry.status === 'ASSIGNED' &&
+      entry.note === ASSIGNMENT_ACCEPTED_NOTE &&
+      entry.changedBy === order.deliveryPartnerId,
+  );
+}
+
 export function serializeOrder(order: OrderWithRelations) {
   return {
     id: order.id,
@@ -14,7 +26,11 @@ export function serializeOrder(order: OrderWithRelations) {
     deliveryFee: order.deliveryFee.toFixed(2),
     discount: order.discount.toFixed(2),
     total: order.total.toFixed(2),
-    payout: order.status === 'DELIVERED' ? env.RIDER_PAYOUT.toFixed(2) : null,
+    payout:
+      order.deliveryPartnerId && order.status !== 'CANCELLED'
+        ? env.RIDER_PAYOUT.toFixed(2)
+        : null,
+    accepted: isAssignmentAccepted(order),
     notes: order.notes,
     estimatedAt: order.estimatedAt,
     deliveredAt: order.deliveredAt,
