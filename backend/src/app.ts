@@ -7,8 +7,10 @@ import express from 'express';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import { env } from './config/env';
+import { addressRoutes } from './modules/addresses/address.routes';
 import { authRoutes } from './modules/auth/auth.routes';
 import { errorHandler } from './middleware/errorHandler';
+import { productRoutes } from './modules/products/product.routes';
 import { globalRateLimiter } from './middleware/rateLimiter';
 import { notFound } from './middleware/notFound';
 import { requestId } from './middleware/requestId';
@@ -68,6 +70,8 @@ app.use(
 );
 
 app.use('/api/auth', authRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/addresses', addressRoutes);
 
 app.get('/health', (_req, res) => {
   sendSuccess(res, {
