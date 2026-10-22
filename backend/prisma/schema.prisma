@@ -7,7 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum ROLE {
+enum Role {
   CUSTOMER
   ADMIN
   DELIVERY_PARTNER
@@ -42,20 +42,21 @@ enum PaymentMethod {
 }
 
 model User {
-  id              String          @id @default(uuid())
-  email           String          @unique
-  name            String?
-  phone           String?
-  password        String?
-  role            ROLE            @default(CUSTOMER)
-  isActive        Boolean         @default(true)
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
+  id          String    @id @default(uuid())
+  email       String    @unique
+  name        String?
+  phone       String?
+  password    String?
+  role        Role      @default(CUSTOMER)
+  isActive    Boolean   @default(true)
+  lastLoginAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   addresses       Address[]
-  orders          Order[]         @relation("CustomerOrders")
-  deliveries      Order[]         @relation("DeliveryPartnerOrders")
-  otps            OtpCode[]
+  orders          Order[]          @relation("CustomerOrders")
+  deliveries      Order[]          @relation("DeliveryPartnerOrders")
+  otpCodes        OtpCode[]
   refreshTokens   RefreshToken[]
   deliveryProfile DeliveryPartner?
 
@@ -64,30 +65,31 @@ model User {
 }
 
 model OtpCode {
-  id        String   @id @default(uuid())
+  id        String    @id @default(uuid())
   userId    String
-  code      String
+  codeHash  String
   expiresAt DateTime
   usedAt    DateTime?
-  attempts  Int      @default(0)
-  createdAt DateTime @default(now())
+  attempts  Int       @default(0)
+  createdAt DateTime  @default(now())
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId])
+  @@index([userId, createdAt])
+  @@index([expiresAt])
   @@map("otp_codes")
 }
 
 model RefreshToken {
   id        String    @id @default(uuid())
   userId    String
-  token     String    @unique
+  tokenHash String    @unique
   family    String
   expiresAt DateTime
   revokedAt DateTime?
   createdAt DateTime  @default(now())
 
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([family])
@@ -95,22 +97,22 @@ model RefreshToken {
 }
 
 model Address {
-  id          String   @id @default(uuid())
-  userId      String
-  label       String   @default("Home")
-  line1       String
-  line2       String?
-  city        String
-  state       String
-  pincode     String
-  latitude    Float?
-  longitude   Float?
-  isDefault   Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(uuid())
+  userId    String
+  label     String   @default("Home")
+  line1     String
+  line2     String?
+  city      String
+  state     String
+  pincode   String
+  latitude  Float?
+  longitude Float?
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  orders      Order[]
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders Order[]
 
   @@index([userId])
   @@map("addresses")
@@ -123,66 +125,70 @@ model Product {
   category    ProductCategory
   price       Decimal         @db.Decimal(10, 2)
   unit        String
-  stock       Int
+  stock       Int             @default(0)
   imageUrl    String?
   isActive    Boolean         @default(true)
   isFeatured  Boolean         @default(false)
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
 
-  orderItems  OrderItem[]
+  orderItems OrderItem[]
 
-  @@index([category])
-  @@index([isActive])
+  @@index([category, isActive])
+  @@index([isFeatured])
+  @@index([name])
   @@map("products")
 }
 
 model Order {
-  id                String               @id @default(uuid())
-  orderNumber       String               @unique
+  id                String        @id @default(uuid())
+  orderNumber       String        @unique
   customerId        String
   deliveryPartnerId String?
   addressId         String
-  status            OrderStatus          @default(PENDING)
-  paymentStatus     PaymentStatus        @default(PENDING)
-  paymentMethod     PaymentMethod        @default(COD)
-  subtotal          Decimal              @db.Decimal(10, 2)
-  deliveryFee       Decimal              @default(0) @db.Decimal(10, 2)
-  discount          Decimal              @default(0) @db.Decimal(10, 2)
-  total             Decimal              @db.Decimal(10, 2)
-  notes             String?
+  status            OrderStatus   @default(PENDING)
+  paymentStatus     PaymentStatus @default(PENDING)
+  paymentMethod     PaymentMethod @default(COD)
+  subtotal          Decimal       @db.Decimal(10, 2)
+  deliveryFee       Decimal       @default(0) @db.Decimal(10, 2)
+  discount          Decimal       @default(0) @db.Decimal(10, 2)
+  total             Decimal       @db.Decimal(10, 2)
+  notes             String?       @db.VarChar(500)
+  idempotencyKey    String?       @unique
   estimatedAt       DateTime?
   deliveredAt       DateTime?
   cancelledAt       DateTime?
-  cancelReason      String?
-  createdAt         DateTime             @default(now())
-  updatedAt         DateTime             @updatedAt
+  cancelReason      String?       @db.VarChar(300)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
 
-  customer          User                 @relation("CustomerOrders", fields: [customerId], references: [id])
-  deliveryPartner   User?                @relation("DeliveryPartnerOrders", fields: [deliveryPartnerId], references: [id])
-  address           Address              @relation(fields: [addressId], references: [id])
-  items             OrderItem[]
-  statusHistory     OrderStatusHistory[]
-  tracking          OrderTracking?
+  customer        User                 @relation("CustomerOrders", fields: [customerId], references: [id])
+  deliveryPartner User?                @relation("DeliveryPartnerOrders", fields: [deliveryPartnerId], references: [id])
+  address         Address              @relation(fields: [addressId], references: [id])
+  items           OrderItem[]
+  statusHistory   OrderStatusHistory[]
+  tracking        OrderTracking?
 
-  @@index([customerId])
-  @@index([deliveryPartnerId])
-  @@index([status])
+  @@index([customerId, createdAt])
+  @@index([deliveryPartnerId, status])
+  @@index([status, createdAt])
+  @@index([createdAt])
   @@map("orders")
 }
 
 model OrderItem {
-  id        String   @id @default(uuid())
+  id        String  @id @default(uuid())
   orderId   String
   productId String
   quantity  Int
-  unitPrice Decimal  @db.Decimal(10, 2)
-  total     Decimal  @db.Decimal(10, 2)
+  unitPrice Decimal @db.Decimal(10, 2)
+  total     Decimal @db.Decimal(10, 2)
 
-  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product   Product  @relation(fields: [productId], references: [id])
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
 
   @@index([orderId])
+  @@index([productId])
   @@map("order_items")
 }
 
@@ -190,61 +196,69 @@ model OrderStatusHistory {
   id        String      @id @default(uuid())
   orderId   String
   status    OrderStatus
-  note      String?
+  note      String?     @db.VarChar(300)
   changedBy String?
   createdAt DateTime    @default(now())
 
-  order     Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
-  @@index([orderId])
+  @@index([orderId, createdAt])
   @@map("order_status_history")
 }
 
 model OrderTracking {
   id                String   @id @default(uuid())
   orderId           String   @unique
-  partnerLatitude   Float?
-  partnerLongitude  Float?
+  latitude          Float?
+  longitude         Float?
   storeLatitude     Float    @default(12.9716)
-  storeLongitude    Float    @default(12.9716)
+  storeLongitude    Float    @default(77.5946)
   customerLatitude  Float?
   customerLongitude Float?
-  updatedAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
-  order             Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@map("order_tracking")
 }
 
 model Store {
-  id        String   @id @default(uuid())
-  name      String   @default("Local Cart")
-  address   String
-  latitude  Float
-  longitude Float
-  phone     String?
-  email     String?
-  openTime  String   @default("08:00")
-  closeTime String   @default("22:00")
-  isOpen    Boolean  @default(true)
+  id                String   @id @default(uuid())
+  name              String   @default("LocalMart Central")
+  address           String
+  city              String   @default("Bengaluru")
+  state             String   @default("Karnataka")
+  pincode           String   @default("560001")
+  latitude          Float    @default(12.9716)
+  longitude         Float    @default(77.5946)
+  phone             String
+  email             String
+  openTime          String   @default("08:00")
+  closeTime         String   @default("22:00")
+  deliveryFee       Decimal  @default(40) @db.Decimal(10, 2)
+  freeDeliveryAbove Decimal  @default(500) @db.Decimal(10, 2)
+  isOpen            Boolean  @default(true)
+  updatedAt         DateTime @updatedAt
 
-  @@map("store")
+  @@map("stores")
 }
 
 model DeliveryPartner {
   id              String   @id @default(uuid())
   userId          String   @unique
-  vehicleType     String   @default("bike")
-  vehicleNumber   String?
+  vehicleType     String   @default("BIKE")
+  vehicleNumber   String
   isAvailable     Boolean  @default(true)
   isVerified      Boolean  @default(false)
   currentLat      Float?
   currentLng      Float?
   totalDeliveries Int      @default(0)
+  earnings        Decimal  @default(0) @db.Decimal(10, 2)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([isAvailable, isVerified])
   @@map("delivery_partners")
 }
