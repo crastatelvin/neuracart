@@ -7,18 +7,21 @@ import express from 'express';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import { env } from './config/env';
+import { prisma } from './config/prisma';
 import { addressRoutes } from './modules/addresses/address.routes';
+import { adminRoutes } from './modules/admin/admin.routes';
 import { authRoutes } from './modules/auth/auth.routes';
 import { deliveryRoutes } from './modules/delivery/delivery.routes';
 import { errorHandler } from './middleware/errorHandler';
 import { orderRoutes } from './modules/orders/order.routes';
 import { productRoutes } from './modules/products/product.routes';
+import { storeRoutes } from './modules/store/store.routes';
 import { globalRateLimiter } from './middleware/rateLimiter';
 import { notFound } from './middleware/notFound';
 import { requestId } from './middleware/requestId';
 import { AppError } from './utils/errors';
 import { morganStream } from './utils/logger';
-import { sendSuccess } from './utils/response';
+import { sendError, sendSuccess } from './utils/response';
 
 const app = express();
 
@@ -76,26 +79,38 @@ app.use('/api/products', productRoutes);
 app.use('/api/addresses', addressRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/delivery', deliveryRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/store', storeRoutes);
 
-app.get('/health', (_req, res) => {
-  sendSuccess(res, {
-    status: 'ok',
-    service: 'localmart-api',
-    environment: env.NODE_ENV,
-    uptimeSeconds: Math.floor(process.uptime()),
-    timestamp: new Date().toISOString(),
-  });
-});
+const healthHandler: express.RequestHandler = async (_req, res) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    sendSuccess(
+      res,
+      {
+        status: 'ok',
+        message: 'Server is running',
+        service: 'localmart-api',
+        environment: env.NODE_ENV,
+        database: 'up',
+        uptimeSeconds: Math.floor(process.uptime()),
+        timestamp: new Date().toISOString(),
+      },
+      'Server is running',
+    );
+  } catch {
+    sendError(
+      res,
+      'Service unavailable',
+      503,
+      { database: 'down' },
+      'DATABASE_DOWN',
+    );
+  }
+};
 
-app.get('/api/health', (_req, res) => {
-  sendSuccess(res, {
-    status: 'ok',
-    service: 'localmart-api',
-    environment: env.NODE_ENV,
-    uptimeSeconds: Math.floor(process.uptime()),
-    timestamp: new Date().toISOString(),
-  });
-});
+app.get('/health', healthHandler);
+app.get('/api/health', healthHandler);
 
 app.use(notFound);
 app.use(errorHandler);

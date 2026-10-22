@@ -19,6 +19,12 @@ export function startOfIstDay(now = new Date()): Date {
   );
 }
 
+export function startOfIstDaysAgo(daysAgo: number, now = new Date()): Date {
+  return new Date(
+    startOfIstDay(now).getTime() - daysAgo * 24 * 60 * 60_000,
+  );
+}
+
 export function startOfIstWeek(now = new Date()): Date {
   const local = shifted(now);
   const day = local.getUTCDay();

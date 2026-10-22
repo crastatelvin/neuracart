@@ -166,3 +166,28 @@ export async function sendRiderDeclinedEmail(input: {
     `,
   });
 }
+
+export async function sendDeliveryPartnerWelcomeEmail(input: {
+  to: string;
+  name: string;
+  password: string;
+}): Promise<void> {
+  const isProduction = env.NODE_ENV === 'production';
+  const credentials = isProduction
+    ? 'Sign in with the delivery partner app using this email address. Ask your manager for access if you cannot sign in.'
+    : `Your temporary password is: ${input.password}`;
+  await sendEmail({
+    to: input.to,
+    subject: 'Welcome to LocalMart Delivery',
+    text: `Hi ${input.name},\n\nYour LocalMart Delivery partner account is ready.\n\n${credentials}\n\nSupport: ${env.SUPPORT_EMAIL}`,
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#14532d">
+        <h1 style="font-size:24px;margin:0 0 8px">Welcome to LocalMart Delivery</h1>
+        <p>Hi ${input.name},</p>
+        <p>Your delivery partner account is ready.</p>
+        <p style="background:#f0fdf4;padding:16px;border-radius:12px">${credentials}</p>
+        <p style="color:#6b7280;font-size:13px">Need help? ${env.SUPPORT_EMAIL}</p>
+      </div>
+    `,
+  });
+}
