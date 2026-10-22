@@ -1,98 +1,143 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
+import { StatusBar } from 'expo-status-bar';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { AppText } from '@/components/ui/AppText';
+import { BrandMark } from '@/components/ui/BrandMark';
+import { Button } from '@/components/ui/Button';
+import { colors, radius } from '@/constants/design';
+import { useAuthStore } from '@/store/auth';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+export default function AuthGateScreen() {
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const isLoading = useAuthStore((state) => state.isLoading);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const bootError = useAuthStore((state) => state.bootError);
+  const loadStoredAuth = useAuthStore((state) => state.loadStoredAuth);
+  const clearLocalSession = useAuthStore((state) => state.clearLocalSession);
+  const [minimumElapsed, setMinimumElapsed] = useState(false);
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
+  useEffect(() => {
+    void loadStoredAuth();
+    const timer = setTimeout(() => setMinimumElapsed(true), 500);
+    return () => clearTimeout(timer);
+  }, [loadStoredAuth]);
+
+  useEffect(() => {
+    if (isLoading || !minimumElapsed) return;
+    void SplashScreen.hideAsync().catch(() => undefined);
+    if (bootError) return;
+    router.replace(isAuthenticated ? '/(tabs)' : '/(auth)');
+  }, [bootError, isAuthenticated, isLoading, minimumElapsed, router]);
+
+  async function retry() {
+    await loadStoredAuth();
   }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
+
+  async function signInInstead() {
+    await clearLocalSession();
+    router.replace('/(auth)');
   }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
+
   return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+    <LinearGradient
+      colors={['#14532D', '#15803D', '#22C55E']}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={styles.fill}
+    >
+      <StatusBar style="light" />
+      <View style={styles.bubbleOne} />
+      <View style={styles.bubbleTwo} />
+      <View
+        style={[
+          styles.content,
+          { paddingTop: insets.top + 40, paddingBottom: insets.bottom + 28 },
+        ]}
+      >
+        <View style={styles.brand}>
+          <BrandMark size={78} light />
+          <AppText variant="display" tone="white" style={styles.wordmark}>
+            LocalMart
+          </AppText>
+          <AppText variant="body" style={styles.tagline}>
+            Your neighbourhood market, delivered.
+          </AppText>
+        </View>
 
-export default function HomeScreen() {
-  return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+        {bootError ? (
+          <View style={styles.errorCard}>
+            <AppText variant="section">We couldn’t reach your account</AppText>
+            <AppText variant="body" tone="muted" style={styles.errorText}>
+              {bootError}
+            </AppText>
+            <Button label="Try again" onPress={retry} icon="refresh" />
+            <Button
+              label="Sign in instead"
+              onPress={signInInstead}
+              variant="ghost"
+              style={{ marginTop: 4 }}
+            />
+          </View>
+        ) : (
+          <View style={styles.loading}>
+            <ActivityIndicator color={colors.white} />
+            <AppText variant="meta" style={{ color: 'rgba(255,255,255,0.78)' }}>
+              Fresh finds, close to home
+            </AppText>
+          </View>
+        )}
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+        <AppText variant="caption" style={styles.footer}>
+          Bengaluru · 08:00–22:00 IST
+        </AppText>
+      </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  fill: { flex: 1 },
+  content: {
     flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
-  },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
     alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
+    justifyContent: 'space-between',
+    paddingHorizontal: 28,
   },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
+  bubbleOne: {
+    position: 'absolute',
+    width: 260,
+    height: 260,
+    borderRadius: 130,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    top: -80,
+    right: -90,
   },
-  title: {
-    textAlign: 'center',
+  bubbleTwo: {
+    position: 'absolute',
+    width: 190,
+    height: 190,
+    borderRadius: 95,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    bottom: 80,
+    left: -100,
   },
-  code: {
-    textTransform: 'uppercase',
+  brand: { alignItems: 'center', marginTop: 36 },
+  wordmark: { marginTop: 18, letterSpacing: -1.2 },
+  tagline: { color: 'rgba(255,255,255,0.82)', marginTop: 8, textAlign: 'center' },
+  loading: { alignItems: 'center', gap: 12, marginBottom: 10 },
+  errorCard: {
+    width: '100%',
+    backgroundColor: colors.white,
+    borderRadius: radius.xxl,
+    padding: 20,
+    gap: 10,
+    marginTop: 36,
   },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
-  },
+  errorText: { marginBottom: 6 },
+  footer: { color: 'rgba(255,255,255,0.66)' },
 });

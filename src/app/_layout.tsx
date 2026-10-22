@@ -1,20 +1,69 @@
 import '../global.css';
 
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
-import { useColorScheme } from 'react-native';
+import { useEffect } from 'react';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { ToastHost } from '@/components/ui/ToastHost';
+import { colors } from '@/constants/design';
+import { setSessionExpiredHandler } from '@/lib/session';
+import { useAuthStore } from '@/store/auth';
+import { useCartStore } from '@/store/cart';
+import { useConfigStore } from '@/store/config';
 
-import { AnimatedSplashOverlay } from '@/components/animated-icon';
-import AppTabs from '@/components/app-tabs';
+SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
-SplashScreen.preventAutoHideAsync();
+export default function RootLayout() {
+  const router = useRouter();
+  const user = useAuthStore((state) => state.user);
+  const loadStore = useConfigStore((state) => state.loadStore);
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  useEffect(() => {
+    void loadStore();
+  }, [loadStore]);
+
+  useEffect(() => {
+    if (user) {
+      void useCartStore.getState().hydrate(user.id);
+    } else {
+      useCartStore.getState().reset();
+    }
+  }, [user]);
+
+  useEffect(() => {
+    setSessionExpiredHandler(() => {
+      void useAuthStore.getState().clearLocalSession();
+      useCartStore.getState().reset();
+      router.replace('/(auth)');
+    });
+    return () => setSessionExpiredHandler(null);
+  }, [router]);
+
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AnimatedSplashOverlay />
-      <AppTabs />
-    </ThemeProvider>
+    <SafeAreaProvider>
+      <StatusBar style="dark" />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: colors.background },
+          animation: 'slide_from_right',
+        }}
+      >
+        <Stack.Screen name="index" options={{ animation: 'fade' }} />
+        <Stack.Screen name="(auth)" options={{ animation: 'fade' }} />
+        <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
+        <Stack.Screen name="product/[id]" />
+        <Stack.Screen name="cart" />
+        <Stack.Screen name="checkout" />
+        <Stack.Screen name="order/[id]" />
+        <Stack.Screen name="tracking/[id]" />
+        <Stack.Screen name="addresses" />
+        <Stack.Screen name="add-address" />
+        <Stack.Screen name="edit-address/[id]" />
+        <Stack.Screen name="edit-profile" />
+      </Stack>
+      <ToastHost />
+    </SafeAreaProvider>
   );
 }

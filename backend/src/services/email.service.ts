@@ -147,6 +147,45 @@ Need help? ${env.SUPPORT_EMAIL}`;
   });
 }
 
+export async function sendRiderAssignmentEmail(input: {
+  to: string;
+  riderName: string;
+  orderNumber: string;
+  deliveryArea: string;
+  total: string;
+  payout: string;
+}): Promise<void> {
+  await sendEmail({
+    to: input.to,
+    subject: `LocalMart ${input.orderNumber}: new delivery assignment`,
+    text: `Hi ${input.riderName},
+
+A new order is ready for you to accept in the LocalMart Delivery app.
+
+Order: ${input.orderNumber}
+Deliver to: ${input.deliveryArea}
+Order value: INR ${input.total}
+Your payout: INR ${input.payout}
+
+Open the app to accept or decline this assignment.`,
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#14532d">
+        <h1 style="font-size:24px;margin:0 0 8px">New delivery assignment</h1>
+        <p>Hi ${input.riderName},</p>
+        <p>A new order is ready for you in the LocalMart Delivery app.</p>
+        <table style="width:100%;background:#f0fdf4;border-radius:12px;padding:12px;border-collapse:separate;border-spacing:8px">
+          <tr><td style="color:#4b5563">Order</td><td style="font-weight:700">${input.orderNumber}</td></tr>
+          <tr><td style="color:#4b5563">Deliver to</td><td style="font-weight:700">${input.deliveryArea}</td></tr>
+          <tr><td style="color:#4b5563">Order value</td><td style="font-weight:700">INR ${input.total}</td></tr>
+          <tr><td style="color:#4b5563">Your payout</td><td style="font-weight:700">INR ${input.payout}</td></tr>
+        </table>
+        <p>Open the app to accept or decline this assignment.</p>
+        <p style="color:#6b7280;font-size:13px">Need help? ${env.SUPPORT_EMAIL}</p>
+      </div>
+    `,
+  });
+}
+
 export async function sendRiderDeclinedEmail(input: {
   to: string;
   orderNumber: string;

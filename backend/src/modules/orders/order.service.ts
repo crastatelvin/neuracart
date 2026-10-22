@@ -2,7 +2,10 @@ import { Prisma } from '@prisma/client';
 import { OrderStatus, PaymentMethod, Role } from '@prisma/client';
 import { env } from '../../config/env';
 import { prisma } from '../../config/prisma';
-import { sendOrderStatusEmail } from '../../services/email.service';
+import {
+  sendOrderStatusEmail,
+  sendRiderAssignmentEmail,
+} from '../../services/email.service';
 import type { AuthUser } from '../../types/auth';
 import { AppError } from '../../utils/errors';
 import { logger } from '../../utils/logger';
@@ -704,6 +707,24 @@ export const orderService = {
     });
 
     notifyOrder(updated, 'ASSIGNED');
+    if (partner.email) {
+      void sendRiderAssignmentEmail({
+        to: partner.email,
+        riderName: partner.name ?? 'rider',
+        orderNumber: updated.orderNumber,
+        deliveryArea: [updated.address.line1, updated.address.city, updated.address.pincode]
+          .filter(Boolean)
+          .join(', '),
+        total: updated.total.toFixed(2),
+        payout: env.RIDER_PAYOUT.toFixed(2),
+      }).catch((error: unknown) => {
+        logger.error('Could not send rider assignment email', {
+          orderId: id,
+          riderId: input.partnerId,
+          error: error instanceof Error ? error : new Error(String(error)),
+        });
+      });
+    }
     logger.info('Rider assigned', {
       orderId: id,
       riderId: input.partnerId,
