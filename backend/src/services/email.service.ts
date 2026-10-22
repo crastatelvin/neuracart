@@ -65,3 +65,84 @@ export async function sendOtpEmail(email: string, code: string): Promise<void> {
     `,
   });
 }
+
+export type OrderEmailStatus =
+  | 'PENDING'
+  | 'CONFIRMED'
+  | 'PREPARING'
+  | 'ASSIGNED'
+  | 'OUT_FOR_DELIVERY'
+  | 'DELIVERED'
+  | 'CANCELLED';
+
+const ORDER_EMAIL_COPY: Record<
+  OrderEmailStatus,
+  { subject: string; heading: string; body: string }
+> = {
+  PENDING: {
+    subject: 'Order placed',
+    heading: 'We received your order',
+    body: 'The store will confirm it shortly.',
+  },
+  CONFIRMED: {
+    subject: 'Order confirmed',
+    heading: 'Your order is confirmed',
+    body: 'We are getting your items ready.',
+  },
+  PREPARING: {
+    subject: 'Order is being packed',
+    heading: 'Your order is being packed',
+    body: 'We will hand it to a rider soon.',
+  },
+  ASSIGNED: {
+    subject: 'Rider assigned',
+    heading: 'A rider is assigned',
+    body: 'Your order will be picked up shortly.',
+  },
+  OUT_FOR_DELIVERY: {
+    subject: 'Out for delivery',
+    heading: 'Your order is on the way',
+    body: 'The rider is heading to your address.',
+  },
+  DELIVERED: {
+    subject: 'Order delivered',
+    heading: 'Delivered — enjoy!',
+    body: 'Thanks for shopping with LocalMart.',
+  },
+  CANCELLED: {
+    subject: 'Order cancelled',
+    heading: 'Your order was cancelled',
+    body: 'If you paid online, a refund will follow shortly.',
+  },
+};
+
+export async function sendOrderStatusEmail(input: {
+  to: string;
+  orderNumber: string;
+  status: OrderEmailStatus;
+  total: string;
+}): Promise<void> {
+  const copy = ORDER_EMAIL_COPY[input.status];
+  const text = `${copy.heading}
+
+Order ${input.orderNumber}
+Total: INR ${input.total}
+
+${copy.body}
+
+Need help? ${env.SUPPORT_EMAIL}`;
+  await sendEmail({
+    to: input.to,
+    subject: `LocalMart ${input.orderNumber}: ${copy.subject}`,
+    text,
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#14532d">
+        <h1 style="font-size:24px;margin:0 0 8px">${copy.heading}</h1>
+        <p style="color:#4b5563">Order <strong>${input.orderNumber}</strong></p>
+        <p style="font-size:20px;font-weight:700">INR ${input.total}</p>
+        <p>${copy.body}</p>
+        <p style="color:#6b7280;font-size:13px">Need help? ${env.SUPPORT_EMAIL}</p>
+      </div>
+    `,
+  });
+}

@@ -10,6 +10,7 @@ import { env } from './config/env';
 import { addressRoutes } from './modules/addresses/address.routes';
 import { authRoutes } from './modules/auth/auth.routes';
 import { errorHandler } from './middleware/errorHandler';
+import { orderRoutes } from './modules/orders/order.routes';
 import { productRoutes } from './modules/products/product.routes';
 import { globalRateLimiter } from './middleware/rateLimiter';
 import { notFound } from './middleware/notFound';
@@ -72,6 +73,7 @@ app.use(
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/addresses', addressRoutes);
+app.use('/api/orders', orderRoutes);
 
 app.get('/health', (_req, res) => {
   sendSuccess(res, {
