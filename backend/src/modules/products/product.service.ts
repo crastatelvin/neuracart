@@ -165,6 +165,9 @@ export const productService = {
         ...(input.isFeatured !== undefined
           ? { isFeatured: input.isFeatured }
           : {}),
+        ...(input.removeImage === true && !newImage
+          ? { imageUrl: null }
+          : {}),
         ...(newImage ? { imageUrl: newImage } : {}),
       });
 

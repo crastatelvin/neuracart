@@ -41,6 +41,7 @@ export const productUpdateSchema = z.object({
   stock: z.coerce.number().int().min(0).max(100000).optional(),
   isActive: booleanish,
   isFeatured: booleanish,
+  removeImage: booleanish,
 });
 
 export type ProductListQuery = z.infer<typeof productListQuerySchema>;
