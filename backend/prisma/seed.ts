@@ -12,6 +12,7 @@ import {
 } from '@prisma/client';
 import sharp from 'sharp';
 import { hashPassword } from '../src/utils/password';
+import { env } from '../src/config/env';
 
 const prisma = new PrismaClient();
 const DEV_PASSWORD = 'LocalMart@123';
@@ -296,8 +297,286 @@ async function createOrders(input: {
   }
 }
 
-async function main(): Promise<void> {
-  if (
+async function seedV2(input: {
+  customer: { id: string };
+  products: Map<string, { id: string; price: Prisma.Decimal }>;
+}): Promise<void> {
+  const { customer, products } = input;
+
+  // ——— Per-user accounts ———
+  await prisma.userPrefs.upsert({
+    where: { userId: customer.id },
+    create: {
+      userId: customer.id,
+      dietTags: ['VEGETARIAN', 'HOUSEHOLD_2'],
+      language: 'en',
+    },
+    update: {},
+  });
+  const wallet = await prisma.wallet.upsert({
+    where: { userId: customer.id },
+    create: { userId: customer.id, balance: new Prisma.Decimal(150) },
+    update: {},
+  });
+  const walletTxns = await prisma.walletTransaction.count({
+    where: { userId: customer.id },
+  });
+  if (walletTxns === 0) {
+    await prisma.walletTransaction.create({
+      data: {
+        userId: customer.id,
+        type: 'GIFT',
+        amount: new Prisma.Decimal(150),
+        note: 'Welcome credit — thanks for joining LocalMart!',
+      },
+    });
+  }
+  await prisma.loyaltyAccount.upsert({
+    where: { userId: customer.id },
+    create: { userId: customer.id, points: 120, lifetimeSpend: new Prisma.Decimal(2190) },
+    update: {},
+  });
+  await prisma.referralCode.upsert({
+    where: { userId: customer.id },
+    create: { userId: customer.id, code: 'SUJAN50' },
+    update: {},
+  });
+
+  // ——— Recipes ———
+  const RECIPES: Array<{
+    slug: string;
+    title: string;
+    description: string;
+    servings: number;
+    steps: string[];
+    ingredients: Array<[string, number]>;
+  }> = [
+    {
+      slug: 'tomato-onion-egg-bhurji',
+      title: 'Masala Egg Bhurji',
+      description: 'A 15-minute three-ingredient breakfast that always lands.',
+      servings: 2,
+      steps: [
+        'Chop onions, tomatoes and capsicum.',
+        'Sizzle with masala, crack in eggs, scramble.',
+        'Finish with coriander and serve hot.',
+      ],
+      ingredients: [
+        ['Eggs (Brown)', 1],
+        ['Onions', 1],
+        ['Tomatoes (Hybrid)', 1],
+        ['Capsicum (Green)', 1],
+      ],
+    },
+    {
+      slug: 'weeknight-salad-bowl',
+      title: 'Crunchy Weeknight Salad',
+      description: 'Everything you need for a fresh, filling salad night.',
+      servings: 2,
+      steps: [
+        'Chop capsicum, carrots, tomato.',
+        'Toss with pomegranate for sweetness.',
+        'Dress with lemon, oil and salt.',
+      ],
+      ingredients: [
+        ['Capsicum (Green)', 1],
+        ['Carrots', 1],
+        ['Tomatoes (Hybrid)', 1],
+        ['Pomegranate', 1],
+        ['Grapes (Green)', 1],
+      ],
+    },
+    {
+      slug: 'rohu-fish-curry',
+      title: 'Sunday Rohu Curry',
+      description: 'A Bengali-style gravy recipe for the family table.',
+      servings: 4,
+      steps: [
+        'Marinate fish with salt and turmeric; fry lightly.',
+        'Build the onion-ginger gravy for ten minutes.',
+        'Simmer fish in the gravy; rest before serving.',
+      ],
+      ingredients: [
+        ['Fish (Rohu)', 1],
+        ['Onions', 2],
+        ['Tomatoes (Hybrid)', 1],
+      ],
+    },
+    {
+      slug: 'fruit-bowl-breakfast',
+      title: 'Monsoon Fruit Bowl',
+      description: 'Zero-cook breakfast bowl that clears the fruit tray.',
+      servings: 2,
+      steps: [
+        'Cube apples, mangoes, bananas and grapes.',
+        'Toss with lemon juice to keep it fresh.',
+        'Top with pomegranate pearls.',
+      ],
+      ingredients: [
+        ['Apples (Shimla)', 1],
+        ['Mangoes (Alphonso)', 1],
+        ['Bananas (Robusta)', 1],
+        ['Grapes (Green)', 1],
+        ['Pomegranate', 1],
+      ],
+    },
+  ];
+
+  for (const recipe of RECIPES) {
+    const saved = await prisma.recipe.upsert({
+      where: { slug: recipe.slug },
+      create: {
+        slug: recipe.slug,
+        title: recipe.title,
+        description: recipe.description,
+        servings: recipe.servings,
+        steps: recipe.steps,
+        isPublished: true,
+      },
+      update: {
+        title: recipe.title,
+        description: recipe.description,
+        servings: recipe.servings,
+        steps: recipe.steps,
+      },
+    });
+    for (const [productName, quantity] of recipe.ingredients) {
+      const product = products.get(productName);
+      if (!product) continue;
+      await prisma.recipeItem.upsert({
+        where: { recipeId_productId: { recipeId: saved.id, productId: product.id } },
+        create: { recipeId: saved.id, productId: product.id, quantity },
+        update: { quantity },
+      });
+    }
+  }
+
+  // ——— Help articles ———
+  const ARTICLES: Array<{ slug: string; title: string; body: string; topics: string[] }> = [
+    {
+      slug: 'delivery-charges',
+      title: 'How are delivery charges calculated?',
+      body: 'Delivery costs ₹40 per order and is free on orders of ₹500 or more. During heavy rain, a small surge fee may apply and is always shown before you place the order.',
+      topics: ['delivery', 'fees'],
+    },
+    {
+      slug: 'cancel-order',
+      title: 'How do I cancel my order?',
+      body: 'Open the order in your orders list and use Cancel while the status is Pending or Confirmed. Once the store starts preparing, only the store can cancel, and support is happy to help.',
+      topics: ['orders', 'cancellation'],
+    },
+    {
+      slug: 'upi-payments',
+      title: 'How do UPI payments work?',
+      body: 'Choose UPI at checkout and approve the payment request in GPay, PhonePe or any UPI app. If your payment app shows a different amount, ignore the request and contact us. COD stays available.',
+      topics: ['payments', 'upi'],
+    },
+    {
+      slug: 'delivery-slots',
+      title: 'Can I schedule a delivery?',
+      body: 'Yes. At checkout pick a delivery slot such as 8–10 AM or 6–8 PM. Slots are optional; choosing one reserves a rider window so your groceries arrive when you want.',
+      topics: ['delivery', 'slots'],
+    },
+    {
+      slug: 'wallet-refunds',
+      title: 'What happens to refunds?',
+      body: 'Cancellations of prepaid orders are credited instantly to your LocalMart wallet, which applies automatically at your next checkout. COD refunds are settled by the store.',
+      topics: ['payments', 'refund', 'wallet'],
+    },
+    {
+      slug: 'fresh-produce-quality',
+      title: 'What if my produce is not fresh?',
+      body: 'Report the item right after delivery from the order screen. Our local team reviews every case and typically credits your wallet same day. We promise market-fresh or your money back.',
+      topics: ['quality', 'refund', 'support'],
+    },
+    {
+      slug: 'referrals',
+      title: 'How does the referral program work?',
+      body: 'Share your referral code from Profile → Referrals. Friends get ₹50 off their first order, and you get ₹50 wallet credit once their first order is delivered.',
+      topics: ['referrals', 'rewards'],
+    },
+    {
+      slug: 'scratch-contact',
+      title: 'Still need help?',
+      body: 'The support assistant on this page answers instantly from these articles. For anything it cannot solve, email support@localmart.app and the store team will reply within a few hours.',
+      topics: ['support'],
+    },
+  ];
+  for (const article of ARTICLES) {
+    await prisma.helpArticle.upsert({
+      where: { slug: article.slug },
+      create: article,
+      update: { title: article.title, body: article.body, topics: article.topics },
+    });
+  }
+
+  // ——— Product tags ———
+  const TAGS: Record<string, string[]> = {
+    'Bananas (Robusta)': ['VEGAN', 'BUDGET'],
+    'Apples (Shimla)': ['EXOTIC'],
+    'Mangoes (Alphonso)': ['EXOTIC', 'SEASONAL'],
+    'Oranges (Nagpur)': ['SEASONAL'],
+    'Grapes (Green)': [],
+    Pomegranate: ['SEASONAL'],
+    'Tomatoes (Hybrid)': ['STAPLE'],
+    Onions: ['STAPLE', 'BUDGET'],
+    Potatoes: ['STAPLE', 'BUDGET'],
+    Spinach: ['LEAN'],
+    Carrots: ['LEAN'],
+    Broccoli: ['LEAN', 'EXOTIC'],
+    'Capsicum (Green)': [],
+    'Chicken Breast': ['LEAN', 'PROTEIN'],
+    'Chicken Curry Cut': ['PROTEIN', 'FAMILY'],
+    'Mutton Curry Cut': ['PROTEIN', 'FAMILY'],
+    'Fish (Rohu)': ['PROTEIN', 'FAMILY'],
+    'Prawns (Medium)': ['PROTEIN', 'EXOTIC'],
+    'Eggs (Brown)': ['PROTEIN', 'VEGETARIAN'],
+  };
+  for (const [name, tags] of Object.entries(TAGS)) {
+    const product = products.get(name);
+    if (!product) continue;
+    await prisma.product.update({ where: { id: product.id }, data: { tags } });
+  }
+
+  // ——— Delivery slots for the next 7 days ———
+  const WINDOWS: Array<[string, string]> = [
+    ['08:00', '10:00'],
+    ['10:00', '12:00'],
+    ['16:00', '18:00'],
+    ['18:00', '20:00'],
+  ];
+  for (let day = 0; day < 7; day += 1) {
+    const date = new Date();
+    date.setHours(0, 0, 0, 0);
+    date.setDate(date.getDate() + day);
+    for (const [startTime, endTime] of WINDOWS) {
+      const windowLabel = `${startTime.slice(0, 5)}–${endTime.slice(0, 5)}`.replace('08:00', '8 AM').replace('10:00', '10 AM').replace('12:00', '12 PM').replace('16:00', '4 PM').replace('18:00', '6 PM').replace('20:00', '8 PM');
+      const exists = await prisma.deliverySlot.findFirst({
+        where: {
+          date: { gte: new Date(date.getFullYear(), date.getMonth(), date.getDate()), lt: new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1) },
+          windowLabel,
+        },
+      });
+      if (!exists) {
+        await prisma.deliverySlot.create({
+          data: {
+            date,
+            windowLabel,
+            startTime,
+            endTime,
+            capacity: env.SLOT_CAPACITY_PER_WINDOW,
+          },
+        });
+      }
+    }
+  }
+
+  console.log(
+    `v2 seed: wallet ₹${wallet.balance.toFixed(2)}, 4 recipes, ${ARTICLES.length} help articles, 7 days × ${WINDOWS.length} slots.`,
+  );
+}
+
+async function main(): Promise<void> {  if (
     process.env.NODE_ENV === 'production' &&
     process.env.ALLOW_SEED !== 'true'
   ) {
@@ -436,6 +715,8 @@ async function main(): Promise<void> {
     riderUserId: riders[0].userId,
     products,
   });
+
+  await seedV2({ customer, products });
 
   console.log('Seed complete.');
   console.log('Admin:    admin@localmart.app');
