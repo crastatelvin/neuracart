@@ -26,6 +26,7 @@ import type {
   UpdateOrderStatusInput,
 } from './order.schemas';
 import { serializeOrder } from './order.serializer';
+import { publish } from '../../utils/events';
 
 const TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   PENDING: ['CONFIRMED', 'CANCELLED'],
@@ -38,6 +39,24 @@ const TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
 };
 
 function notifyOrder(order: OrderWithRelations, status: OrderStatus): void {
+  publish(`user:${order.customerId}`, 'order.status', {
+    orderId: order.id,
+    orderNumber: order.orderNumber,
+    status,
+    paymentStatus: order.paymentStatus,
+  });
+  if (order.deliveryPartnerId) {
+    publish(`rider:${order.deliveryPartnerId}`, 'order.status', {
+      orderId: order.id,
+      orderNumber: order.orderNumber,
+      status,
+    });
+  }
+  publish('admin', 'order.status', {
+    orderId: order.id,
+    orderNumber: order.orderNumber,
+    status,
+  });
   void sendOrderStatusEmail({
     to: order.customer.email,
     orderNumber: order.orderNumber,

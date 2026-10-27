@@ -10,6 +10,7 @@ import {
   type EarningsPeriod,
 } from '../../utils/ist';
 import { orderInclude, orderRepository } from '../orders/order.repository';
+import { publish } from '../../utils/events';
 import {
   ASSIGNMENT_ACCEPTED_NOTE,
   isAssignmentAccepted,
@@ -178,6 +179,16 @@ export const deliveryService = {
       });
     });
 
+    publish(`user:${updated.customerId}`, 'order.accepted', {
+      orderId: updated.id,
+      orderNumber: updated.orderNumber,
+      riderId: userId,
+    });
+    publish('admin', 'order.accepted', {
+      orderId: updated.id,
+      orderNumber: updated.orderNumber,
+      riderId: userId,
+    });
     logger.info('Delivery assignment accepted', { orderId, riderId: userId });
     return serializeOrder(updated);
   },
@@ -241,6 +252,12 @@ export const deliveryService = {
         });
       });
     }
+    publish('admin', 'order.declined', {
+      orderId: updated.id,
+      orderNumber: updated.orderNumber,
+      riderId: userId,
+      status: updated.status,
+    });
     logger.info('Delivery assignment declined', { orderId, riderId: userId });
     return serializeOrder(updated);
   },
@@ -299,6 +316,17 @@ export const deliveryService = {
     });
 
     notifyCustomer(updated, 'OUT_FOR_DELIVERY');
+    publish(`user:${updated.customerId}`, 'order.out_for_delivery', {
+      orderId: updated.id,
+      orderNumber: updated.orderNumber,
+      riderId: userId,
+      estimatedAt: updated.estimatedAt?.toISOString() ?? null,
+    });
+    publish('admin', 'order.status', {
+      orderId: updated.id,
+      orderNumber: updated.orderNumber,
+      status: 'OUT_FOR_DELIVERY',
+    });
     logger.info('Delivery started', { orderId, riderId: userId });
     return serializeOrder(updated);
   },

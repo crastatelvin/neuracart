@@ -16,6 +16,7 @@ import { errorHandler } from './middleware/errorHandler';
 import { orderRoutes } from './modules/orders/order.routes';
 import { productRoutes } from './modules/products/product.routes';
 import { storeRoutes } from './modules/store/store.routes';
+import { streamUpdates } from './modules/realtime/realtime.routes';
 import { globalRateLimiter } from './middleware/rateLimiter';
 import { notFound } from './middleware/notFound';
 import { requestId } from './middleware/requestId';
@@ -81,6 +82,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/delivery', deliveryRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/store', storeRoutes);
+app.get('/api/updates', streamUpdates);
 
 const healthHandler: express.RequestHandler = async (_req, res) => {
   try {

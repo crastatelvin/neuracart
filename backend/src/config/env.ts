@@ -61,6 +61,31 @@ const envSchema = z
     RAZORPAY_KEY_SECRET: z.string().default(''),
     RAZORPAY_WEBHOOK_SECRET: z.string().default(''),
 
+    // ——— v2 AI/engagement configuration (all optional; fallbacks apply) ———
+    GEMINI_API_KEY: z.string().default(''),
+    GEMINI_MODEL: z.string().default('gemini-3.8-flash'),
+    GEMINI_EMBEDDING_MODEL: z.string().default('text-embedding-004'),
+
+    UPI_VPA: z.string().default('localmart@upi'),
+    UPI_PAYEE_NAME: z.string().default('LocalMart'),
+
+    WEATHER_LAT: z.coerce.number().default(12.9716),
+    WEATHER_LON: z.coerce.number().default(77.5946),
+    WEATHER_MODE_MANUAL: z
+      .enum(['auto', 'normal', 'rain', 'heavy'])
+      .default('auto'),
+
+    WHATSAPP_TOKEN: z.string().default(''),
+    WHATSAPP_PHONE_ID: z.string().default(''),
+
+    SLOT_WINDOWS: z.string().default('08:00-10:00,10:00-12:00,16:00-18:00,18:00-20:00'),
+    SLOT_CAPACITY_PER_WINDOW: z.coerce.number().int().positive().default(8),
+
+    LOYALTY_EARN_RATE: z.coerce.number().nonnegative().default(0.02),
+    REFERRAL_REWARD: z.coerce.number().nonnegative().default(50),
+    FLASH_DEAL_MAX_PCT: z.coerce.number().int().positive().default(60),
+    SUBSCRIPTION_MAX_ITEMS: z.coerce.number().int().positive().default(50),
+
     SENTRY_DSN: z.string().default(''),
     LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('debug'),
   })
