@@ -165,6 +165,15 @@ export const deliveryPartnerAdminService = {
     if (!existing) {
       throw new AppError('Delivery partner not found', 404, 'RIDER_NOT_FOUND');
     }
+    const activeAssignments = await repo.countActiveAssignments(userId);
+    if (activeAssignments > 0) {
+      throw new AppError(
+        'Reassign this partner’s active orders before deactivating the account',
+        409,
+        'RIDER_HAS_ACTIVE_ORDERS',
+        { activeAssignments },
+      );
+    }
     const partner = await repo.setActive(userId, false);
     logger.info('Delivery partner deactivated', { userId });
     return withActiveCount(partner);

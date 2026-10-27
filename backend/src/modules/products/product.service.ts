@@ -55,10 +55,16 @@ export function serializeProduct(product: Product): ProductDto {
 export const productService = {
   async list(query: ProductListQuery, includeInactive = false) {
     const pagination = getPaginationParams(query.page, query.limit, 20, 50);
+    const status = includeInactive ? (query.status ?? 'all') : 'active';
     const where: Prisma.ProductWhereInput = {
-      ...(includeInactive ? {} : { isActive: true }),
+      ...(status === 'active'
+        ? { isActive: true }
+        : status === 'inactive'
+          ? { isActive: false }
+          : {}),
       ...(query.category ? { category: query.category } : {}),
       ...(query.featured === undefined ? {} : { isFeatured: query.featured }),
+      ...(query.lowStock ? { stock: { lte: 5 } } : {}),
       ...(query.search
         ? {
             OR: [

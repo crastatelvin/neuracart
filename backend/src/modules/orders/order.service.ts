@@ -529,6 +529,7 @@ export const orderService = {
     const where: Prisma.OrderWhereInput = {
       ...(query.status ? { status: query.status } : {}),
       ...(query.paymentStatus ? { paymentStatus: query.paymentStatus } : {}),
+      ...(query.paymentMethod ? { paymentMethod: query.paymentMethod } : {}),
       ...(query.from || query.to
         ? {
             createdAt: {

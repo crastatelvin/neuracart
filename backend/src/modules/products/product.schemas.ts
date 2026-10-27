@@ -17,6 +17,8 @@ export const productListQuerySchema = z.object({
   featured: booleanish,
   search: z.string().trim().max(80).optional(),
   sort: z.enum(['newest', 'price_asc', 'price_desc']).default('newest'),
+  status: z.enum(['active', 'inactive', 'all']).optional(),
+  lowStock: booleanish,
 });
 
 export const productCreateSchema = z.object({

@@ -1,4 +1,5 @@
 import type { RequestHandler } from 'express';
+import { Role } from '@prisma/client';
 import { sendPaginated, sendSuccess } from '../../utils/response';
 import type {
   ProductCreateInput,
@@ -11,7 +12,8 @@ import { param } from '../../utils/request';
 export const list: RequestHandler = async (req, res, next) => {
   try {
     const query = req.validatedQuery as ProductListQuery;
-    const result = await productService.list(query);
+    const canSeeInactive = req.user?.role === Role.ADMIN;
+    const result = await productService.list(query, canSeeInactive);
     sendPaginated(res, result.data, result.pagination, 'Products fetched');
   } catch (error) {
     next(error);
@@ -29,7 +31,10 @@ export const featured: RequestHandler = async (_req, res, next) => {
 
 export const getById: RequestHandler = async (req, res, next) => {
   try {
-    const product = await productService.getById(param(req, 'id'));
+    const product = await productService.getById(
+      param(req, 'id'),
+      req.user?.role === Role.ADMIN,
+    );
     sendSuccess(res, product, 'Product fetched');
   } catch (error) {
     next(error);

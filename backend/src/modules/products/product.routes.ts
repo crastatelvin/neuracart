@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { Role } from '@prisma/client';
 import { authenticate } from '../../middleware/authenticate';
+import { optionalAuthenticate } from '../../middleware/optionalAuthenticate';
 import { authorize } from '../../middleware/authorize';
 import { uploadRateLimiter } from '../../middleware/rateLimiter';
 import { productImageUpload } from '../../middleware/upload';
@@ -16,11 +17,12 @@ export const productRoutes = Router();
 
 productRoutes.get(
   '/',
+  optionalAuthenticate,
   validateQuery(productListQuerySchema),
   controller.list,
 );
 productRoutes.get('/featured', controller.featured);
-productRoutes.get('/:id', controller.getById);
+productRoutes.get('/:id', optionalAuthenticate, controller.getById);
 
 productRoutes.post(
   '/',

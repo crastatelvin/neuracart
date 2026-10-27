@@ -62,6 +62,10 @@ export const adminOrderListQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(50).default(20),
   status: orderStatus.optional(),
   paymentStatus: paymentStatus.optional(),
+  paymentMethod: z
+    .enum(['cod', 'online'])
+    .transform((value) => value.toUpperCase() as 'COD' | 'ONLINE')
+    .optional(),
   from: z.coerce.date().optional(),
   to: z.coerce.date().optional(),
   search: z.string().trim().max(120).optional(),
