@@ -3292,6 +3292,8 @@ The tutorial hit these issues live. Each is a checklist item for LocalMart.
 
 ## 24. Future roadmap
 
+> **Status (Oct 2026):** v1.0 shipped — customer app, backend, admin panel, and rider app are built and verified. The v2.0/v2.1 items below have been **approved and expanded** into the concrete §26 v2 roadmap: all tiers were green-lit for implementation with free-tier resources only.
+
 | Release | Theme | Highlights |
 |---|---|---|
 | **v1.0** | Launch | COD, single store, 3 apps, emails, admin ops |
@@ -3453,3 +3455,105 @@ LocalMart v1.0 is accepted when:
 ---
 
 *End of plan — LocalMart v1.0.*
+
+---
+---
+
+# 26. v2 Roadmap — approved advanced & AI features (Oct 2026)
+
+> **Decision log:** After a competitive research pass (Instacart, GoPuff, Swiggy, Blinkit, Zepto, BigBasket, practical RAG guides), the owner approved **all six proposed tiers** for implementation: AI-on-our-data, LLM flagship, heavyweight foundations, growth, rider/logistics, and polish/voice. **Free resources only**: Gemini API free tier, open-meteo, Expo push, Razorpay *test-mode* keys, WhatsApp Cloud API env-gated (no cost incurred without a real account). Everything must remain fully functional **without** any external key via deterministic fallbacks — the same pattern as dev OTP.
+
+## 26.1 Provider matrix (feature → provider → fallback)
+
+| Capability | Provider (free tier) | Model/config | Fallback when key/config absent |
+|---|---|---|---|
+| Chat assistant, catalog drafting, note summarisation, NL admin ops, review sentiment | Google Gemini API | `gemini-3.8-flash` (backend env `GEMINI_MODEL`, configurable) | Rules-based canned assistant / skipped draft |
+| Semantic search + embeddings | Gemini embeddings (`text-embedding-004`, env `GEMINI_EMBEDDING_MODEL`) | Vectors cached on product rows | keyword (ILIKE) search |
+| Vision search + vision catalog ingest | Gemini multimodal (same chat model, image part) | — | error `AI_UNAVAILABLE` |
+| Demand forecasting, reorder, personalised home, CF “frequently together” | Own heuristics on order history (weighted weekday recency model) | SQL/JS only | — (always on) |
+| Weather/surge mode | open-meteo (keyless) | Bengaluru coords | “normal” mode |
+| Push notifications | Expo push service (free, keyless) | expo-notifications token registry | in-app + email only |
+| Payments | Razorpay **test mode** keys (env-gated) + **UPI intent deep-link** (`upi://pay?pa=…&tr=<orderNumber>`) which costs nothing | `RAZORPAY_KEY_ID/SECRET` | UPI intent + UTR confirmation flow (works today, admin verifies) |
+| WhatsApp updates | Meta WhatsApp Cloud API (env-gated: `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_ID`) | utility templates | logged + email only |
+| Route/dispatch heuristics, ETA, batching | Own geo math (haversine + OSRM-free straight-line) | in-process | — (always on) |
+
+**Quota discipline:** one in-process token-bucket per Gemini call class (chat 3 rpm, embed 10 rpm, vision 3 rpm), exponential backoff on 429, and a 24h circuit breaker that pins the feature to fallback after repeated failures.
+
+## 26.2 Phase plan (each phase = verified, committed, pushed)
+
+- **P0 — Platform hooks.** Gemini client w/ rate limiting + fallbacks; in-process event bus + SSE endpoint (`/api/updates`); env plumbing; `plan.md` §26 (this document).
+- **P1 — Data delta.** Prisma migration for every new model/field (§26.3); idempotent seed extension (recipes, help articles, slots, wallet, loyalty defaults).
+- **P2 — AI-on-our-data (no LLM).** Recommendation service: reorder nudges, buy-again, frequently-together (co-purchase CF); personalised home feed; dietary prefs; product reviews (photo-less v1) + moderation; green score.
+- **P3 — LLM suite.** Semantic search (hybrid); “Ask LocalMart” chat with cart-tool JSON protocol; vision search; recipe→cart; AI substitutions; admin NL-ops console; AI catalog draft; note summarisation; help-article support chat.
+- **P4 — Money & scheduling.** Wallet ledger + checkout redemption; loyalty points/tiers + referral program; near-expiry flash deals; delivery slots with capacity; store-pickup mode; subscriptions (weekly cadence, runs into pending orders); UPI intent flow + Razorpay test-mode integration.
+- **P5 — Logistics.** Rider live GPS (expo-location → tracking endpoint → rider/customer UI); smart dispatch suggestions; 2-order batching; proof-of-delivery (photo + 4-digit OTP); weather surge mode.
+- **P6 — Engagement & polish.** Expo push notifications; WhatsApp module (env-gated); EN/KN/HI string catalogue + language toggle; voice search; accessibility audit; fraud guardrails (COD refusal scoring).
+- **P7 — Verification & docs.** Playwright suites per surface; README/AGENTS/plan updates; final E2E screenshot evidence.
+
+## 26.3 Data-model delta
+
+New enums: `WalletTxnType {REFUND, CASHBACK, REFERRAL, GIFT, REDEEM}`, `LoyaltyTier {GREEN, SILVER, PRIME}`, `SlotDay {today, tomorrow}`, `SubscriptionStatus {ACTIVE, PAUSED, CANCELLED}`, `WeatherMode {NORMAL, RAIN, HEAVY}`, `SupportKind {SHOPPING, SUPPORT}`, `BatchStatus…` (implicit).
+
+New models (all `@@map` snake_case, uuid ids, Decimal(10,2) money):
+- `UserPrefs` (1:1 user): `dietTags String[]`, `householdSize Int?`, `language String @default("en")`, `pushEnabled`, `greenBags Boolean @default(true)`.
+- `Wallet` (1:1 user, `balance Decimal`), `WalletTransaction (userId, type, amount, orderId?, note, createdAt)`.
+- `LoyaltyAccount` (1:1 user: `points`, `lifetimeSpend`, `tier`); `ReferralCode` (user-unique code, `referredCount`, `creditsEarned`), used at signup by code.
+- `ProductReview (orderId, productId, userId, rating 1..5, comment?, isVerified (purchase), createdAt)` unique(orderId, productId) + `ProductReviewReply?` via admin `response`.
+- `Recipe (slug, title, description?, servings, category?, imageUrl?, steps String[], isPublished)` + `RecipeItem (recipeId, productId, quantity)`.
+- `HelpArticle (slug, title, body, topics String[], isPublished)`.
+- `ChatSession (userId, kind, title?, createdAt)` + `ChatMessage (sessionId, role {user, assistant}, content, cartProposal jsonb?, model?, createdAt)`.
+- `DeliverySlot (date DateTime, windowLabel “08–10 AM”, startTime, endTime, capacity, booked, isActive)` + `Order.slotId?`.
+- `Subscription (userId, addressId, notes?, cadenceDays Int (7/14), dayOfWeek, items jsonb [{productId, quantity}], status, nextRunAt, lastRunAt?)` — runs generate PENDING orders at 05:00 IST via admin-toggled cron-or-on-request runner.
+- `FlashDeal (productId, discountPct Int, startsAt, endsAt, stockLimit?, isActive)` — near-expiry/markdown tool.
+- `RiderBatch (status, createdAt)` + `Order.batchId?` (≤2 orders/batch, same or co-route pincode).
+- `ProofOfDelivery (orderId unique, otpHash, otpSentAt, attempts, photoUrl?, verifiedAt?, method {OTP, PHOTO_otp, PIN})`.
+- `RiskFlag (userId, kind {COD_REFUSAL, RAPID_CANCEL, BOUNCE}, score, note?, createdAt)` + rolling counters on Order (`cancelledAt` already exists).
+- `PushToken (userId, token unique, platform {ios, android, web}, isActive, createdAt)`.
+- `Store` additions: `weatherMode WeatherMode @default(NORMAL)`, `weatherNote?`, `surgeFee Decimal @default(0)`, `slotCapacityPerHour Int`, `pickupEnabled Boolean @default(false)`, `upiVpa?`, `whatsappAdminPhone?`; `Store coupons?` — no, coupons deferred.
+- `Product` additions: `tags String[]` (vegan/veggie/nonveg/exotic…), `dietLabel`, `bestBeforeAt DateTime?`, `embedding Float[] (Json)`, `embeddingModel?`, `embeddingAt?`, `searchText String?` (cached lexical blob), `expiryDiscountPct Int @default(0)` when near-expiry.
+- `Order` additions: `slotId?`, `pickupAt DateTime?` (store pickup), `walletApplied Decimal @default(0)`, `loyaltyPointsEarned Int @default(0)`, `loyaltyPointsUsed Int @default(0)`, `referralCode?`, `paymentRef?` (Razorpay order/payment id), `mode` = shipping mode? covered by pickupAt; `batchId?`; `fulfilment {DELIVERY, PICKUP}` enum field default DELIVERY.
+- `DeliveryPartner` additions: `lastSeenAt DateTime?`, `batchesDone Int @default(0)`.
+
+## 26.4 API surface delta
+
+Customer (`/api`): `GET /recs/home` (sections), `GET /recs/reorder`, `GET /products/:id/reviews`, `POST /reviews`, `PATCH /me/prefs`, `GET /recipes` + `POST /recipes/:id/cart`, `POST /ai/chat` (+ `POST /ai/chat/:sessionId/replay`), `POST /ai/search`, `POST /ai/vision-search`, `GET /ai/substitutes?productId=`, `GET /slots?date=`, `POST /wallet`, `GET /wallet/transactions`, `GET /loyalty`, `POST /referrals/apply` (signup) — signup schema gains optional `referralCode`; `GET /flash-deals`; `POST /subscriptions` CRUD at `/subscriptions/:id` (+pause/resume); `GET /updates` (SSE); `POST /push-token`; `POST /support/chat` (help-article RAG); `POST /orders/:id/unlock-otp`? (POD is rider-side; customer sees verify screen).
+Checkout input gains: `slotId?`, `fulfilment`, `walletApply? bool`, `loyaltyApply?`, `referral at signup only`, `upiVpa` informs payment intent; `paymentMethod` gains `upi`.
+Rider: `PATCH /delivery/location` (online throttle 15s), `GET /delivery/batch` (current batch view), `POST /delivery/assignments/:id/proof` (photo multipart + `otp`), `GET /delivery/weather` (mode banner).
+Admin: `GET /admin/forecast?days=7`, `GET /admin/stock-alerts`, `POST /admin/ai/ask`, `POST /admin/ai/catalog-draft` (multipart image), `POST /admin/ai/summarize` (notes), `GET/POST/PATCH /admin/reviews`, `GET/POST /admin/recipes`, `GET/POST /admin/flash-deals`, `POST /admin/slots/bulk` (auto-create next 14 days × windows), `POST /admin/rider-batches` (create from 2 ready orders), `GET/POST /admin/store/weather` (open-meteo proxy + manual override), `GET /admin/risk`, `PATCH /admin/orders/:id/verify-upi`.
+
+## 26.5 Screen delta
+
+**Customer:** Home adds reorder chips row, “Buy again” rail, recipe rail, flash-deals banner, weather banner; new **Assistant** screen (chat + cart proposals + voice mic); Search becomes hybrid + voice + camera button; Product page gains reviews + “goes well with”; Checkout revamp (slot picker, pickup toggle, wallet/loyalty toggles, UPI/Razorpay/COD selector, green-bag opt); Orders list/detail gains live tracking map (real GPS dot + ETA), substitution approvals, POD OTP entry slot; Profile gains Wallet, Loyalty/referrals card, Subscriptions manager, Language, Dietary prefs, Help chat; Review composer appears post-delivery.
+**Admin:** Dashboard gains Forecast panel + weather widget; new pages: Reviews, Recipes, Flash deals, Slots, Subscriptions (admin pause), Risk flags, Batching (pair ready orders), NL-ops console (“Ask the data”); Products form gains tags/diet/expiry + “AI draft from image” button; Order detail gains UPI verify button, weather/surge context, AI substitution workflow.
+**Rider:** Assignments adds weather banner + batch cards (2-stop list); Order detail gains turn-by-turn leg list, “send POD OTP”, photo capture + verify screen; GPS auto-updates while on active delivery.
+
+## 26.6 New environment variables (all optional at boot)
+
+`GEMINI_API_KEY` (unlocks AI suite; without it everything runs on fallbacks), `GEMINI_MODEL=gemini-3.8-flash`, `GEMINI_EMBEDDING_MODEL=text-embedding-004`, `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `UPI_VPA=localmart@upi`, `UPI_PAYEE_NAME=LocalMart`, `WEATHER_LAT=12.9716`, `WEATHER_LON=77.5946`, `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_ID`, `SLOT_WINDOW_DEFAULTS=08-10,10-12,16-18,18-20`, `LOYALTY_EARN_RATE=0.02` (pts/₹), `REFERRAL_REWARD=50`, `FLASH_DEAL_MAX_PCT=40`. Frontends inherit existing env patterns (no changes needed except optional `EXPO_PUBLIC_*` mirrors if ever needed).
+
+## 26.7 Risks & mitigations
+
+- **Gemini 429s / quota →** token bucket + backoff + circuit breaker + always-on fallbacks; free-tier chat calls stay short-context (product summaries only, never raw PII).
+- **UPI intent can’t auto-verify →** honest model: order is `PENDING_PAID_CONFIRMATION`? No — keep architecture: UPI intent pays outside; customer hits “I’ve paid”, enters the last 4 of UTR; admin gets a verify queue entry. Razorpay, when keys are present, automates it. Both paths documented in UI copy.
+- **WhatsApp costs →** env-gated; dev mode logs the payload like dev OTP; never initialized without both config values.
+- **Background GPS on web export →** foreground-only; riders are guided to the native app for continuous tracking; manual “share my location” fallback.
+- **Embedding drift →** recomputed nightly (admin button) and on every product create/edit.
+- **Scope explosion →** phase discipline: nothing merges without its phase-DoD in §26.2 and a Playwright pass.
+
+## 26.8 Phase gates (definition of done)
+
+Every phase ships with: `backend: npm run typecheck + build`, customer/admin/delivery `tsc --noEmit` + lint in their own directories, migration applied to the local DB, seed idempotent re-runnable, at least one Playwright-driven proof of the new flow, screenshots in `/tmp/opencode/shots/`, a conventional commit **and push**.
+
+### 26.9 v2 acceptance highlights
+
+1. A customer types “dinner for two under ₹400, no meat” into Assistant and receives an in-app cart they can add in one tap.
+2. Home shows “Reorder — you’re likely running low”, and reorder chips add a known basket in two taps.
+3. Checkout offers slots vs delivery-now vs store pickup; wallet balance and loyalty points apply to the total; UPI Intent and COD both complete orders end-to-end.
+4. Riders stream GPS; customers watch a live dot + ETA; delivery verification is an OTP; rain days show surge banner and adjusted ETA.
+5. Admin asks “which customers stopped ordering meat?” in plain text and gets data-derived answers; forecast and stock alerts drive an actual restock decision; a product photo becomes a draft catalog card in one click.
+6. Every AI feature still works, with degraded quality, when the API key is absent.
+
+---
+
+*End of plan — LocalMart v2 scope.*
+
