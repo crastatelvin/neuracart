@@ -16,8 +16,8 @@ import {
   formatINR,
   relativeTime,
   STATUS_LABEL,
+  STATUS_TONE,
 } from '@/lib/format';
-import { STATUS_TONE } from '@/lib/format';
 import type { DashboardStats, Store } from '@/lib/types';
 
 type Range = 'today' | '7d' | '30d';

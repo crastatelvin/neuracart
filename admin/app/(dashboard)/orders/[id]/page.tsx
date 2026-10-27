@@ -8,7 +8,6 @@ import { useToast } from '@/components/Toast';
 import {
   ConfirmDialog,
   EmptyState,
-  ErrorBanner,
   Modal,
   PaymentStatusBadge,
   SkeletonTable,
