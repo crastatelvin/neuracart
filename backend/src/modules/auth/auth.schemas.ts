@@ -46,3 +46,13 @@ export type VerifyOtpInput = z.infer<typeof verifyOtpSchema>;
 export type RefreshInput = z.infer<typeof refreshSchema>;
 export type ProfileInput = z.infer<typeof profileSchema>;
 export type DeliveryLoginInput = z.infer<typeof deliveryLoginSchema>;
+
+export const prefsSchema = z.object({
+  dietTags: z.array(z.string().trim().min(2).max(30)).max(10).optional(),
+  householdSize: z.coerce.number().int().min(1).max(20).optional(),
+  language: z.enum(['en', 'kn', 'hi']).optional(),
+  pushEnabled: z.boolean().optional(),
+  greenBags: z.boolean().optional(),
+});
+
+export type PrefsInput = z.infer<typeof prefsSchema>;

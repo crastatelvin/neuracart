@@ -2,6 +2,7 @@ import type { Request, RequestHandler } from 'express';
 import { sendSuccess } from '../../utils/response';
 import type {
   DeliveryLoginInput,
+  PrefsInput,
   ProfileInput,
   RefreshInput,
   SendOtpInput,
@@ -110,6 +111,27 @@ export const updateProfile: RequestHandler = async (req, res, next) => {
     const data = req.body as ProfileInput;
     const result = await authService.updateProfile(user.id, data);
     sendSuccess(res, result, 'Profile updated');
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const prefs: RequestHandler = async (req, res, next) => {
+  try {
+    const user = requireUser(req);
+    const result = await authService.getPrefs(user.id);
+    sendSuccess(res, result, 'Prefs fetched');
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updatePrefs: RequestHandler = async (req, res, next) => {
+  try {
+    const user = requireUser(req);
+    const data = req.body as PrefsInput;
+    const result = await authService.updatePrefs(user.id, data);
+    sendSuccess(res, result, 'Prefs updated');
   } catch (error) {
     next(error);
   }

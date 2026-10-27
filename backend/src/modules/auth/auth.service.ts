@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import type { DeliveryPartner, User } from '@prisma/client';
 import { Role } from '@prisma/client';
 import { env } from '../../config/env';
+import { prisma } from '../../config/prisma';
 import { sendOtpEmail } from '../../services/email.service';
 import { API_ROLE } from '../../utils/enums';
 import { AppError } from '../../utils/errors';
@@ -14,6 +15,7 @@ import {
 import { logger } from '../../utils/logger';
 import { generateOtp, getOtpExpiry, hashOtp, isExpired, verifyOtpHash } from '../../utils/otp';
 import { comparePassword } from '../../utils/password';
+import type { PrefsInput } from './auth.schemas';
 import { authRepository as repo } from './auth.repository';
 
 export type SafeUser = {
@@ -281,6 +283,23 @@ export const authService = {
     }
     const updated = await repo.updateProfile(userId, data);
     return safeUser(updated);
+  },
+
+  async getPrefs(userId: string) {
+    return prisma.userPrefs.upsert({
+      where: { userId },
+      create: { userId },
+      update: {},
+    });
+  },
+
+  async updatePrefs(userId: string, data: PrefsInput) {
+    await prisma.userPrefs.upsert({
+      where: { userId },
+      create: { userId, ...data },
+      update: data,
+    });
+    return prisma.userPrefs.findUniqueOrThrow({ where: { userId } });
   },
 
   async deliveryLogin(

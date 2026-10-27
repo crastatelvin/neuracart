@@ -26,6 +26,12 @@ export function serializeOrder(order: OrderWithRelations) {
     deliveryFee: order.deliveryFee.toFixed(2),
     discount: order.discount.toFixed(2),
     total: order.total.toFixed(2),
+    // ——— v2 surfaces ———
+    fulfilment: order.fulfilment === 'PICKUP' ? 'pickup' : 'delivery',
+    walletApplied: order.walletApplied.toFixed(2),
+    loyaltyPointsEarned: order.loyaltyPointsEarned,
+    loyaltyPointsUsed: order.loyaltyPointsUsed,
+    green: greenScore(order),
     payout:
       order.deliveryPartnerId && order.status !== 'CANCELLED'
         ? env.RIDER_PAYOUT.toFixed(2)
@@ -86,4 +92,38 @@ export function serializeOrder(order: OrderWithRelations) {
         }
       : null,
   };
+}
+
+/** Simple model estimate: consolidated one-trip delivery vs. individual errands. */
+function greenScore(order: OrderWithRelations): {
+  distanceKm: number;
+  co2SavedKg: number;
+  bagsReused: number;
+} | null {
+  if (!order.address.latitude || !order.address.longitude) return null;
+  const km = haversineKm(
+    order.tracking?.storeLatitude ?? 12.9716,
+    order.tracking?.storeLongitude ?? 77.5946,
+    order.address.latitude,
+    order.address.longitude,
+  );
+  // Consolidated e-bike delivery ≈ 0.075 kg/km vs. individual car errands ≈ 0.23 kg/km.
+  const co2SavedKg = Math.max(0, km * (0.23 - 0.075));
+  return {
+    distanceKm: Number(km.toFixed(2)),
+    co2SavedKg: Number(co2SavedKg.toFixed(2)),
+    bagsReused: 1,
+  };
+}
+
+function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(a));
 }

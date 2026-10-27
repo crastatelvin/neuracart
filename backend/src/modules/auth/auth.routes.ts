@@ -5,6 +5,7 @@ import { validateBody } from '../../middleware/validate';
 import * as controller from './auth.controller';
 import {
   deliveryLoginSchema,
+  prefsSchema,
   profileSchema,
   refreshSchema,
   sendOtpSchema,
@@ -50,6 +51,13 @@ authRoutes.post(
 );
 authRoutes.post('/logout-all', authenticate, controller.logoutAll);
 authRoutes.get('/me', authenticate, controller.me);
+authRoutes.get('/me/prefs', authenticate, controller.prefs);
+authRoutes.patch(
+  '/me/prefs',
+  authenticate,
+  validateBody(prefsSchema),
+  controller.updatePrefs,
+);
 authRoutes.patch(
   '/profile',
   authenticate,
