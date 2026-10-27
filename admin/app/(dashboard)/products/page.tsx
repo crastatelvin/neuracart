@@ -49,16 +49,13 @@ export default function ProductsPage() {
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  const currentParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
-
   useEffect(() => {
-    const params = currentParams;
-    if (!params) return;
+    const params = new URLSearchParams(window.location.search);
     const statusParam = params.get('status');
     if (statusParam === 'inactive' || statusParam === 'all') setStatus(statusParam);
     const featuredParam = params.get('featured');
     if (featuredParam === 'true') setFeatured('featured');
-  }, [currentParams]);
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(search.trim().toLowerCase()), 300);
