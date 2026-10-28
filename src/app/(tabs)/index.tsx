@@ -22,6 +22,7 @@ import { EmptyState, ErrorState, ProductGridSkeleton } from '@/components/ui/Sta
 import { colors, radius, shadows } from '@/constants/design';
 import { apiErrorMessage, apiPath, apiRequest, apiRequestPage } from '@/lib/api';
 import { greetingFor, money } from '@/lib/format';
+import { aiSmartSearch } from '@/lib/ai';
 import { fetchRecsHome } from '@/lib/recs';
 import type {
   Address,
@@ -79,6 +80,7 @@ export default function HomeScreen() {
   const [promoVisible, setPromoVisible] = useState(true);
   const [addressLabel, setAddressLabel] = useState('Indiranagar, Bengaluru');
   const [recsHome, setRecsHome] = useState<RecsHome | null>(null);
+  const [smartSearch, setSmartSearch] = useState(false);
   const requestId = useRef(0);
   const featuredLoaded = useRef(false);
   const itemsRef = useRef(items);
@@ -111,6 +113,7 @@ export default function HomeScreen() {
       const currentRequest = ++requestId.current;
       if (mode === 'replace') {
         setLoading(true);
+        setSmartSearch(false);
         setError(null);
       } else {
         setLoadingMore(true);
@@ -126,6 +129,28 @@ export default function HomeScreen() {
           { auth: false },
         );
         if (currentRequest !== requestId.current) return;
+        if (mode === 'replace' && debouncedQuery && response.data.length === 0 && user) {
+          // Keyword search came up empty — try the AI hybrid match (falls back
+          // to lexical scoring server-side when the AI key is absent).
+          try {
+            const smart = await aiSmartSearch(debouncedQuery, 12);
+            if (currentRequest === requestId.current && smart.length > 0) {
+              setProducts(smart);
+              setPagination({
+                page: 1,
+                limit: smart.length,
+                total: smart.length,
+                totalPages: 1,
+                hasNext: false,
+                hasPrev: false,
+              });
+              setSmartSearch(true);
+              return;
+            }
+          } catch {
+            // Degrade to the plain empty state.
+          }
+        }
         setProducts((current) => {
           if (mode === 'replace') return response.data;
           const ids = new Set(current.map((product) => product.id));
@@ -145,7 +170,7 @@ export default function HomeScreen() {
         }
       }
     },
-    [category, debouncedQuery],
+    [category, debouncedQuery, user],
   );
 
   useEffect(() => {
@@ -334,6 +359,16 @@ export default function HomeScreen() {
           ) : null}
         </View>
 
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Open the LocalMart assistant"
+          onPress={() => router.push('/assistant')}
+          style={({ pressed }) => [styles.assistantPill, pressed && { opacity: 0.9 }]}
+        >
+          <Ionicons name="sparkles" size={14} color={colors.primaryDark} />
+          <AppText style={styles.assistantPillText}>Ask the assistant</AppText>
+        </Pressable>
+
         <View style={styles.heroMeta}>
           <View style={styles.metaPill}>
             <View
@@ -474,11 +509,20 @@ export default function HomeScreen() {
         <View style={styles.productsHeading}>
           <View style={{ flex: 1, gap: 2 }}>
             <AppText variant="section">{listHeading}</AppText>
-            <AppText variant="caption" tone="muted">
-              {loading
-                ? 'Gathering today’s best…'
-                : `${pagination.total} ${pagination.total === 1 ? 'item' : 'items'} available`}
-            </AppText>
+            {smartSearch ? (
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                <Ionicons name="sparkles" size={12} color={colors.primaryDark} />
+                <AppText variant="caption" style={{ color: colors.primaryDark, fontWeight: '700' }}>
+                  Smart matches — closest picks by meaning
+                </AppText>
+              </View>
+            ) : (
+              <AppText variant="caption" tone="muted">
+                {loading
+                  ? 'Gathering today’s best…'
+                  : `${pagination.total} ${pagination.total === 1 ? 'item' : 'items'} available`}
+              </AppText>
+            )}
           </View>
           {hasFilters ? (
             <Pressable onPress={clearFilters} hitSlop={8}>
@@ -686,6 +730,18 @@ const styles = StyleSheet.create({
     gap: 9,
     ...shadows.card,
   },
+  assistantPill: {
+    marginTop: 10,
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: colors.white,
+    borderRadius: radius.pill,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+  },
+  assistantPillText: { color: colors.primaryDark, fontWeight: '800', fontSize: 12 },
   searchInput: {
     flex: 1,
     fontSize: 14,
