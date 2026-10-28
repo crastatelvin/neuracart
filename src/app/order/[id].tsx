@@ -53,6 +53,14 @@ export default function OrderDetailScreen() {
   const [cancelReason, setCancelReason] = useState('');
   const [cancelling, setCancelling] = useState(false);
   const [cancelError, setCancelError] = useState<string | null>(null);
+  const [reviewTarget, setReviewTarget] = useState<{ productId: string; name: string } | null>(
+    null,
+  );
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState('');
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [reviewedProductIds, setReviewedProductIds] = useState<string[]>([]);
+  const [reviewedDrafts, setReviewedDrafts] = useState<Record<string, string>>({});
 
   const load = useCallback(
     async (quiet = false) => {
@@ -85,6 +93,53 @@ export default function OrderDetailScreen() {
     }, 30_000);
     return () => clearInterval(timer);
   }, [load, order]);
+
+  // Which of this order's items already carry the customer's review.
+  const orderStatus = order?.status;
+  const orderKey = order?.id;
+  useEffect(() => {
+    if (!orderKey || orderStatus !== 'delivered') return;
+    apiRequest<{ productId: string }[]>('/reviews/mine')
+      .then((mine) => {
+        setReviewedProductIds(mine.map((review) => review.productId));
+      })
+      .catch(() => setReviewedProductIds([]));
+  }, [orderKey, orderStatus]);
+
+  function setReviewedTextFor(value: string) {
+    if (!reviewTarget) return;
+    setReviewComment(value);
+    setReviewedDrafts((current) => ({ ...current, [reviewTarget.productId]: value }));
+  }
+
+  async function submitReview() {
+    if (!order || !reviewTarget || reviewSubmitting) return;
+    setReviewSubmitting(true);
+    try {
+      await apiRequest('/reviews', {
+        method: 'POST',
+        body: {
+          orderId: order.id,
+          productId: reviewTarget.productId,
+          rating: reviewRating,
+          comment: reviewComment.trim() || undefined,
+        },
+      });
+      setReviewedProductIds((current) =>
+        current.includes(reviewTarget.productId)
+          ? current
+          : [...current, reviewTarget.productId],
+      );
+      setReviewTarget(null);
+      setReviewComment('');
+      setReviewRating(5);
+      showToast('Thanks for the review!');
+    } catch (caught) {
+      showToast(apiErrorMessage(caught), 'error');
+    } finally {
+      setReviewSubmitting(false);
+    }
+  }
 
   async function refresh() {
     setRefreshing(true);
@@ -347,9 +402,38 @@ export default function OrderDetailScreen() {
                   {money(item.unitPrice)} × {item.quantity} · {item.product.unit}
                 </AppText>
               </View>
-              <AppText variant="bodyMedium" style={{ fontWeight: '600' }}>
-                {money(item.total)}
-              </AppText>
+              <View style={{ alignItems: 'flex-end', gap: 6 }}>
+                <AppText variant="bodyMedium" style={{ fontWeight: '600' }}>
+                  {money(item.total)}
+                </AppText>
+                {order.status === 'delivered' ? (
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={`Rate ${item.product.name}`}
+                    onPress={() => {
+                      setReviewTarget({
+                        productId: item.productId,
+                        name: item.product.name,
+                      });
+                      setReviewRating(5);
+                      setReviewComment(
+                        (reviewedDrafts[item.productId] as string | undefined) ?? '',
+                      );
+                    }}
+                    hitSlop={6}
+                    style={({ pressed }) => [styles.rateButton, pressed && { opacity: 0.8 }]}
+                  >
+                    <Ionicons
+                      name={reviewedProductIds.includes(item.productId) ? 'star' : 'star-outline'}
+                      size={12}
+                      color="#F59E0B"
+                    />
+                    <AppText style={styles.rateText}>
+                      {reviewedProductIds.includes(item.productId) ? 'Rated' : 'Rate'}
+                    </AppText>
+                  </Pressable>
+                ) : null}
+              </View>
             </View>
           ))}
         </Card>
@@ -479,6 +563,48 @@ export default function OrderDetailScreen() {
           />
         </View>
       </ModalSheet>
+
+      <ModalSheet
+        visible={reviewTarget !== null}
+        onClose={() => {
+          if (!reviewSubmitting) setReviewTarget(null);
+        }}
+        title={`Rate ${reviewTarget?.name ?? 'item'}`}
+        subtitle="How fresh was it? The store reads every review."
+      >
+        <View style={styles.starPicker}>
+          {[1, 2, 3, 4, 5].map((star) => (
+            <Pressable
+              key={star}
+              accessibilityRole="button"
+              accessibilityLabel={`${star} star${star === 1 ? '' : 's'}`}
+              onPress={() => setReviewRating(star)}
+              hitSlop={8}
+              disabled={reviewSubmitting}
+            >
+              <Ionicons
+                name={star <= reviewRating ? 'star' : 'star-outline'}
+                size={34}
+                color={star <= reviewRating ? '#F59E0B' : colors.subtle}
+              />
+            </Pressable>
+          ))}
+        </View>
+        <TextField
+          label="Comment (optional)"
+          placeholder="Fresh, well packed, right on time…"
+          value={reviewComment}
+          onChangeText={setReviewedTextFor}
+          multiline
+          maxLength={500}
+          editable={!reviewSubmitting}
+        />
+        <Button
+          label={reviewTarget && reviewedProductIds.includes(reviewTarget.productId) ? 'Update review' : 'Submit review'}
+          onPress={() => void submitReview()}
+          loading={reviewSubmitting}
+        />
+      </ModalSheet>
     </View>
   );
 }
@@ -546,6 +672,25 @@ const styles = StyleSheet.create({
   cardHeading: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   itemRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 7 },
   itemBorder: { borderBottomWidth: 1, borderBottomColor: colors.border },
+  rateButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+    backgroundColor: '#FFFBEB',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  rateText: { fontSize: 10.5, fontWeight: '800', color: '#B45309', lineHeight: 14 },
+  starPicker: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 10,
+    paddingVertical: 6,
+    marginBottom: 8,
+  },
   itemImageWrap: {
     width: 44,
     height: 44,

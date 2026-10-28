@@ -228,6 +228,12 @@ export default function ProfileScreen() {
               PREFERENCES
             </AppText>
             <Card padded={false} style={styles.menuCard}>
+              <MenuRow
+                icon="restaurant-outline"
+                title="Dietary preferences"
+                subtitle="Diet needs, language, and household size"
+                onPress={() => router.push('/dietary-preferences')}
+              />
               <View style={styles.menuRow}>
                 <View style={[styles.menuIcon, { backgroundColor: colors.warningSoft }]}>
                   <Ionicons name="notifications-outline" size={19} color={colors.warning} />

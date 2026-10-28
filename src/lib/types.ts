@@ -178,3 +178,85 @@ export type ApiEnvelope<T> = {
   code?: string;
   errors?: unknown;
 };
+
+// ——— v2 recommendations & reviews ———
+
+export type RecsCard = {
+  id: string;
+  name: string;
+  category: string;
+  price: string;
+  unit: string;
+  imageUrl: string | null;
+  stock: number;
+  isFeatured: boolean;
+  tags: string[];
+};
+
+export type ReorderUrgency = 'running_low' | 'likely_out' | 'due_soon';
+
+export type ReorderEntry = RecsCard & {
+  lastOrderedAt: string;
+  daysSinceLastPurchase: number;
+  typicalIntervalDays: number | null;
+  urgency: ReorderUrgency;
+  lastQuantity: number;
+};
+
+export type RecipeSummary = {
+  id: string;
+  slug: string;
+  title: string;
+  description: string | null;
+  imageUrl: string | null;
+  servings: number;
+  items: number;
+};
+
+export type RecsHome = {
+  reorder: ReorderEntry[];
+  buyAgain: RecsCard[];
+  together: RecsCard[];
+  featured: RecsCard[];
+  recipes: RecipeSummary[];
+  headline: string | null;
+};
+
+export type ReviewItem = {
+  id: string;
+  rating: number;
+  comment: string | null;
+  response: string | null;
+  isVerified: boolean;
+  createdAt: string;
+  author: string;
+};
+
+export type ProductReviewFeed = {
+  reviews: ReviewItem[];
+  summary: { count: number; average: number | null };
+};
+
+export type RecipeDetail = {
+  id: string;
+  slug: string;
+  title: string;
+  description: string | null;
+  servings: number;
+  imageUrl: string | null;
+  steps: string[];
+  items: {
+    id: string;
+    quantity: number;
+    product: {
+      id: string;
+      name: string;
+      description: string | null;
+      category: string;
+      price: number | string;
+      unit: string;
+      stock: number;
+      imageUrl: string | null;
+    };
+  }[];
+};

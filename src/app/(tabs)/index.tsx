@@ -22,7 +22,17 @@ import { EmptyState, ErrorState, ProductGridSkeleton } from '@/components/ui/Sta
 import { colors, radius, shadows } from '@/constants/design';
 import { apiErrorMessage, apiPath, apiRequest, apiRequestPage } from '@/lib/api';
 import { greetingFor, money } from '@/lib/format';
-import type { Address, Pagination, Product, ProductCategory } from '@/lib/types';
+import { fetchRecsHome } from '@/lib/recs';
+import type {
+  Address,
+  Pagination,
+  Product,
+  ProductCategory,
+  RecsHome,
+  RecipeDetail,
+  RecipeSummary,
+} from '@/lib/types';
+import { PersonalRails } from '@/components/PersonalRails';
 import { useAuthStore } from '@/store/auth';
 import { cartDeliveryFee, cartItemCount, cartSubtotal, useCartStore } from '@/store/cart';
 import { useConfigStore } from '@/store/config';
@@ -68,12 +78,28 @@ export default function HomeScreen() {
   const [category, setCategory] = useState<CategoryFilter>('all');
   const [promoVisible, setPromoVisible] = useState(true);
   const [addressLabel, setAddressLabel] = useState('Indiranagar, Bengaluru');
+  const [recsHome, setRecsHome] = useState<RecsHome | null>(null);
   const requestId = useRef(0);
   const featuredLoaded = useRef(false);
+  const itemsRef = useRef(items);
+  itemsRef.current = items;
 
   const count = cartItemCount(items);
   const subtotal = cartSubtotal(items);
   const total = subtotal + cartDeliveryFee(subtotal, store);
+
+  const fetchRecs = useCallback(async () => {
+    if (!user) {
+      setRecsHome(null);
+      return;
+    }
+    try {
+      const feed = await fetchRecsHome(itemsRef.current.map((item) => item.product.id));
+      setRecsHome(feed);
+    } catch {
+      // Personalised rails degrade silently; the catalogue stays usable.
+    }
+  }, [user]);
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedQuery(query.trim()), 350);
@@ -158,18 +184,46 @@ export default function HomeScreen() {
   useFocusEffect(
     useCallback(() => {
       void loadAddress();
-    }, [loadAddress]),
+      void fetchRecs();
+    }, [loadAddress, fetchRecs]),
   );
 
   async function refresh() {
     setRefreshing(true);
-    await Promise.all([fetchProducts(1, 'replace'), fetchFeatured(), loadStore(), loadAddress()]);
+    await Promise.all([fetchProducts(1, 'replace'), fetchFeatured(), loadStore(), loadAddress(), fetchRecs()]);
     setRefreshing(false);
   }
 
   function add(product: Product) {
     addItem(product);
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  }
+
+  /** Add every remaining ingredient of a recipe to the cart in one tap. */
+  async function addRecipe(summary: RecipeSummary) {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    try {
+      const detail = await apiRequest<RecipeDetail>(`/recs/recipes/${summary.id}`);
+      for (const item of detail.items) {
+        if (quantityFor(item.product.id) >= item.quantity) continue;
+        addItem({
+          id: item.product.id,
+          name: item.product.name,
+          description: item.product.description ?? null,
+          category: item.product.category as ProductCategory,
+          price: String(Number(item.product.price)),
+          unit: item.product.unit,
+          stock: item.product.stock,
+          imageUrl: item.product.imageUrl,
+          isActive: true,
+          isFeatured: false,
+          createdAt: '',
+          updatedAt: '',
+        });
+      }
+    } catch {
+      // Recipe add is best-effort; the cart stays untouched on failure.
+    }
   }
 
   function quantityFor(productId: string): number {
@@ -406,6 +460,16 @@ export default function HomeScreen() {
             </ScrollView>
           </View>
         ) : null}
+
+        {recsHome && !hasFilters ? <PersonalRails
+          feeds={recsHome}
+          quantityFor={(productId: string) => quantityFor(productId)}
+          onPressProduct={(productId: string) => router.push(`/product/${productId}`)}
+          onAdd={add}
+          onIncrement={increment}
+          onDecrement={decrement}
+          onAddRecipe={(recipe: RecipeSummary) => void addRecipe(recipe)}
+        /> : null}
 
         <View style={styles.productsHeading}>
           <View style={{ flex: 1, gap: 2 }}>
