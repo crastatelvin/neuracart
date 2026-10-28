@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ProductCard } from '@/components/ProductCard';
+import { ProductReviews } from '@/components/ProductReviews';
 import { AppText } from '@/components/ui/AppText';
 import { Badge } from '@/components/ui/Badge';
 import { BottomBar } from '@/components/ui/BottomBar';
@@ -273,6 +274,8 @@ export default function ProductDetailScreen() {
               copy={`On orders over ${money(store.freeDeliveryAbove)}`}
             />
           </View>
+
+          <ProductReviews productId={product.id} />
 
           {related.length > 0 ? (
             <View style={styles.related}>
