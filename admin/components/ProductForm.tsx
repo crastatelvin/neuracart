@@ -60,6 +60,7 @@ export default function ProductForm({ mode }: { mode: 'create' | 'edit' }) {
   const router = useRouter();
   const toast = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const draftInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(mode === 'edit');
   const [initial, setInitial] = useState<Product | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -69,6 +70,7 @@ export default function ProductForm({ mode }: { mode: 'create' | 'edit' }) {
   const [fileName, setFileName] = useState('');
   const [error, setError] = useState('');
   const [notFound, setNotFound] = useState(false);
+  const [drafting, setDrafting] = useState(false);
   const [values, setValues] = useState<ProductFormValues>({
     name: '',
     description: '',
@@ -137,6 +139,63 @@ export default function ProductForm({ mode }: { mode: 'create' | 'edit' }) {
     setValues({ ...values, image: file, removeImage: false });
     setPreview(URL.createObjectURL(file));
     setFileName(file.name);
+  };
+
+  const fileToBase64 = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error('Could not read that file.'));
+      reader.onload = () => {
+        const result = String(reader.result ?? '');
+        resolve(result.slice(result.indexOf(',') + 1));
+      };
+      reader.readAsDataURL(file);
+    });
+
+  /** Vision draft: photo → Gemini catalog card → prefill the form. */
+  const draftFromPhoto = async (file: File | null) => {
+    if (!file || drafting) return;
+    if (!ACCEPTED_TYPES.includes(file.type)) {
+      toast.error('Only JPG, PNG, or WebP images are supported.');
+      return;
+    }
+    if (file.size > MAX_IMAGE_MB * 1024 * 1024) {
+      toast.error(`The image must be under ${MAX_IMAGE_MB} MB.`);
+      return;
+    }
+    setDrafting(true);
+    try {
+      const base64 = await fileToBase64(file);
+      const draft = await api<{
+        name: string;
+        category: string;
+        price: number;
+        unit: string;
+        description: string;
+        tags?: string[];
+      }>('/ai/admin/catalog-draft', {
+        method: 'POST',
+        body: { image: base64, mimeType: file.type },
+        redirectOnUnauthorized: false,
+      });
+      const category = ['fruits', 'vegetables', 'meat'].includes(draft.category.toLowerCase())
+        ? (draft.category.toLowerCase() as Category)
+        : 'fruits';
+      setValues((current) => ({
+        ...current,
+        name: draft.name || current.name,
+        description: draft.description || current.description,
+        category,
+        price: draft.price ? String(Math.round(draft.price)) : current.price,
+        unit: draft.unit || current.unit,
+      }));
+      toast.success(`AI drafted “${draft.name || 'product'}” — review and save.`);
+    } catch (caught) {
+      toast.error(caught instanceof Error ? caught.message : 'The AI draft failed.');
+    } finally {
+      setDrafting(false);
+      if (draftInputRef.current) draftInputRef.current.value = '';
+    }
   };
 
   const submit = async (event: React.FormEvent) => {
@@ -458,6 +517,31 @@ export default function ProductForm({ mode }: { mode: 'create' | 'edit' }) {
                 </label>
               )}
               <FieldError>{fieldErrors.image}</FieldError>
+              {mode === 'create' ? (
+                <>
+                  <input
+                    ref={draftInputRef}
+                    className="visually-hidden-input"
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    hidden
+                    onChange={(event) => void draftFromPhoto(event.target.files?.[0] ?? null)}
+                  />
+                  <button
+                    className="btn btn-secondary btn-sm"
+                    style={{ width: '100%', justifyContent: 'center', marginTop: 10 }}
+                    onClick={() => draftInputRef.current?.click()}
+                    disabled={drafting}
+                    type="button"
+                  >
+                    {drafting ? <Spinner /> : <Icon name="sparkles" size={13} />}
+                    Draft with AI from a photo
+                  </button>
+                  <span className="field-hint">
+                    Upload a product photo to prefill name, price, unit, and description.
+                  </span>
+                </>
+              ) : null}
               {!preview ? null : (
                 <button
                   className="btn btn-secondary btn-sm"

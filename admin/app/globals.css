@@ -2568,3 +2568,26 @@ p {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ——— AI console ——— */
+.ai-answer {
+  margin-top: 12px;
+  padding: 14px;
+  border-radius: 12px;
+  background: var(--surface-soft, #F0FDF4);
+  border: 1px solid var(--border, #E5E7EB);
+  display: grid;
+  gap: 10px;
+}
+
+.ai-sql {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #0F172A;
+  color: #BBF7D0;
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-all;
+}

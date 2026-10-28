@@ -40,7 +40,8 @@ export type IconName =
   | 'bike'
   | 'rupee'
   | 'check-circle'
-  | 'info';
+  | 'info'
+  | 'sparkles';
 
 type IconProps = SVGProps<SVGSVGElement> & {
   name: IconName;
@@ -259,6 +260,12 @@ const PATHS: Record<IconName, ReactNode> = {
     <>
       <circle cx="12" cy="12" r="9" />
       <path d="M12 11v5M12 8h.01" />
+    </>
+  ),
+  sparkles: (
+    <>
+      <path d="M12 3l1.9 4.9L19 9.8l-5.1 1.9L12 16.6l-1.9-4.9L5 9.8l5.1-1.9L12 3Z" />
+      <path d="M19 15l.9 2.3 2.3.9-2.3.9-.9 2.3-.9-2.3-2.3-.9 2.3-.9.9-2.3Z" />
     </>
   ),
 };

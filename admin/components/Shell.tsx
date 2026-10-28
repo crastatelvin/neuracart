@@ -20,6 +20,7 @@ const NAV: NavItem[] = [
   { href: '/dashboard', label: 'Dashboard', icon: 'dashboard' },
   { href: '/orders', label: 'Orders', icon: 'orders', badgeStatus: 'pending' },
   { href: '/products', label: 'Products', icon: 'products' },
+  { href: '/ai', label: 'AI console', icon: 'sparkles' },
   { href: '/delivery', label: 'Delivery partners', icon: 'delivery' },
   { href: '/settings', label: 'Settings', icon: 'settings' },
 ];
@@ -30,6 +31,7 @@ const TITLES: { prefix: string; title: string; subtitle: string }[] = [
   { prefix: '/dashboard', title: 'Dashboard', subtitle: 'Store performance at a glance' },
   { prefix: '/orders', title: 'Orders', subtitle: 'Confirm, prepare, assign, and track orders' },
   { prefix: '/products', title: 'Products', subtitle: 'Catalog, stock, and pricing' },
+  { prefix: '/ai', title: 'AI console', subtitle: 'Ask the data, drafts, and AI health' },
   { prefix: '/delivery', title: 'Delivery partners', subtitle: 'Riders, verification, and workload' },
   { prefix: '/settings', title: 'Settings', subtitle: 'Store profile, hours, and delivery rules' },
 ];
