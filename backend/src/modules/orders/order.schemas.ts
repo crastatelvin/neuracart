@@ -63,6 +63,13 @@ export const cancelOrderSchema = z.object({
     .max(300),
 });
 
+export const upiAckSchema = z.object({
+  upiUtrLast4: z
+    .string()
+    .trim()
+    .regex(/^\d{4}$/, 'Enter the last 4 digits of your UPI reference'),
+});
+
 export const customerOrderListQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(50).default(20),
@@ -99,6 +106,7 @@ export const orderTrackingSchema = z.object({
 
 export type CreateOrderInput = z.infer<typeof createOrderSchema>;
 export type CancelOrderInput = z.infer<typeof cancelOrderSchema>;
+export type UpiAckInput = z.infer<typeof upiAckSchema>;
 export type CustomerOrderListQuery = z.infer<
   typeof customerOrderListQuerySchema
 >;

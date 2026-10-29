@@ -10,6 +10,7 @@ import type {
   OrderTrackingInput,
   UpdateOrderStatusInput,
 } from './order.schemas';
+import type { UpiAckInput } from './order.schemas';
 import { orderService } from './order.service';
 
 function actor(req: Request) {
@@ -72,6 +73,17 @@ export const cancel: RequestHandler = async (req, res, next) => {
       reason,
     );
     sendSuccess(res, order, 'Order cancelled');
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const upiAck: RequestHandler = async (req, res, next) => {
+  try {
+    const { upiUtrLast4 } = req.body as UpiAckInput;
+    if (!req.user) throw new Error('authenticate middleware did not attach a user');
+    const order = await orderService.upiAck(param(req, 'id'), req.user.id, upiUtrLast4);
+    sendSuccess(res, order, 'Payment reported — awaiting verification');
   } catch (error) {
     next(error);
   }

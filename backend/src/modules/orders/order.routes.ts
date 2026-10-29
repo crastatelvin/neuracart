@@ -9,6 +9,7 @@ import {
   adminOrderListQuerySchema,
   assignOrderSchema,
   cancelOrderSchema,
+  upiAckSchema,
   createOrderSchema,
   customerOrderListQuerySchema,
   orderTrackingSchema,
@@ -48,6 +49,12 @@ orderRoutes.post(
   authorize(Role.CUSTOMER, Role.ADMIN),
   validateBody(cancelOrderSchema),
   controller.cancel,
+);
+orderRoutes.post(
+  '/:id/upi-ack',
+  authorize(Role.CUSTOMER),
+  validateBody(upiAckSchema),
+  controller.upiAck,
 );
 orderRoutes.patch(
   '/:id/status',

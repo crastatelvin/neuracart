@@ -859,6 +859,55 @@ export const orderService = {
     return cancelOrder(id, actor, reason);
   },
 
+  /**
+   * Customer acknowledges paying a UPI order: stores the UTR claim for admin
+   * review. Only own, ONLINE, still-pending orders can be acked.
+   */
+  async upiAck(orderId: string, customerId: string, upiUtrLast4: string) {
+    const order = await repo.findById(orderId);
+    if (!order) {
+      throw new AppError('Order not found', 404, 'ORDER_NOT_FOUND');
+    }
+    if (order.customerId !== customerId) {
+      throw new AppError('You do not have access to this order', 403, 'FORBIDDEN');
+    }
+    if (order.paymentMethod !== PaymentMethod.ONLINE) {
+      throw new AppError('This order is not a UPI payment', 409, 'NOT_UPI_ORDER');
+    }
+    if (order.paymentStatus !== 'PENDING') {
+      throw new AppError(
+        'This payment is already settled',
+        409,
+        'PAYMENT_SETTLED',
+      );
+    }
+    if (order.paymentRef?.startsWith('upi-acked')) {
+      throw new AppError('You have already reported this payment', 409, 'PAYMENT_ACKED');
+    }
+
+    const ack = makeUpiAck(order.orderNumber, upiUtrLast4);
+    await prisma.$transaction(async (tx) => {
+      await tx.order.update({
+        where: { id: orderId },
+        data: { paymentRef: ack.paymentRef },
+      });
+      await tx.walletTransaction.create({
+        data: {
+          userId: customerId,
+          orderId,
+          type: WalletTxnType.CASHBACK,
+          amount: new Prisma.Decimal(0),
+          note: ack.txnNote,
+        },
+      });
+    });
+    logger.info('UPI payment acknowledged', {
+      orderId,
+      orderNumber: order.orderNumber,
+    });
+    return addUpiIntent(order);
+  },
+
   async updateStatus(
     id: string,
     actor: AuthUser,
