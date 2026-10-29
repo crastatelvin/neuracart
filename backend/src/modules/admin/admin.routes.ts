@@ -12,6 +12,12 @@ import {
   updatePartnerSchema,
   verifyPartnerSchema,
 } from './deliveryPartner.schemas';
+import { upiQueueHandler, upiVerifyHandler } from '../money/money.routes';
+import { z } from 'zod';
+
+const upiVerifySchema = z.object({
+  approved: z.boolean().default(true),
+});
 
 export const adminRoutes = Router();
 
@@ -46,4 +52,12 @@ adminRoutes.patch(
   '/delivery-partners/:id',
   validateBody(updatePartnerSchema),
   partnerController.updatePartner,
+);
+
+// ——— UPI intent-flow review queue (P4) ———
+adminRoutes.get('/upi-queue', upiQueueHandler);
+adminRoutes.post(
+  '/orders/:orderId/verify-upi',
+  validateBody(upiVerifySchema),
+  upiVerifyHandler,
 );

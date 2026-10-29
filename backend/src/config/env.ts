@@ -82,6 +82,8 @@ const envSchema = z
     SLOT_CAPACITY_PER_WINDOW: z.coerce.number().int().positive().default(8),
 
     LOYALTY_EARN_RATE: z.coerce.number().nonnegative().default(0.02),
+    LOYALTY_POINT_VALUE: z.coerce.number().positive().default(0.25),
+    LOYALTY_MAX_REDEEM_PCT: z.coerce.number().int().min(0).max(100).default(20),
     REFERRAL_REWARD: z.coerce.number().nonnegative().default(50),
     FLASH_DEAL_MAX_PCT: z.coerce.number().int().positive().default(60),
     SUBSCRIPTION_MAX_ITEMS: z.coerce.number().int().positive().default(50),

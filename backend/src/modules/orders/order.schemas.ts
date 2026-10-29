@@ -42,6 +42,17 @@ export const createOrderSchema = z.object({
     .min(1, 'Your cart is empty')
     .max(50),
   notes: z.string().trim().max(500).optional(),
+  // ——— v2 checkout: fulfilment, scheduling, money ———
+  fulfilment: z.enum(['delivery', 'pickup']).default('delivery'),
+  slotId: z.string().uuid('Choose a valid slot').optional(),
+  walletApply: z.boolean().default(false),
+  loyaltyApply: z.boolean().default(false),
+  referralCode: z.string().trim().min(4).max(12).optional(),
+  upiUtrLast4: z
+    .string()
+    .trim()
+    .regex(/^\d{4}$/, 'Enter the last 4 digits of your UPI reference')
+    .optional(),
 });
 
 export const cancelOrderSchema = z.object({

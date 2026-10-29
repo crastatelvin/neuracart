@@ -20,6 +20,9 @@ import { streamUpdates } from './modules/realtime/realtime.routes';
 import { recsRoutes } from './modules/recs/recs.routes';
 import { reviewRoutes } from './modules/reviews/review.routes';
 import { aiRoutes } from './modules/ai/ai.routes';
+import { moneyRoutes } from './modules/money/money.routes';
+import { schedulingRoutes } from './modules/scheduling/scheduling.routes';
+import { dealsRoutes } from './modules/deals/deals.routes';
 import { globalRateLimiter } from './middleware/rateLimiter';
 import { notFound } from './middleware/notFound';
 import { requestId } from './middleware/requestId';
@@ -88,6 +91,10 @@ app.use('/api/store', storeRoutes);
 app.use('/api/recs', recsRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/money', moneyRoutes);
+// both routers declare /admin/* sub-paths that should land under /api/admin/*
+app.use('/api', schedulingRoutes);
+app.use('/api', dealsRoutes);
 app.get('/api/updates', streamUpdates);
 
 const healthHandler: express.RequestHandler = async (_req, res) => {

@@ -1,6 +1,18 @@
 import { Prisma } from '@prisma/client';
-import { OrderStatus, PaymentMethod, Role } from '@prisma/client';
+import {
+  Fulfilment,
+  OrderStatus,
+  PaymentMethod,
+  Role,
+  WalletTxnType,
+} from '@prisma/client';
 import { env } from '../../config/env';
+import { moneyService } from '../money/money.service';
+import {
+  earnLoyaltyOnDelivery,
+  refundOrderResources,
+} from '../money/money.service';
+import { buildUpiIntent, makeUpiAck } from '../money/upi';
 import { prisma } from '../../config/prisma';
 import {
   sendOrderStatusEmail,
@@ -69,6 +81,21 @@ function notifyOrder(order: OrderWithRelations, status: OrderStatus): void {
       error: error instanceof Error ? error : new Error(String(error)),
     });
   });
+}
+
+/** Attach the `upi://pay` intent when an ONLINE order is still awaiting payment. */
+function addUpiIntent(input: OrderWithRelations) {
+  const serialized = serializeOrder(input);
+  if (input.paymentMethod === PaymentMethod.ONLINE && input.paymentStatus === 'PENDING') {
+    return {
+      ...serialized,
+      upiIntent: buildUpiIntent({
+        orderNumber: input.orderNumber,
+        amount: input.total.toFixed(2),
+      }),
+    };
+  }
+  return serialized;
 }
 
 function mergeItems(
@@ -187,6 +214,9 @@ async function markDelivered(
       });
     }
 
+    // Money rails: points + tier from this order's spend.
+    await earnLoyaltyOnDelivery(tx, order.customerId, orderId, order.total);
+
     await tx.orderStatusHistory.create({
       data: {
         orderId,
@@ -270,6 +300,41 @@ async function cancelOrder(
       });
     }
 
+    // Money rails: return wallet balance and redeemed loyalty points.
+    await refundOrderResources(
+      tx,
+      order.customerId,
+      orderId,
+      order.walletApplied,
+      order.loyaltyPointsUsed,
+    );
+
+    // Free the reserved delivery slot.
+    if (order.slotId) {
+      await tx.deliverySlot.updateMany({
+        where: { id: order.slotId, booked: { gt: 0 } },
+        data: { booked: { decrement: 1 } },
+      });
+    }
+
+    // Return flash-deal quota for live deals on the cancelled items.
+    const now = new Date();
+    const productIds = [...new Set(order.items.map((item) => item.productId))];
+    const liveDeals = await tx.flashDeal.findMany({
+      where: {
+        productId: { in: productIds },
+        isActive: true,
+        startsAt: { lte: now },
+        endsAt: { gte: now },
+      },
+    });
+    for (const deal of liveDeals) {
+      await tx.flashDeal.updateMany({
+        where: { id: deal.id, usedCount: { gt: 0 } },
+        data: { usedCount: { decrement: 1 } },
+      });
+    }
+
     await tx.orderStatusHistory.create({
       data: {
         orderId,
@@ -300,13 +365,7 @@ export const orderService = {
     input: CreateOrderInput,
     idempotencyKey?: string,
   ) {
-    if (input.paymentMethod === 'online') {
-      throw new AppError(
-        'Online payments are coming soon. Please use cash on delivery.',
-        400,
-        'ONLINE_PAYMENTS_UNAVAILABLE',
-      );
-    }
+    const isUpiPayment = input.paymentMethod === 'online';
     if (
       idempotencyKey &&
       !/^[A-Za-z0-9._-]{8,128}$/.test(idempotencyKey)
@@ -329,6 +388,20 @@ export const orderService = {
     }
 
     const items = mergeItems(input.items);
+    if (input.upiUtrLast4 && !isUpiPayment) {
+      throw new AppError(
+        'UPI reference numbers only apply to UPI payments',
+        422,
+        'UTR_NOT_ALLOWED',
+      );
+    }
+    if (input.slotId && input.fulfilment === 'pickup') {
+      throw new AppError(
+        'Store pickup does not use delivery slots',
+        422,
+        'SLOT_NOT_ALLOWED',
+      );
+    }
     let created: OrderWithRelations | undefined;
 
     for (let attempt = 0; attempt < 3; attempt += 1) {
@@ -368,11 +441,34 @@ export const orderService = {
                 'STORE_CLOSED',
               );
             }
+            if (input.fulfilment === 'pickup' && !store.pickupEnabled) {
+              throw new AppError(
+                'Store pickup is temporarily unavailable',
+                400,
+                'PICKUP_DISABLED',
+              );
+            }
 
             const products = await tx.product.findMany({
               where: { id: { in: items.map((item) => item.productId) } },
             });
             const byId = new Map(products.map((product) => [product.id, product]));
+
+            // Live flash deals change what customers actually pay.
+            const now = new Date();
+            const deals = await tx.flashDeal.findMany({
+              where: {
+                isActive: true,
+                startsAt: { lte: now },
+                endsAt: { gte: now },
+                productId: { in: items.map((item) => item.productId) },
+              },
+            });
+            const dealPct = new Map<string, number>();
+            for (const deal of deals) {
+              if (deal.stockLimit !== null && deal.usedCount >= deal.stockLimit) continue;
+              dealPct.set(deal.productId, deal.discountPct);
+            }
 
             let subtotal = new Prisma.Decimal(0);
             const resolved = items.map((item) => {
@@ -392,10 +488,13 @@ export const orderService = {
                   { productId: product.id, productName: product.name, available: product.stock },
                 );
               }
-              subtotal = subtotal.plus(
-                product.price.mul(item.quantity),
-              );
-              return { product, quantity: item.quantity };
+              const pct = dealPct.get(item.productId) ?? 0;
+              const unitPrice =
+                pct > 0
+                  ? product.price.mul(1 - Math.min(pct, env.FLASH_DEAL_MAX_PCT) / 100)
+                  : product.price;
+              subtotal = subtotal.plus(unitPrice.mul(item.quantity));
+              return { product, quantity: item.quantity, unitPrice };
             });
 
             for (const item of resolved) {
@@ -417,36 +516,109 @@ export const orderService = {
               }
             }
 
-            const deliveryFee = subtotal.greaterThanOrEqualTo(
-              store.freeDeliveryAbove,
-            )
-              ? new Prisma.Decimal(0)
-              : store.deliveryFee;
-            const total = subtotal.plus(deliveryFee);
+            const fulfilment = input.fulfilment === 'pickup' ? Fulfilment.PICKUP : Fulfilment.DELIVERY;
+            const deliveryFee =
+              fulfilment === Fulfilment.PICKUP || subtotal.greaterThanOrEqualTo(store.freeDeliveryAbove)
+                ? new Prisma.Decimal(0)
+                : store.deliveryFee;
+
+            // Reserve the delivery slot capacity first.
+            let slot: Prisma.DeliverySlotGetPayload<Record<string, never>> | null = null;
+            if (input.slotId) {
+              const slotRow = await tx.deliverySlot.findUnique({
+                where: { id: input.slotId },
+              });
+              if (!slotRow || !slotRow.isActive) {
+                throw new AppError(
+                  'That delivery slot is unavailable',
+                  404,
+                  'SLOT_UNAVAILABLE',
+                );
+              }
+              if (slotRow.date.getTime() + 24 * 3600_000 <= Date.now()) {
+                throw new AppError(
+                  'That delivery slot has already passed',
+                  400,
+                  'SLOT_UNAVAILABLE',
+                );
+              }
+              const reserved = await tx.deliverySlot.updateMany({
+                where: {
+                  id: input.slotId,
+                  isActive: true,
+                  booked: { lt: slotRow.capacity },
+                },
+                data: { booked: { increment: 1 } },
+              });
+              if (reserved.count !== 1) {
+                throw new AppError(
+                  'That delivery slot just filled up',
+                  409,
+                  'SLOT_UNAVAILABLE',
+                );
+              }
+              slot = slotRow;
+            }
+
+            // Pre-read money rails (debits happen after the order row exists).
+            const walletRow = input.walletApply
+              ? await tx.wallet.upsert({ where: { userId: customerId }, update: {}, create: { userId: customerId } })
+              : null;
+            const loyaltyRow = input.loyaltyApply
+              ? await tx.loyaltyAccount.upsert({ where: { userId: customerId }, update: {}, create: { userId: customerId } })
+              : null;
+
+            const maxLoyaltyAmount = subtotal.mul(env.LOYALTY_MAX_REDEEM_PCT / 100);
+            const maxLoyaltyPoints = Math.floor(
+              maxLoyaltyAmount.div(env.LOYALTY_POINT_VALUE).toNumber(),
+            );
+            const loyaltyPointsUsed =
+              input.loyaltyApply && loyaltyRow
+                ? Math.min(loyaltyRow.points, maxLoyaltyPoints)
+                : 0;
+            const loyaltyAmount = new Prisma.Decimal(loyaltyPointsUsed).mul(env.LOYALTY_POINT_VALUE);
+
+            const dueBeforeWallet = subtotal.plus(deliveryFee).minus(loyaltyAmount);
+            const walletApplied =
+              input.walletApply && walletRow
+                ? Prisma.Decimal.min(walletRow.balance, dueBeforeWallet)
+                : new Prisma.Decimal(0);
+
+            const total = dueBeforeWallet.minus(walletApplied);
+            const walletCoversEverything = subtotal
+              .plus(deliveryFee)
+              .minus(loyaltyAmount)
+              .minus(walletApplied)
+              .lessThanOrEqualTo(0);
             const orderNumber = await nextOrderNumber(tx);
             const estimatedAt = new Date(Date.now() + 45 * 60_000);
 
-            return tx.order.create({
+            const createdOrder = await tx.order.create({
               data: {
                 orderNumber,
                 customerId,
                 addressId: address.id,
                 status: 'PENDING',
-                paymentStatus: 'PENDING',
-                paymentMethod: PaymentMethod.COD,
+                paymentStatus: walletCoversEverything ? 'PAID' : 'PENDING',
+                paymentMethod: isUpiPayment ? PaymentMethod.ONLINE : PaymentMethod.COD,
                 subtotal,
                 deliveryFee,
-                discount: new Prisma.Decimal(0),
+                discount: loyaltyAmount,
                 total,
                 notes: input.notes?.trim() || null,
                 idempotencyKey: idempotencyKey ?? null,
                 estimatedAt,
+                fulfilment,
+                slotId: slot?.id ?? null,
+                pickupAt: fulfilment === Fulfilment.PICKUP ? estimatedAt : null,
+                walletApplied,
+                loyaltyPointsUsed,
                 items: {
                   create: resolved.map((item) => ({
                     productId: item.product.id,
                     quantity: item.quantity,
-                    unitPrice: item.product.price,
-                    total: item.product.price.mul(item.quantity),
+                    unitPrice: item.unitPrice,
+                    total: item.unitPrice.mul(item.quantity),
                   })),
                 },
                 statusHistory: {
@@ -456,17 +628,117 @@ export const orderService = {
                     changedBy: customerId,
                   },
                 },
-                tracking: {
-                  create: {
-                    storeLatitude: store.latitude,
-                    storeLongitude: store.longitude,
-                    customerLatitude: address.latitude,
-                    customerLongitude: address.longitude,
-                  },
-                },
+                ...(fulfilment === Fulfilment.DELIVERY
+                  ? {
+                      tracking: {
+                        create: {
+                          storeLatitude: store.latitude,
+                          storeLongitude: store.longitude,
+                          customerLatitude: address.latitude,
+                          customerLongitude: address.longitude,
+                        },
+                      },
+                    }
+                  : {}),
               },
               include: orderInclude,
             });
+
+            // Settle the money rails with the real order id.
+            const settledPaymentRef: string[] = [];
+            if (isUpiPayment && input.upiUtrLast4) {
+              const ack = makeUpiAck(createdOrder.orderNumber, input.upiUtrLast4);
+              settledPaymentRef.push(ack.paymentRef);
+              await tx.walletTransaction.create({
+                data: {
+                  userId: customerId,
+                  orderId: createdOrder.id,
+                  type: WalletTxnType.CASHBACK,
+                  amount: new Prisma.Decimal(0),
+                  note: ack.txnNote,
+                },
+              });
+            }
+
+            if (loyaltyPointsUsed > 0) {
+              await tx.loyaltyAccount.update({
+                where: { userId: customerId },
+                data: { points: { decrement: loyaltyPointsUsed } },
+              });
+              await tx.walletTransaction.create({
+                data: {
+                  userId: customerId,
+                  orderId: createdOrder.id,
+                  type: WalletTxnType.REDEEM,
+                  amount: loyaltyAmount.negated(),
+                  note: `Loyalty: ${loyaltyPointsUsed} points redeemed`,
+                },
+              });
+            }
+
+            if (walletApplied.greaterThan(0)) {
+              const settled = await tx.wallet.updateMany({
+                where: { userId: customerId, balance: { gte: walletApplied } },
+                data: { balance: { decrement: walletApplied } },
+              });
+              if (settled.count !== 1) {
+                throw new AppError('Wallet balance changed while paying', 409, 'WALLET_CHANGED');
+              }
+              await tx.walletTransaction.create({
+                data: {
+                  userId: customerId,
+                  orderId: createdOrder.id,
+                  type: WalletTxnType.REDEEM,
+                  amount: walletApplied.negated(),
+                  note: 'Wallet redemption at checkout',
+                },
+              });
+              if (walletCoversEverything && !isUpiPayment) {
+                settledPaymentRef.push('WALLET');
+              }
+            }
+
+            if (settledPaymentRef.length > 0) {
+              await tx.order.update({
+                where: { id: createdOrder.id },
+                data: {
+                  paymentRef: settledPaymentRef[0],
+                  ...(settledPaymentRef.includes('WALLET') ? { paymentStatus: 'PAID' } : {}),
+                },
+              });
+            }
+
+            for (const deal of deals) {
+              if (dealPct.get(deal.productId) !== deal.discountPct) continue;
+              const counted = await tx.flashDeal.updateMany({
+                where: {
+                  id: deal.id,
+                  isActive: true,
+                  startsAt: { lte: now },
+                  endsAt: { gte: now },
+                  OR: [{ stockLimit: null }, { usedCount: { lt: deal.stockLimit ?? 10_000_000 } }],
+                },
+                data: { usedCount: { increment: 1 } },
+              });
+              if (counted.count !== 1) {
+                throw new AppError(
+                  'That flash deal just sold out — the price has been updated',
+                  409,
+                  'DEAL_SOLD_OUT',
+                );
+              }
+            }
+
+            if (input.referralCode) {
+              await moneyService.applyReferral(customerId, input.referralCode, tx);
+            }
+
+            // Re-read with UPI/wallet settlement for the notify pipeline.
+            const finalOrder = await tx.order.findUniqueOrThrow({
+              where: { id: createdOrder.id },
+              include: orderInclude,
+            });
+            return finalOrder;
           },
           { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
         );
@@ -515,7 +787,7 @@ export const orderService = {
       customerId,
       total: created.total.toFixed(2),
     });
-    return serializeOrder(created);
+    return addUpiIntent(created);
   },
 
   async listMy(customerId: string, query: CustomerOrderListQuery) {
