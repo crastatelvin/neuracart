@@ -7,6 +7,7 @@ import { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ToastHost } from '@/components/ui/ToastHost';
 import { colors } from '@/constants/design';
+import { registerForPush } from '@/lib/push';
 import { setSessionExpiredHandler } from '@/lib/session';
 import { useAuthStore } from '@/store/auth';
 import { useCartStore } from '@/store/cart';
@@ -26,6 +27,7 @@ export default function RootLayout() {
   useEffect(() => {
     if (user) {
       void useCartStore.getState().hydrate(user.id);
+      void registerForPush().catch(() => undefined);
     } else {
       useCartStore.getState().reset();
     }
