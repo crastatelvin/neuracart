@@ -115,6 +115,15 @@ const runSubscriptionsHandler: RequestHandler = async (_req, res, next) => {
   }
 };
 
+const adminSlotsHandler: RequestHandler = async (_req, res, next) => {
+  try {
+    const slots = await schedulingService.listSlots(7);
+    sendSuccess(res, slots, 'Delivery slots');
+  } catch (error) {
+    next(error);
+  }
+};
+
 const adminSubscriptionsHandler: RequestHandler = async (_req, res, next) => {
   try {
     const subs = await listAllSubscriptions();
@@ -166,6 +175,7 @@ schedulingRoutes.patch(
 );
 
 // ——— admin (also mounted under /api/admin) ———
+schedulingRoutes.get('/admin/slots', authorize(Role.ADMIN), adminSlotsHandler);
 schedulingRoutes.post('/admin/slots/bulk', authorize(Role.ADMIN), validateBody(bulkSlotsSchema), bulkSlotsHandler);
 schedulingRoutes.post('/admin/subscriptions/run', authorize(Role.ADMIN), runSubscriptionsHandler);
 schedulingRoutes.get('/admin/subscriptions', authorize(Role.ADMIN), adminSubscriptionsHandler);
