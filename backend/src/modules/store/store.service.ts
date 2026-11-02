@@ -22,6 +22,11 @@ function serializeStore(store: Store) {
     freeDeliveryAbove: store.freeDeliveryAbove.toFixed(2),
     isOpen: isStoreOpenNow(store),
     manuallyOpen: store.isOpen,
+    weatherMode: store.weatherMode,
+    weatherNote: store.weatherNote,
+    surgeFee: store.surgeFee.toFixed(2),
+    pickupEnabled: store.pickupEnabled,
+    rebagEnabled: store.rebagEnabled,
     timezone: 'Asia/Kolkata',
     updatedAt: store.updatedAt,
   };

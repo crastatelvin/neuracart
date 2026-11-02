@@ -54,6 +54,11 @@ export type StoreInfo = {
   isOpen: boolean;
   manuallyOpen: boolean;
   timezone: string;
+  weatherMode?: 'NORMAL' | 'RAIN' | 'HEAVY';
+  weatherNote?: string | null;
+  surgeFee?: string;
+  pickupEnabled?: boolean;
+  rebagEnabled?: boolean;
   updatedAt: string;
 };
 

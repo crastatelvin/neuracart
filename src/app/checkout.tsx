@@ -30,6 +30,25 @@ import { useToastStore } from '@/store/toast';
 
 let sessionAddressId: string | null = null;
 
+type SlotDay = {
+  date: string;
+  label: string;
+  windows: {
+    id: string;
+    windowLabel: string;
+    available: number;
+    capacity: number;
+  }[];
+};
+
+type WalletInfo = { balance: number };
+
+type LoyaltyInfo = {
+  points: number;
+  pointValue: number;
+  maxRedeemPct: number;
+};
+
 export default function CheckoutScreen() {
   const router = useRouter();
   const items = useCartStore((state) => state.items);
@@ -47,9 +66,36 @@ export default function CheckoutScreen() {
   const [updatingDefault, setUpdatingDefault] = useState<string | null>(null);
   const idempotencyKey = useRef(Crypto.randomUUID());
 
+  const [fulfilment, setFulfilment] = useState<'delivery' | 'pickup'>('delivery');
+  const [slotDays, setSlotDays] = useState<SlotDay[]>([]);
+  const [slotDayIndex, setSlotDayIndex] = useState(0);
+  const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
+  const [wallet, setWallet] = useState<WalletInfo | null>(null);
+  const [loyalty, setLoyalty] = useState<LoyaltyInfo | null>(null);
+  const [walletApply, setWalletApply] = useState(false);
+  const [loyaltyApply, setLoyaltyApply] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<'cod' | 'online'>('cod');
+  const [upiUtr, setUpiUtr] = useState('');
+
+  const isPickup = fulfilment === 'pickup';
   const subtotal = cartSubtotal(items);
-  const deliveryFee = cartDeliveryFee(subtotal, store);
-  const total = subtotal + deliveryFee;
+  const baseFee = isPickup ? 0 : cartDeliveryFee(subtotal, store);
+  const surge =
+    !isPickup && store?.weatherMode && store.weatherMode !== 'NORMAL'
+      ? Number(store.surgeFee ?? 0)
+      : 0;
+  const deliveryFee = baseFee + surge;
+  const maxLoyalty = subtotal * ((loyalty?.maxRedeemPct ?? 20) / 100);
+  const loyaltyAmount =
+    loyaltyApply && loyalty
+      ? Math.min(loyalty.points * loyalty.pointValue, maxLoyalty)
+      : 0;
+  const due = subtotal + deliveryFee - loyaltyAmount;
+  const walletAmount =
+    walletApply && wallet ? Math.min(wallet.balance, Math.max(0, due)) : 0;
+  const total = Math.max(0, due - walletAmount);
+  const currentDay = slotDays[slotDayIndex];
+  const availableWindows = currentDay?.windows.filter((window) => window.available > 0) ?? [];
 
   const loadAddresses = useCallback(async () => {
     setAddressError(null);
@@ -73,10 +119,25 @@ export default function CheckoutScreen() {
     }
   }, []);
 
+  const loadCheckoutExtras = useCallback(async () => {
+    const [walletResult, loyaltyResult, slotResult] = await Promise.allSettled([
+      apiRequest<WalletInfo>('/money/wallet'),
+      apiRequest<LoyaltyInfo>('/money/loyalty'),
+      apiRequest<SlotDay[]>('/slots?days=2'),
+    ]);
+    if (walletResult.status === 'fulfilled') setWallet(walletResult.value);
+    if (loyaltyResult.status === 'fulfilled') setLoyalty(loyaltyResult.value);
+    if (slotResult.status === 'fulfilled') {
+      setSlotDays(slotResult.value);
+      setSlotDayIndex(0);
+    }
+  }, []);
+
   useFocusEffect(
     useCallback(() => {
       void loadAddresses();
-    }, [loadAddresses]),
+      void loadCheckoutExtras();
+    }, [loadAddresses, loadCheckoutExtras]),
   );
 
   async function setDefault(address: Address) {
@@ -107,6 +168,14 @@ export default function CheckoutScreen() {
       setOrderError('LocalMart is closed right now. Please order during opening hours.');
       return;
     }
+    if (!isPickup && availableWindows.length > 0 && !selectedSlotId) {
+      setOrderError('Choose a delivery slot before placing your order.');
+      return;
+    }
+    if (paymentMethod === 'online' && !/^\d{4}$/.test(upiUtr.trim())) {
+      setOrderError('Enter the last 4 digits of your UPI reference.');
+      return;
+    }
     setPlacing(true);
     setOrderError(null);
     try {
@@ -115,7 +184,12 @@ export default function CheckoutScreen() {
         idempotencyKey: idempotencyKey.current,
         body: {
           addressId: selectedAddressId,
-          paymentMethod: 'cod',
+          paymentMethod,
+          fulfilment,
+          ...(isPickup ? {} : { slotId: selectedSlotId ?? undefined }),
+          walletApply,
+          loyaltyApply,
+          ...(paymentMethod === 'online' ? { upiUtrLast4: upiUtr.trim() } : {}),
           items: items.map((item) => ({
             productId: item.product.id,
             quantity: item.quantity,
@@ -160,7 +234,7 @@ export default function CheckoutScreen() {
       <StatusBar style="dark" />
       <ScreenHeader
         title="Checkout"
-        subtitle={`${items.length} ${items.length === 1 ? 'line item' : 'line items'} · cash on delivery`}
+        subtitle={`${items.length} ${items.length === 1 ? 'line item' : 'line items'} · ${isPickup ? 'store pickup' : paymentMethod === 'online' ? 'UPI' : 'cash on delivery'}`}
         onBack={() => router.back()}
       />
       <ScrollView
@@ -260,15 +334,137 @@ export default function CheckoutScreen() {
 
         <View style={styles.sectionHeading}>
           <View style={{ gap: 2 }}>
+            <AppText variant="section">How would you like it?</AppText>
+            <AppText variant="caption" tone="muted">
+              Doorstep delivery or collect from the store.
+            </AppText>
+          </View>
+        </View>
+        <View style={styles.choiceRow}>
+          {(['delivery', 'pickup'] as const).map((option) => {
+            const active = fulfilment === option;
+            return (
+              <Pressable
+                key={option}
+                onPress={() => {
+                  setFulfilment(option);
+                  if (option === 'pickup') setSelectedSlotId(null);
+                }}
+                accessibilityRole="radio"
+                accessibilityState={{ selected: active }}
+                style={[styles.choice, active && styles.choiceActive]}
+              >
+                <Ionicons
+                  name={option === 'delivery' ? 'bicycle-outline' : 'storefront-outline'}
+                  size={19}
+                  color={active ? colors.primaryDark : colors.subtle}
+                />
+                <AppText
+                  variant="meta"
+                  tone={active ? 'primary' : 'muted'}
+                  style={{ fontWeight: '700' }}
+                >
+                  {option === 'delivery' ? 'Delivery' : 'Store pickup'}
+                </AppText>
+              </Pressable>
+            );
+          })}
+        </View>
+
+        {!isPickup ? (
+          <>
+            <View style={styles.sectionHeading}>
+              <View style={{ gap: 2 }}>
+                <AppText variant="section">Delivery slot</AppText>
+                <AppText variant="caption" tone="muted">
+                  Two-hour windows, capped per slot.
+                </AppText>
+              </View>
+            </View>
+            {slotDays.length === 0 ? (
+              <Card style={styles.addressLoading}>
+                <ActivityIndicator color={colors.primary} />
+                <AppText variant="meta" tone="muted">
+                  Loading slots…
+                </AppText>
+              </Card>
+            ) : (
+              <View style={{ gap: 10 }}>
+                <View style={styles.dayRow}>
+                  {slotDays.map((day, index) => (
+                    <Pressable
+                      key={day.date}
+                      onPress={() => {
+                        setSlotDayIndex(index);
+                        setSelectedSlotId(null);
+                      }}
+                      style={[styles.dayChip, index === slotDayIndex && styles.dayChipActive]}
+                    >
+                      <AppText
+                        variant="caption"
+                        tone={index === slotDayIndex ? 'primary' : 'muted'}
+                        style={{ fontWeight: '700' }}
+                      >
+                        {day.label}
+                      </AppText>
+                      <AppText variant="caption" tone="subtle">
+                        {day.date.slice(5)}
+                      </AppText>
+                    </Pressable>
+                  ))}
+                </View>
+                <View style={styles.slotGrid}>
+                  {availableWindows.length === 0 ? (
+                    <AppText variant="caption" tone="muted">
+                      No slots left for this day — try the next one.
+                    </AppText>
+                  ) : (
+                    availableWindows.map((window) => {
+                      const active = selectedSlotId === window.id;
+                      return (
+                        <Pressable
+                          key={window.id}
+                          onPress={() => setSelectedSlotId(window.id)}
+                          accessibilityRole="radio"
+                          accessibilityState={{ selected: active }}
+                          style={[styles.slotChip, active && styles.slotChipActive]}
+                        >
+                          <AppText
+                            variant="caption"
+                            tone={active ? 'primary' : 'muted'}
+                            style={{ fontWeight: '700' }}
+                          >
+                            {window.windowLabel}
+                          </AppText>
+                          <AppText variant="caption" tone="subtle">
+                            {window.available} left
+                          </AppText>
+                        </Pressable>
+                      );
+                    })
+                  )}
+                </View>
+              </View>
+            )}
+          </>
+        ) : null}
+
+        <View style={styles.sectionHeading}>
+          <View style={{ gap: 2 }}>
             <AppText variant="section">Payment method</AppText>
             <AppText variant="caption" tone="muted">
-              Pay when your order arrives.
+              UPI pays instantly; cash is collected on arrival.
             </AppText>
           </View>
         </View>
 
         <View style={styles.paymentList}>
-          <View style={[styles.paymentOption, styles.paymentSelected]}>
+          <Pressable
+            onPress={() => setPaymentMethod('cod')}
+            accessibilityRole="radio"
+            accessibilityState={{ selected: paymentMethod === 'cod' }}
+            style={[styles.paymentOption, paymentMethod === 'cod' && styles.paymentSelected]}
+          >
             <View style={styles.paymentIcon}>
               <Ionicons name="cash-outline" size={22} color={colors.primaryDark} />
             </View>
@@ -280,30 +476,106 @@ export default function CheckoutScreen() {
                 Have the exact amount ready if possible.
               </AppText>
             </View>
-            <View style={styles.radioSelected}>
-              <View style={styles.radioInner} />
+            <View style={[styles.radio, paymentMethod === 'cod' && styles.radioSelected]}>
+              {paymentMethod === 'cod' ? <View style={styles.radioInner} /> : null}
             </View>
-          </View>
+          </Pressable>
 
-          <View style={[styles.paymentOption, styles.paymentDisabled]}>
-            <View style={[styles.paymentIcon, { backgroundColor: colors.border }]}>
-              <Ionicons name="card-outline" size={22} color={colors.subtle} />
+          <Pressable
+            onPress={() => setPaymentMethod('online')}
+            accessibilityRole="radio"
+            accessibilityState={{ selected: paymentMethod === 'online' }}
+            style={[styles.paymentOption, paymentMethod === 'online' && styles.paymentSelected]}
+          >
+            <View style={styles.paymentIcon}>
+              <Ionicons name="phone-portrait-outline" size={22} color={colors.primaryDark} />
             </View>
             <View style={{ flex: 1, gap: 1 }}>
-              <AppText variant="bodyMedium" tone="subtle" style={{ fontWeight: '700' }}>
-                Online payment
+              <AppText variant="bodyMedium" style={{ fontWeight: '700' }}>
+                UPI
               </AppText>
-              <AppText variant="caption" tone="subtle">
-                UPI and cards are coming soon.
-              </AppText>
-            </View>
-            <View style={styles.comingSoon}>
-              <AppText variant="caption" tone="muted" style={{ fontWeight: '700' }}>
-                Soon
+              <AppText variant="caption" tone="muted">
+                Pay with GPay, PhonePe or any UPI app.
               </AppText>
             </View>
-          </View>
+            <View style={[styles.radio, paymentMethod === 'online' && styles.radioSelected]}>
+              {paymentMethod === 'online' ? <View style={styles.radioInner} /> : null}
+            </View>
+          </Pressable>
+
+          {paymentMethod === 'online' ? (
+            <TextField
+              label="UPI reference — last 4 digits"
+              placeholder="e.g. 4821"
+              value={upiUtr}
+              onChangeText={(value) => setUpiUtr(value.replace(/\D/g, '').slice(0, 4))}
+              keyboardType="number-pad"
+              maxLength={4}
+              editable={!placing}
+              hint="Shown in your UPI app after paying. The store verifies it before dispatch."
+            />
+          ) : null}
         </View>
+
+        {wallet || loyalty ? (
+          <>
+            <View style={styles.sectionHeading}>
+              <AppText variant="section">Save more</AppText>
+            </View>
+            <View style={styles.paymentList}>
+              {wallet ? (
+                <Pressable
+                  onPress={() => setWalletApply((value) => !value)}
+                  accessibilityRole="checkbox"
+                  accessibilityState={{ checked: walletApply }}
+                  style={[styles.paymentOption, walletApply && styles.paymentSelected]}
+                >
+                  <View style={styles.paymentIcon}>
+                    <Ionicons name="wallet-outline" size={22} color={colors.primaryDark} />
+                  </View>
+                  <View style={{ flex: 1, gap: 1 }}>
+                    <AppText variant="bodyMedium" style={{ fontWeight: '700' }}>
+                      Use wallet balance
+                    </AppText>
+                    <AppText variant="caption" tone="muted">
+                      {money(wallet.balance)} available
+                    </AppText>
+                  </View>
+                  <View style={[styles.checkbox, walletApply && styles.checkboxActive]}>
+                    {walletApply ? (
+                      <Ionicons name="checkmark" size={14} color={colors.white} />
+                    ) : null}
+                  </View>
+                </Pressable>
+              ) : null}
+              {loyalty && loyalty.points > 0 ? (
+                <Pressable
+                  onPress={() => setLoyaltyApply((value) => !value)}
+                  accessibilityRole="checkbox"
+                  accessibilityState={{ checked: loyaltyApply }}
+                  style={[styles.paymentOption, loyaltyApply && styles.paymentSelected]}
+                >
+                  <View style={styles.paymentIcon}>
+                    <Ionicons name="star-outline" size={22} color={colors.primaryDark} />
+                  </View>
+                  <View style={{ flex: 1, gap: 1 }}>
+                    <AppText variant="bodyMedium" style={{ fontWeight: '700' }}>
+                      Redeem loyalty points
+                    </AppText>
+                    <AppText variant="caption" tone="muted">
+                      {loyalty.points} pts · up to {loyalty.maxRedeemPct}% of items
+                    </AppText>
+                  </View>
+                  <View style={[styles.checkbox, loyaltyApply && styles.checkboxActive]}>
+                    {loyaltyApply ? (
+                      <Ionicons name="checkmark" size={14} color={colors.white} />
+                    ) : null}
+                  </View>
+                </Pressable>
+              ) : null}
+            </View>
+          </>
+        ) : null}
 
         <View style={styles.sectionHeading}>
           <AppText variant="section">Order summary</AppText>
@@ -346,11 +618,13 @@ export default function CheckoutScreen() {
           </View>
         </Card>
 
-        <FreeDeliveryProgress
-          subtotal={subtotal}
-          threshold={Number(store.freeDeliveryAbove)}
-          fee={deliveryFee}
-        />
+        {!isPickup ? (
+          <FreeDeliveryProgress
+            subtotal={subtotal}
+            threshold={Number(store.freeDeliveryAbove)}
+            fee={deliveryFee}
+          />
+        ) : null}
 
         <Card style={styles.billCard}>
           <AppText variant="section">Bill details</AppText>
@@ -358,10 +632,15 @@ export default function CheckoutScreen() {
             order={{
               subtotal: subtotal.toFixed(2),
               deliveryFee: deliveryFee.toFixed(2),
-              discount: '0',
+              discount: (loyaltyAmount + walletAmount).toFixed(2),
               total: total.toFixed(2),
             }}
           />
+          {surge > 0 ? (
+            <AppText variant="caption" tone="muted">
+              Includes a {money(surge)} weather surge fee.
+            </AppText>
+          ) : null}
         </Card>
 
         <View style={styles.notesBlock}>
@@ -467,6 +746,44 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  choiceRow: { flexDirection: 'row', gap: 10 },
+  choice: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 7,
+    paddingVertical: 12,
+    borderRadius: radius.lg,
+    borderWidth: 1.5,
+    borderColor: colors.border,
+    backgroundColor: colors.white,
+  },
+  choiceActive: { borderColor: colors.primary, backgroundColor: colors.primarySoft },
+  dayRow: { flexDirection: 'row', gap: 8 },
+  dayChip: {
+    flex: 1,
+    alignItems: 'center',
+    gap: 1,
+    paddingVertical: 8,
+    borderRadius: radius.md,
+    borderWidth: 1.5,
+    borderColor: colors.border,
+    backgroundColor: colors.white,
+  },
+  dayChipActive: { borderColor: colors.primary, backgroundColor: colors.primarySoft },
+  slotGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  slotChip: {
+    minWidth: '46%',
+    gap: 1,
+    paddingVertical: 9,
+    paddingHorizontal: 11,
+    borderRadius: radius.md,
+    borderWidth: 1.5,
+    borderColor: colors.border,
+    backgroundColor: colors.white,
+  },
+  slotChipActive: { borderColor: colors.primary, backgroundColor: colors.primarySoft },
   paymentList: { gap: 10 },
   paymentOption: {
     flexDirection: 'row',
@@ -479,7 +796,6 @@ const styles = StyleSheet.create({
     padding: 14,
   },
   paymentSelected: { borderColor: colors.primary },
-  paymentDisabled: { opacity: 0.7, backgroundColor: '#FCFCFD' },
   paymentIcon: {
     width: 44,
     height: 44,
@@ -488,22 +804,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  radioSelected: {
+  radio: {
     width: 22,
     height: 22,
     borderRadius: 11,
     borderWidth: 2,
-    borderColor: colors.primary,
+    borderColor: colors.borderStrong,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  radioInner: { width: 10, height: 10, borderRadius: 5, backgroundColor: colors.primary },
-  comingSoon: {
-    backgroundColor: colors.border,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: radius.pill,
+  radioSelected: {
+    borderColor: colors.primary,
   },
+  radioInner: { width: 10, height: 10, borderRadius: 5, backgroundColor: colors.primary },
+  checkbox: {
+    width: 22,
+    height: 22,
+    borderRadius: 7,
+    borderWidth: 2,
+    borderColor: colors.borderStrong,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkboxActive: { backgroundColor: colors.primary, borderColor: colors.primary },
   summaryCard: { gap: 0 },
   summaryRow: { flexDirection: 'row', alignItems: 'center', gap: 9, paddingVertical: 8 },
   summaryBorder: { borderBottomWidth: 1, borderBottomColor: colors.border },
