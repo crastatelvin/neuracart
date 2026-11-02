@@ -73,6 +73,12 @@ function notifyOrder(order: OrderWithRelations, status: OrderStatus): void {
     paymentStatus: order.paymentStatus,
   });
   if (order.deliveryPartnerId) {
+    void sendPushToUser(
+      order.deliveryPartnerId,
+      `Order ${order.orderNumber}`,
+      `Status: ${label}.`,
+      { orderId: order.id, status },
+    );
     publish(`rider:${order.deliveryPartnerId}`, 'order.status', {
       orderId: order.id,
       orderNumber: order.orderNumber,
