@@ -84,10 +84,10 @@ const dealDeleteHandler: RequestHandler = async (req, res, next) => {
 dealsRoutes.get('/flash-deals', listDealsHandler);
 
 // ——— admin (mounted under /api/admin) ———
-dealsRoutes.use(authenticate, authorize(Role.ADMIN));
-dealsRoutes.get('/admin/flash-deals', adminDealsHandler);
-dealsRoutes.post('/admin/flash-deals', validateBody(dealCreateSchema), dealCreateHandler);
-dealsRoutes.patch('/admin/flash-deals/:id', validateBody(dealUpdateSchema), dealUpdateHandler);
-dealsRoutes.delete('/admin/flash-deals/:id', dealDeleteHandler);
+const adminOnly = [authenticate, authorize(Role.ADMIN)];
+dealsRoutes.get('/admin/flash-deals', ...adminOnly, adminDealsHandler);
+dealsRoutes.post('/admin/flash-deals', ...adminOnly, validateBody(dealCreateSchema), dealCreateHandler);
+dealsRoutes.patch('/admin/flash-deals/:id', ...adminOnly, validateBody(dealUpdateSchema), dealUpdateHandler);
+dealsRoutes.delete('/admin/flash-deals/:id', ...adminOnly, dealDeleteHandler);
 
 export {};

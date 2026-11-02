@@ -13,6 +13,8 @@ import {
   verifyPartnerSchema,
 } from './deliveryPartner.schemas';
 import { upiQueueHandler, upiVerifyHandler } from '../money/money.routes';
+import { adminLogisticsRoutes } from '../logistics/logistics.routes';
+import { adminRiskRoutes } from '../risk/risk.routes';
 import { z } from 'zod';
 
 const upiVerifySchema = z.object({
@@ -61,3 +63,5 @@ adminRoutes.post(
   validateBody(upiVerifySchema),
   upiVerifyHandler,
 );
+adminRoutes.use('/risk', adminRiskRoutes);
+adminRoutes.use('/', adminLogisticsRoutes);

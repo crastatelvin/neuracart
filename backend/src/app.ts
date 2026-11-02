@@ -23,6 +23,8 @@ import { aiRoutes } from './modules/ai/ai.routes';
 import { moneyRoutes } from './modules/money/money.routes';
 import { schedulingRoutes } from './modules/scheduling/scheduling.routes';
 import { dealsRoutes } from './modules/deals/deals.routes';
+import { paymentRoutes } from './modules/payments/payment.routes';
+import { notificationRoutes } from './modules/notifications/notification.routes';
 import { globalRateLimiter } from './middleware/rateLimiter';
 import { notFound } from './middleware/notFound';
 import { requestId } from './middleware/requestId';
@@ -70,6 +72,8 @@ app.use(
     stream: morganStream,
   }),
 );
+// Razorpay webhooks need the raw body for the HMAC check — mount before JSON parsing.
+app.use('/api/payments', paymentRoutes);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
@@ -95,6 +99,7 @@ app.use('/api/money', moneyRoutes);
 // both routers declare /admin/* sub-paths that should land under /api/admin/*
 app.use('/api', schedulingRoutes);
 app.use('/api', dealsRoutes);
+app.use('/api', notificationRoutes);
 app.get('/api/updates', streamUpdates);
 
 const healthHandler: express.RequestHandler = async (_req, res) => {

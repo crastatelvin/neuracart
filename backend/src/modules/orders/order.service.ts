@@ -13,6 +13,8 @@ import {
   refundOrderResources,
 } from '../money/money.service';
 import { buildUpiIntent, makeUpiAck } from '../money/upi';
+import { sendPushToUser } from '../../services/push.service';
+import { sendWhatsAppMessage } from '../../services/whatsapp.service';
 import { prisma } from '../../config/prisma';
 import {
   sendOrderStatusEmail,
@@ -51,6 +53,19 @@ const TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
 };
 
 function notifyOrder(order: OrderWithRelations, status: OrderStatus): void {
+  const label = status.toLowerCase().replaceAll('_', ' ');
+  void sendPushToUser(
+    order.customerId,
+    `Order ${order.orderNumber}`,
+    `Your order is now ${label}.`,
+    { orderId: order.id, status },
+  );
+  if (order.customer.phone) {
+    void sendWhatsAppMessage(
+      order.customer.phone,
+      `LocalMart ${order.orderNumber}: your order is now ${label}.`,
+    );
+  }
   publish(`user:${order.customerId}`, 'order.status', {
     orderId: order.id,
     orderNumber: order.orderNumber,
@@ -335,6 +350,17 @@ async function cancelOrder(
       });
     }
 
+    if (actor.role === Role.CUSTOMER) {
+      await tx.riskFlag.create({
+        data: {
+          userId: actor.id,
+          kind: 'RAPID_CANCEL',
+          score: 1,
+          note: reason.slice(0, 200),
+        },
+      });
+    }
+
     await tx.orderStatusHistory.create({
       data: {
         orderId,
@@ -517,10 +543,17 @@ export const orderService = {
             }
 
             const fulfilment = input.fulfilment === 'pickup' ? Fulfilment.PICKUP : Fulfilment.DELIVERY;
-            const deliveryFee =
-              fulfilment === Fulfilment.PICKUP || subtotal.greaterThanOrEqualTo(store.freeDeliveryAbove)
+            // Weather surge is charged on delivery orders only, on top of the base fee.
+            const surge =
+              fulfilment === Fulfilment.PICKUP || store.weatherMode === 'NORMAL'
                 ? new Prisma.Decimal(0)
-                : store.deliveryFee;
+                : store.surgeFee;
+            const deliveryFee = (
+              fulfilment === Fulfilment.PICKUP ||
+              subtotal.greaterThanOrEqualTo(store.freeDeliveryAbove)
+                ? new Prisma.Decimal(0)
+                : store.deliveryFee
+            ).plus(surge);
 
             // Reserve the delivery slot capacity first.
             let slot: Prisma.DeliverySlotGetPayload<Record<string, never>> | null = null;

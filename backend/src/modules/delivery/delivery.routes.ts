@@ -10,6 +10,7 @@ import {
   completeAssignmentSchema,
   earningsQuerySchema,
 } from './delivery.schemas';
+import { deliveryLogisticsRoutes } from '../logistics/logistics.routes';
 
 export const deliveryRoutes = Router();
 
@@ -48,3 +49,4 @@ deliveryRoutes.patch(
   validateBody(availabilitySchema),
   controller.updateAvailability,
 );
+deliveryRoutes.use('/', deliveryLogisticsRoutes);
