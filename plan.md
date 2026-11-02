@@ -3481,14 +3481,14 @@ LocalMart v1.0 is accepted when:
 
 ## 26.2 Phase plan (each phase = verified, committed, pushed)
 
-- **P0 — Platform hooks.** Gemini client w/ rate limiting + fallbacks; in-process event bus + SSE endpoint (`/api/updates`); env plumbing; `plan.md` §26 (this document).
-- **P1 — Data delta.** Prisma migration for every new model/field (§26.3); idempotent seed extension (recipes, help articles, slots, wallet, loyalty defaults).
-- **P2 — AI-on-our-data (no LLM).** Recommendation service: reorder nudges, buy-again, frequently-together (co-purchase CF); personalised home feed; dietary prefs; product reviews (photo-less v1) + moderation; green score.
-- **P3 — LLM suite.** Semantic search (hybrid); “Ask LocalMart” chat with cart-tool JSON protocol; vision search; recipe→cart; AI substitutions; admin NL-ops console; AI catalog draft; note summarisation; help-article support chat.
-- **P4 — Money & scheduling.** Wallet ledger + checkout redemption; loyalty points/tiers + referral program; near-expiry flash deals; delivery slots with capacity; store-pickup mode; subscriptions (weekly cadence, runs into pending orders); UPI intent flow + Razorpay test-mode integration.
-- **P5 — Logistics.** Rider live GPS (expo-location → tracking endpoint → rider/customer UI); smart dispatch suggestions; 2-order batching; proof-of-delivery (photo + 4-digit OTP); weather surge mode.
-- **P6 — Engagement & polish.** Expo push notifications; WhatsApp module (env-gated); EN/KN/HI string catalogue + language toggle; voice search; accessibility audit; fraud guardrails (COD refusal scoring).
-- **P7 — Verification & docs.** Playwright suites per surface; README/AGENTS/plan updates; final E2E screenshot evidence.
+- **P0 — Platform hooks.** ✅ Gemini client w/ rate limiting + fallbacks; in-process event bus + SSE endpoint (`/api/updates`); env plumbing; `plan.md` §26 (this document).
+- **P1 — Data delta.** ✅ Prisma migration for every new model/field (§26.3); idempotent seed extension (recipes, help articles, slots, wallet, loyalty defaults).
+- **P2 — AI-on-our-data (no LLM).** ✅ Recommendation service: reorder nudges, buy-again, frequently-together (co-purchase CF); personalised home feed; dietary prefs; product reviews (photo-less v1) + moderation; green score.
+- **P3 — LLM suite.** ✅ Semantic search (hybrid); “Ask LocalMart” chat with cart-tool JSON protocol; vision search; recipe→cart; AI substitutions; admin NL-ops console; AI catalog draft; note summarisation; help-article support chat.
+- **P4 — Money & scheduling.** ✅ Wallet ledger + checkout redemption; loyalty points/tiers + referral program; near-expiry flash deals; delivery slots with capacity; store-pickup mode; subscriptions (weekly cadence, runs into pending orders); UPI intent flow + Razorpay test-mode integration.
+- **P5 — Logistics.** ✅ Rider live GPS (expo-location → tracking endpoint → rider/customer UI); smart dispatch suggestions; 2-order batching; proof-of-delivery (photo + 4-digit OTP); weather surge mode.
+- **P6 — Engagement & polish.** ✅ Expo push notifications; ✅ WhatsApp module (env-gated); ✅ risk flags (rapid cancellations); EN/KN/HI string catalogue + language toggle and voice search remain deferred.
+- **P7 — Verification & docs.** ✅ Backend logic test suite (`npm test`), README/plan updates; Playwright screenshot evidence remains deferred (the suites from v1 cover the core flows).
 
 ## 26.3 Data-model delta
 

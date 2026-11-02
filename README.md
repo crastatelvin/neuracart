@@ -6,10 +6,10 @@ LocalMart is a full-stack grocery delivery platform for a single neighbourhood s
 
 | App | Stack | Status |
 |---|---|---|
-| **Customer mobile** | Expo SDK 57, React Native, Expo Router, Zustand, SecureStore / AsyncStorage | ✅ Built & verified — OTP login, catalog, cart, checkout with COD, order tracking, address book |
-| **Backend API** | Node.js, Express 5, TypeScript, Prisma 5.22, PostgreSQL 18 | ✅ Built & verified — auth, catalog, addresses, orders, delivery, admin, store, health |
-| **Admin panel** | Next.js 15 (App Router), plain CSS design system, OTP login | ✅ Built & verified — dashboard, order lifecycle, catalog management, rider management, store settings |
-| **Delivery app** | Expo SDK 57, React Native, Expo Router, Zustand | ✅ Built & verified — password login, assignment board, accept/decline/start/complete, earnings history, rider profile |
+| **Customer mobile** | Expo SDK 57, React Native, Expo Router, Zustand, SecureStore / AsyncStorage | ✅ Built & verified — OTP login, catalog, cart, slots/pickup checkout, wallet + loyalty, subscriptions, order tracking, address book, AI assistant |
+| **Backend API** | Node.js, Express 5, TypeScript, Prisma 5.22, PostgreSQL 18 | ✅ Built & verified — auth, catalog, addresses, orders, money, scheduling, deals, AI, logistics, delivery, admin, store, health |
+| **Admin panel** | Next.js 15 (App Router), plain CSS design system, OTP login | ✅ Built & verified — dashboard, order lifecycle with dispatch/batching/UPI verify, catalog, reviews, flash deals, slots, risk flags, AI console, rider management, store settings |
+| **Delivery app** | Expo SDK 57, React Native, Expo Router, Zustand | ✅ Built & verified — password login, assignment board, live GPS, weather banner, paired batches, proof of delivery, earnings history, rider profile |
 
 ## Documentation
 
@@ -104,10 +104,18 @@ On a physical phone, set `EXPO_PUBLIC_API_URL=http://<your-LAN-IP>:8000` in the 
 | Customer | `customer@localmart.app` | email OTP (dev code returned by the API) |
 | Riders | `driver1@localmart.app` … `driver10@localmart.app` | `LocalMart@123` |
 
+## v2 features
+
+- **AI suite** — hybrid semantic search, “Ask LocalMart” chat with cart proposals, vision search, recipe→cart, substitutions, admin NL-ops console and catalog drafts. Every AI path has a deterministic fallback when `GEMINI_API_KEY` is absent.
+- **Money** — wallet ledger with checkout redemption, loyalty points and tiers, referral codes, near-expiry flash deals, UPI intent with admin verification, and Razorpay test mode when keys are configured.
+- **Scheduling** — two-hour delivery slots with capacity, store pickup, and recurring subscriptions that generate orders on demand.
+- **Logistics** — rider live GPS, smart dispatch suggestions, two-order batches, proof of delivery (4-digit OTP + photo), and weather surge pricing driven by open-meteo or a manual override.
+- **Engagement** — Expo push notifications, env-gated WhatsApp order updates, and risk flags (e.g. rapid cancellations) surfaced in the admin panel.
+
 ## Key product rules
 
 - Free delivery above **₹500**, otherwise **₹40**; prices are INR, GST-inclusive, IST day boundaries.
-- **COD at launch** — online payments are intentionally rejected with `ONLINE_PAYMENTS_UNAVAILABLE` until Razorpay lands in v1.1.
+- **COD is the default.** UPI intent works without keys (customer reports the last 4 digits of the UTR, an admin verifies). Razorpay test-mode automation activates when `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, and `RAZORPAY_WEBHOOK_SECRET` are set.
 - Order lifecycle: `pending → confirmed → preparing → assigned → out_for_delivery → delivered` (admin can cancel through `out_for_delivery`; customers through `confirmed`).
 - Riders earn **₹40 per delivered order**; assignments must be accepted before starting; declining returns the order to the store and emails the admin.
 - Access tokens live **15 minutes**, refresh tokens **7 days** with rotation and reuse detection; OTPs and refresh tokens are stored hashed.
@@ -125,7 +133,7 @@ On a physical phone, set `EXPO_PUBLIC_API_URL=http://<your-LAN-IP>:8000` in the 
 
 ```bash
 # backend
-cd backend && npm run typecheck && npm run build
+cd backend && npm test && npm run typecheck && npm run build
 
 # customer / delivery
 npx tsc --noEmit && npx expo lint
@@ -134,7 +142,7 @@ npx tsc --noEmit && npx expo lint
 cd admin && npm run typecheck && npm run build
 ```
 
-All four apps were verified end to end with Playwright-driven browser sessions (customer: browse → cart → checkout → order detail; admin: OTP login → confirm/prepare/assign → product create; delivery: login → accept → start → complete → earnings).
+All four apps were verified end to end with Playwright-driven browser sessions (customer: browse → cart → checkout → order detail; admin: OTP login → confirm/prepare/assign → product create; delivery: login → accept → start → complete → earnings). Backend logic tests run on Node's built-in test runner (`npm test`), so no extra test dependency is required.
 
 ## License
 

@@ -53,4 +53,6 @@ yarn-error.*
 .DS_Store
 
 # example
-example
+example.codegraph/
+
+.codegraph/
