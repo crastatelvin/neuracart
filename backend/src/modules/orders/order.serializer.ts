@@ -31,6 +31,9 @@ export function serializeOrder(order: OrderWithRelations) {
     walletApplied: order.walletApplied.toFixed(2),
     loyaltyPointsEarned: order.loyaltyPointsEarned,
     loyaltyPointsUsed: order.loyaltyPointsUsed,
+    slotId: order.slotId,
+    batchId: order.batchId,
+    paymentRef: order.paymentRef,
     green: greenScore(order),
     payout:
       order.deliveryPartnerId && order.status !== 'CANCELLED'

@@ -97,6 +97,13 @@ export type Order = {
   total: string;
   payout: string | null;
   accepted: boolean;
+  fulfilment: 'delivery' | 'pickup';
+  walletApplied: string;
+  loyaltyPointsEarned: number;
+  loyaltyPointsUsed: number;
+  slotId: string | null;
+  batchId: string | null;
+  paymentRef: string | null;
   notes: string | null;
   estimatedAt: string | null;
   deliveredAt: string | null;

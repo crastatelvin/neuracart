@@ -14,7 +14,7 @@ import {
   Spinner,
   StatusBadge,
 } from '@/components/ui';
-import { api } from '@/lib/api';
+import { api, apiPage } from '@/lib/api';
 import {
   formatDateIST,
   formatINR,
@@ -27,6 +27,15 @@ import {
 import type { DeliveryPartner, Order, OrderStatus } from '@/lib/types';
 
 const NOT_FOUND = 'ORDER_NOT_FOUND';
+
+type DispatchSuggestion = {
+  userId: string;
+  name: string | null;
+  email: string;
+  vehicleType: string | null;
+  activeLoad: number;
+  distanceKm: number | null;
+};
 
 function statusDotTone(status: OrderStatus): string {
   return status === 'cancelled' ? 'var(--red-600)' : status === 'delivered' ? 'var(--green-600)' : '#16a34a';
@@ -49,6 +58,13 @@ export default function OrderDetailPage() {
   const [cancelLoading, setCancelLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [suggestions, setSuggestions] = useState<DispatchSuggestion[]>([]);
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false);
+  const [assigningSuggestion, setAssigningSuggestion] = useState<string | null>(null);
+  const [upiBusy, setUpiBusy] = useState(false);
+  const [batchOpen, setBatchOpen] = useState(false);
+  const [batchCandidates, setBatchCandidates] = useState<Order[]>([]);
+  const [batchBusy, setBatchBusy] = useState<string | null>(null);
   const [notFound, setNotFound] = useState(false);
 
   const load = useCallback(async () => {
@@ -70,6 +86,88 @@ export default function OrderDetailPage() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  const loadSuggestions = useCallback(async (orderId: string) => {
+    setSuggestionsLoading(true);
+    try {
+      setSuggestions(await api<DispatchSuggestion[]>(`/admin/orders/${orderId}/dispatch`));
+    } catch {
+      setSuggestions([]);
+    } finally {
+      setSuggestionsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!order || order.deliveryPartner) return;
+    if (!['pending', 'confirmed', 'preparing'].includes(order.status)) return;
+    void loadSuggestions(order.id);
+  }, [order, loadSuggestions]);
+
+  const assignSuggested = async (suggestion: DispatchSuggestion) => {
+    if (!order) return;
+    setAssigningSuggestion(suggestion.userId);
+    try {
+      await api<Order>(`/orders/${order.id}/assign`, {
+        method: 'PATCH',
+        body: {
+          partnerId: suggestion.userId,
+          note: `Assigned to ${suggestion.name ?? 'rider'}`,
+        },
+      });
+      await load();
+      toast.success(`${suggestion.name ?? 'Rider'} assigned to ${order.orderNumber}.`);
+    } catch (caught) {
+      toast.error(caught instanceof Error ? caught.message : 'Could not assign the rider.');
+    } finally {
+      setAssigningSuggestion(null);
+    }
+  };
+
+  const verifyUpi = async (approved: boolean) => {
+    if (!order) return;
+    setUpiBusy(true);
+    try {
+      await api(`/admin/orders/${order.id}/verify-upi`, {
+        method: 'POST',
+        body: { approved },
+      });
+      await load();
+      toast.success(approved ? 'UPI payment verified.' : 'UPI payment rejected.');
+    } catch (caught) {
+      toast.error(caught instanceof Error ? caught.message : 'Could not update the payment.');
+    } finally {
+      setUpiBusy(false);
+    }
+  };
+
+  const openBatch = async () => {
+    setBatchOpen(true);
+    try {
+      const result = await apiPage<Order>('/orders?status=confirmed&limit=20');
+      setBatchCandidates(result.data.filter((item) => !item.batchId));
+    } catch (caught) {
+      toast.error(caught instanceof Error ? caught.message : 'Could not load open orders.');
+    }
+  };
+
+  const createBatch = async (candidate: Order) => {
+    if (!order) return;
+    setBatchBusy(candidate.id);
+    try {
+      await api('/admin/rider-batches', {
+        method: 'POST',
+        body: { orderIds: [order.id, candidate.id] },
+      });
+      setBatchOpen(false);
+      await load();
+      toast.success(`Batched with ${candidate.orderNumber}.`);
+    } catch (caught) {
+      toast.error(caught instanceof Error ? caught.message : 'Could not create the batch.');
+    } finally {
+      setBatchBusy(null);
+    }
+  };
 
   const transition = async () => {
     if (!order || !action) return;
@@ -355,7 +453,23 @@ export default function OrderDetailPage() {
             <div className="info-list" style={{ marginTop: 12 }}>
               <div className="info-row"><span>Method</span><span>{order.paymentMethod}</span></div>
               <div className="info-row"><span>Total</span><span>{formatINR(order.total)}</span></div>
+              {order.paymentRef ? (
+                <div className="info-row"><span>Reference</span><span style={{ textAlign: 'right', wordBreak: 'break-all' }}>{order.paymentRef}</span></div>
+              ) : null}
+              {order.walletApplied && Number(order.walletApplied) > 0 ? (
+                <div className="info-row"><span>Wallet applied</span><span>{formatINR(Number(order.walletApplied))}</span></div>
+              ) : null}
             </div>
+            {order.paymentMethod === 'online' && order.paymentStatus === 'pending' ? (
+              <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                <button className="btn btn-sm btn-primary" disabled={upiBusy} onClick={() => void verifyUpi(true)} type="button">
+                  {upiBusy ? <Spinner size={11} /> : <Icon name="check" size={12} />} Verify UPI
+                </button>
+                <button className="btn btn-sm btn-danger-soft" disabled={upiBusy} onClick={() => void verifyUpi(false)} type="button">
+                  <Icon name="x" size={12} /> Reject
+                </button>
+              </div>
+            ) : null}
           </div>
 
           <div className="detail-card">
@@ -388,6 +502,60 @@ export default function OrderDetailPage() {
               <EmptyState icon="bike" title="No rider assigned yet" text={order.status === 'preparing' ? 'Assign a partner from the available list.' : 'The rider appears once the order advances.'} />
             )}
           </div>
+
+          {!order.deliveryPartner && ['pending', 'confirmed', 'preparing'].includes(order.status) ? (
+            <div className="detail-card">
+              <div className="detail-card-title">
+                Dispatch suggestions
+                {suggestionsLoading ? <Spinner size={12} /> : null}
+              </div>
+              {suggestions.length === 0 ? (
+                <p className="cell-sub" style={{ margin: 0 }}>
+                  {suggestionsLoading ? 'Ranking riders…' : 'No verified riders are online right now.'}
+                </p>
+              ) : (
+                <div style={{ display: 'grid', gap: 8 }}>
+                  {suggestions.map((suggestion, index) => (
+                    <div key={suggestion.userId} className="rider-row">
+                      <span className="avatar">{initials(suggestion.name ?? 'Rider')}</span>
+                      <span style={{ flex: 1 }}>
+                        <span className="detail-name">
+                          {index === 0 ? '★ ' : ''}
+                          {suggestion.name ?? suggestion.email}
+                        </span>
+                        <div className="rider-meta">
+                          {suggestion.activeLoad} active ·{' '}
+                          {suggestion.distanceKm === null
+                            ? 'location unknown'
+                            : `${suggestion.distanceKm} km away`}
+                          {suggestion.vehicleType ? ` · ${titleCase(suggestion.vehicleType)}` : ''}
+                        </div>
+                      </span>
+                      <button
+                        className="btn btn-sm btn-primary"
+                        disabled={assigningSuggestion === suggestion.userId}
+                        onClick={() => void assignSuggested(suggestion)}
+                        type="button"
+                      >
+                        {assigningSuggestion === suggestion.userId ? <Spinner size={11} /> : <Icon name="bike" size={12} />}
+                        Assign
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {order.status === 'confirmed' && !order.batchId ? (
+                <button className="btn btn-sm btn-secondary" style={{ marginTop: 10 }} onClick={() => void openBatch()} type="button">
+                  <Icon name="package" size={13} /> Batch with another order
+                </button>
+              ) : null}
+              {order.batchId ? (
+                <p className="cell-sub" style={{ marginTop: 10, marginBottom: 0 }}>
+                  Part of a two-order rider batch.
+                </p>
+              ) : null}
+            </div>
+          ) : null}
 
           {order.tracking && ['assigned', 'out_for_delivery'].includes(order.status) ? (
             <div className="detail-card">
@@ -467,6 +635,41 @@ export default function OrderDetailPage() {
           {cancelError ? <span className="field-error">{cancelError}</span> : null}
         </div>
       </ConfirmDialog>
+
+      <Modal
+        open={batchOpen}
+        title="Batch with another order"
+        description="Pair this order with one other confirmed order so a single rider can carry both."
+        onClose={() => setBatchOpen(false)}
+        wide
+      >
+        {batchCandidates.length === 0 ? (
+          <EmptyState icon="package" title="No unbatched orders" text="Only confirmed orders without a batch can be paired." />
+        ) : (
+          <div style={{ display: 'grid', gap: 8 }}>
+            {batchCandidates.map((candidate) => (
+              <div key={candidate.id} className="rider-row">
+                <span className="avatar">{candidate.orderNumber.slice(-3)}</span>
+                <span style={{ flex: 1 }}>
+                  <span className="detail-name">{candidate.orderNumber}</span>
+                  <div className="rider-meta">
+                    {candidate.address.line1} · {formatINR(candidate.total)} · {candidate.itemCount} items
+                  </div>
+                </span>
+                <button
+                  className="btn btn-sm btn-primary"
+                  disabled={batchBusy === candidate.id}
+                  onClick={() => void createBatch(candidate)}
+                  type="button"
+                >
+                  {batchBusy === candidate.id ? <Spinner size={11} /> : <Icon name="check" size={12} />}
+                  Pair
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </Modal>
 
       <Modal
         open={assignOpen}

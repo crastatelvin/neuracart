@@ -79,6 +79,13 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [refreshing, setRefreshing] = useState(false);
+  const [weather, setWeather] = useState<{
+    mode: 'NORMAL' | 'RAIN' | 'HEAVY';
+    note: string;
+    surgeFee: string;
+    etaMinutes: number;
+  } | null>(null);
+  const [weatherSaving, setWeatherSaving] = useState(false);
 
   const load = useCallback(async ({ silent = false } = {}) => {
     if (!silent) setLoading(true);
@@ -101,9 +108,38 @@ export default function SettingsPage() {
     void load();
   }, [load]);
 
+  const loadWeather = useCallback(async () => {
+    try {
+      setWeather(await api('/admin/store/weather'));
+    } catch {
+      setWeather(null);
+    }
+  }, []);
+
   useEffect(() => {
-    void load({ silent: true });
-  }, [load]);
+    void loadWeather();
+  }, [loadWeather]);
+
+  async function saveWeather() {
+    if (!weather) return;
+    setWeatherSaving(true);
+    try {
+      await api('/admin/store/weather', {
+        method: 'POST',
+        body: {
+          mode: weather.mode,
+          note: weather.note.trim() || undefined,
+          surgeFee: Number(weather.surgeFee) || 0,
+        },
+      });
+      toast.success('Weather settings saved.');
+      await loadWeather();
+    } catch (caught) {
+      toast.error(caught instanceof Error ? caught.message : 'Could not save weather settings.');
+    } finally {
+      setWeatherSaving(false);
+    }
+  }
 
   const update = <K extends keyof Values>(key: K, value: Values[K]) => {
     setValues((current) => {
@@ -289,6 +325,71 @@ export default function SettingsPage() {
                 <span>Turning this off shows “temporarily closed” in the customer app until reopened.</span>
               </span>
             </div>
+          </div>
+
+          <div className="form-section">
+            <div className="form-section-header">
+              <p className="form-section-title">Weather surge</p>
+              <p className="form-section-text">Added to the delivery fee while conditions are poor.</p>
+            </div>
+            {weather ? (
+              <div className="form-grid">
+                <div className="field">
+                  <label className="label" htmlFor="weatherMode">Conditions</label>
+                  <select
+                    className="input"
+                    id="weatherMode"
+                    value={weather.mode}
+                    onChange={(event) =>
+                      setWeather({ ...weather, mode: event.target.value as typeof weather.mode })
+                    }
+                  >
+                    <option value="NORMAL">Normal</option>
+                    <option value="RAIN">Rain</option>
+                    <option value="HEAVY">Heavy / storm</option>
+                  </select>
+                  <span className="field-hint">ETA shown to customers: {weather.etaMinutes} min</span>
+                </div>
+                <div className="field">
+                  <label className="label" htmlFor="surgeFee">Surge fee</label>
+                  <div className="input-group">
+                    <span className="input-prefix">₹</span>
+                    <input
+                      className="input"
+                      id="surgeFee"
+                      type="number"
+                      min={0}
+                      max={200}
+                      value={weather.surgeFee}
+                      onChange={(event) => setWeather({ ...weather, surgeFee: event.target.value })}
+                    />
+                  </div>
+                </div>
+                <div className="field full">
+                  <label className="label" htmlFor="weatherNote">Customer note</label>
+                  <input
+                    className="input"
+                    id="weatherNote"
+                    maxLength={200}
+                    value={weather.note}
+                    onChange={(event) => setWeather({ ...weather, note: event.target.value })}
+                    placeholder="E.g. Heavy rain — deliveries may take longer"
+                  />
+                </div>
+                <div className="field full">
+                  <button
+                    className="btn btn-secondary"
+                    type="button"
+                    disabled={weatherSaving}
+                    onClick={() => void saveWeather()}
+                  >
+                    {weatherSaving ? <Spinner /> : <Icon name="save" size={13} />} Save weather settings
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <p className="field-hint">Weather settings are unavailable right now.</p>
+            )}
           </div>
 
           <div className="form-actions">
