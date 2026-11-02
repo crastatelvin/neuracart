@@ -40,6 +40,21 @@ import { useConfigStore } from '@/store/config';
 
 type CategoryFilter = 'all' | ProductCategory;
 
+type FlashDeal = {
+  id: string;
+  discountPct: number;
+  endsAt: string;
+  remaining: number | null;
+  product: {
+    id: string;
+    name: string;
+    unit: string;
+    price: number;
+    dealPrice: number;
+    imageUrl: string | null;
+  };
+};
+
 const CATEGORIES: { key: CategoryFilter; label: string; icon: string }[] = [
   { key: 'all', label: 'All', icon: 'grid-outline' },
   { key: 'fruits', label: 'Fruits', icon: 'nutrition-outline' },
@@ -80,6 +95,7 @@ export default function HomeScreen() {
   const [promoVisible, setPromoVisible] = useState(true);
   const [addressLabel, setAddressLabel] = useState('Indiranagar, Bengaluru');
   const [recsHome, setRecsHome] = useState<RecsHome | null>(null);
+  const [deals, setDeals] = useState<FlashDeal[]>([]);
   const [smartSearch, setSmartSearch] = useState(false);
   const requestId = useRef(0);
   const featuredLoaded = useRef(false);
@@ -206,16 +222,26 @@ export default function HomeScreen() {
     }
   }, []);
 
+  const fetchDeals = useCallback(async () => {
+    try {
+      const result = await apiRequestPage<FlashDeal>('/flash-deals?limit=10');
+      setDeals(result.data);
+    } catch {
+      setDeals([]);
+    }
+  }, []);
+
   useFocusEffect(
     useCallback(() => {
       void loadAddress();
       void fetchRecs();
-    }, [loadAddress, fetchRecs]),
+      void fetchDeals();
+    }, [loadAddress, fetchRecs, fetchDeals]),
   );
 
   async function refresh() {
     setRefreshing(true);
-    await Promise.all([fetchProducts(1, 'replace'), fetchFeatured(), loadStore(), loadAddress(), fetchRecs()]);
+    await Promise.all([fetchProducts(1, 'replace'), fetchFeatured(), loadStore(), loadAddress(), fetchRecs(), fetchDeals()]);
     setRefreshing(false);
   }
 
@@ -461,6 +487,71 @@ export default function HomeScreen() {
             );
           })}
         </ScrollView>
+
+        {store?.weatherMode && store.weatherMode !== 'NORMAL' ? (
+          <View style={styles.weatherBanner}>
+            <Ionicons name="rainy" size={16} color="#92400E" />
+            <AppText variant="caption" style={{ color: '#92400E', flex: 1 }}>
+              {store.weatherNote || 'Rainy conditions'} · deliveries may take a little longer.
+            </AppText>
+          </View>
+        ) : null}
+
+        {deals.length > 0 && !hasFilters ? (
+          <View style={styles.featuredSection}>
+            <View style={styles.sectionHeading}>
+              <View style={{ gap: 1 }}>
+                <AppText variant="section">Flash deals</AppText>
+                <AppText variant="caption" tone="muted">
+                  Marked down to clear — while stock lasts
+                </AppText>
+              </View>
+              <View style={styles.sparkle}>
+                <Ionicons name="pricetag" size={14} color={colors.primaryDark} />
+              </View>
+            </View>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.featuredRow}
+            >
+              {deals.map((deal) => (
+                <Pressable
+                  key={deal.id}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${deal.product.name}, ${deal.discountPct}% off`}
+                  onPress={() => router.push(`/product/${deal.product.id}`)}
+                  style={({ pressed }) => [styles.dealCard, pressed && { opacity: 0.85 }]}
+                >
+                  <View style={styles.dealBadge}>
+                    <AppText variant="caption" tone="white" style={{ fontWeight: '800' }}>
+                      {deal.discountPct}% off
+                    </AppText>
+                  </View>
+                  <AppText variant="bodyMedium" numberOfLines={2} style={{ fontWeight: '700' }}>
+                    {deal.product.name}
+                  </AppText>
+                  <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6 }}>
+                    <AppText variant="price" style={{ fontSize: 16 }}>
+                      {money(deal.product.dealPrice)}
+                    </AppText>
+                    <AppText
+                      variant="caption"
+                      tone="subtle"
+                      style={{ textDecorationLine: 'line-through' }}
+                    >
+                      {money(deal.product.price)}
+                    </AppText>
+                  </View>
+                  <AppText variant="caption" tone="muted">
+                    {deal.product.unit}
+                    {deal.remaining !== null ? ` · ${deal.remaining} left` : ''}
+                  </AppText>
+                </Pressable>
+              ))}
+            </ScrollView>
+          </View>
+        ) : null}
 
         {featured.length > 0 && !hasFilters ? (
           <View style={styles.featuredSection}>
@@ -795,6 +886,33 @@ const styles = StyleSheet.create({
   },
   categoryIconActive: { backgroundColor: 'rgba(255,255,255,0.16)' },
   featuredSection: { marginBottom: 20 },
+  weatherBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginHorizontal: 20,
+    marginBottom: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    borderRadius: radius.md,
+    backgroundColor: '#FEF3C7',
+  },
+  dealCard: {
+    width: 168,
+    gap: 5,
+    padding: 12,
+    borderRadius: radius.lg,
+    backgroundColor: colors.white,
+    borderWidth: 1.5,
+    borderColor: colors.border,
+  },
+  dealBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: colors.danger,
+    borderRadius: radius.pill,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
   sectionHeading: {
     flexDirection: 'row',
     alignItems: 'center',

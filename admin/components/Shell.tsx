@@ -22,6 +22,7 @@ const NAV: NavItem[] = [
   { href: '/products', label: 'Products', icon: 'products' },
   { href: '/deals', label: 'Flash deals', icon: 'trending-up' },
   { href: '/slots', label: 'Delivery slots', icon: 'clock' },
+  { href: '/subscriptions', label: 'Subscriptions', icon: 'refresh' },
   { href: '/reviews', label: 'Reviews', icon: 'star' },
   { href: '/risk', label: 'Risk flags', icon: 'shield' },
   { href: '/ai', label: 'AI console', icon: 'sparkles' },
