@@ -10,6 +10,7 @@ import { recsService } from './recs.service';
 import { prisma } from '../../config/prisma';
 import { AppError } from '../../utils/errors';
 import { param } from '../../utils/request';
+import { adminRecipeRoutes } from './recipe.admin.routes';
 
 export const recsRoutes = Router();
 
@@ -133,3 +134,5 @@ recsRoutes.post(
   validateBody(idsSchema),
   togetherHandler,
 );
+
+recsRoutes.use('/admin/recipes', authenticate, authorize(Role.ADMIN), adminRecipeRoutes);

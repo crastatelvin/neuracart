@@ -24,6 +24,7 @@ const NAV: NavItem[] = [
   { href: '/slots', label: 'Delivery slots', icon: 'clock' },
   { href: '/subscriptions', label: 'Subscriptions', icon: 'refresh' },
   { href: '/reviews', label: 'Reviews', icon: 'star' },
+  { href: '/recipes', label: 'Recipes', icon: 'package' },
   { href: '/risk', label: 'Risk flags', icon: 'shield' },
   { href: '/ai', label: 'AI console', icon: 'sparkles' },
   { href: '/delivery', label: 'Delivery partners', icon: 'delivery' },
