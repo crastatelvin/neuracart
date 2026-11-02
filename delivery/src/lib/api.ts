@@ -169,6 +169,35 @@ export async function apiRequestPage<T>(
   return { data: envelope.data, pagination };
 }
 
+/** Multipart upload (proof-of-delivery photos). Same envelope handling, no JSON body. */
+export async function apiUpload<T>(path: string, form: FormData): Promise<T> {
+  const token = getAccessToken();
+  const response = await fetch(`${API_BASE}${path}`, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: form,
+  });
+  const raw = await response.text();
+  let body: ApiEnvelope<T> | null = null;
+  try {
+    body = raw ? (JSON.parse(raw) as ApiEnvelope<T>) : null;
+  } catch {
+    body = null;
+  }
+  if (!response.ok) {
+    throw new ApiError(
+      body?.message ?? 'Upload failed. Please try again.',
+      response.status,
+      body?.code ?? 'UPLOAD_ERROR',
+      body?.errors,
+    );
+  }
+  return body?.data as T;
+}
+
 export function apiErrorMessage(error: unknown): string {
   if (isApiError(error)) {
     if (error.code === 'NETWORK_ERROR') {

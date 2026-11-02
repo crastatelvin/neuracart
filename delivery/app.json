@@ -36,7 +36,20 @@
           "imageWidth": 76
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "LocalMart Delivery shares your live location with customers while you are on a delivery."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "LocalMart Delivery uses your camera to capture proof of delivery."
+        }
+      ],
+      "expo-notifications"
     ],
     "experiments": {
       "typedRoutes": true,

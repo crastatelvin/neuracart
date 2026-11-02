@@ -2,6 +2,8 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
+import { startRiderTracking, stopRiderTracking } from '@/lib/location';
+import { registerRiderPush } from '@/lib/push';
 import { setSessionExpiredHandler } from '@/lib/session';
 import { ToastHost } from '@/components/ui/ToastHost';
 import { useDeliveryStore } from '@/store/delivery';
@@ -13,9 +15,20 @@ setSessionExpiredHandler(() => {
 });
 
 export default function DeliveryLayout() {
+  const status = useDeliveryStore((state) => state.status);
+
   useEffect(() => {
     return () => setSessionExpiredHandler(null);
   }, []);
+
+  useEffect(() => {
+    if (status !== 'signedIn') {
+      void stopRiderTracking();
+      return;
+    }
+    void startRiderTracking();
+    void registerRiderPush().catch(() => undefined);
+  }, [status]);
 
   return (
     <>

@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
@@ -17,6 +18,8 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { ConfirmAction } from '@/components/ConfirmAction';
 import { EmptyState } from '@/components/ui/States';
+import { TextField } from '@/components/ui/TextField';
+import { apiRequest, apiUpload } from '@/lib/api';
 import { colors, radius } from '@/constants/design';
 import { STORE_PREVIEW } from '@/lib/config';
 import {
@@ -31,6 +34,15 @@ import { useDeliveryStore } from '@/store/delivery';
 import { useToastStore } from '@/store/toast';
 
 type PendingAction = 'start' | 'complete' | 'decline' | 'accept' | null;
+
+type BatchOrder = {
+  id: string;
+  orderNumber: string;
+  status: string;
+  address: { line1: string; pincode: string };
+};
+
+type Batch = { id: string; orders: BatchOrder[] } | null;
 
 export default function AssignmentDetailScreen() {
   const router = useRouter();
@@ -49,6 +61,12 @@ export default function AssignmentDetailScreen() {
 
   const [pending, setPending] = useState<PendingAction>(null);
   const [checked, setChecked] = useState<Record<string, boolean>>({});
+  const [otp, setOtp] = useState('');
+  const [photo, setPhoto] = useState<{ uri: string; name: string; type: string } | null>(null);
+  const [podSent, setPodSent] = useState(false);
+  const [podVerified, setPodVerified] = useState(false);
+  const [podBusy, setPodBusy] = useState<'send' | 'verify' | null>(null);
+  const [batch, setBatch] = useState<Batch>(null);
 
   const order = assignments ? findAssignmentFn(orderId) : null;
 
@@ -59,6 +77,65 @@ export default function AssignmentDetailScreen() {
   useEffect(() => {
     void refresh();
   }, [refresh]);
+
+  useEffect(() => {
+    if (!order?.batchId) return;
+    void apiRequest<Batch>('/delivery/batch')
+      .then(setBatch)
+      .catch(() => setBatch(null));
+  }, [order?.batchId]);
+
+  const sendProofCode = async () => {
+    if (!order) return;
+    setPodBusy('send');
+    try {
+      const result = await apiRequest<{ sent: boolean; devOtp?: string }>(
+        `/delivery/assignments/${order.id}/proof/send`,
+        { method: 'POST' },
+      );
+      setPodSent(true);
+      toast(
+        result.devOtp
+          ? `Delivery code for testing: ${result.devOtp}`
+          : `Code sent to ${order.customer.name ?? 'the customer'}.`,
+      );
+    } catch (caught) {
+      toast(caught instanceof Error ? caught.message : 'Could not send the delivery code.');
+    } finally {
+      setPodBusy(null);
+    }
+  };
+
+  const pickProofPhoto = async () => {
+    const permission = await ImagePicker.requestCameraPermissionsAsync();
+    const result = permission.granted
+      ? await ImagePicker.launchCameraAsync({ quality: 0.5 })
+      : await ImagePicker.launchImageLibraryAsync({ quality: 0.5, mediaTypes: ['images'] });
+    if (result.canceled || !result.assets[0]) return;
+    const asset = result.assets[0];
+    setPhoto({
+      uri: asset.uri,
+      name: asset.fileName ?? `proof-${order?.orderNumber ?? 'order'}.jpg`,
+      type: asset.mimeType ?? 'image/jpeg',
+    });
+  };
+
+  const verifyProof = async () => {
+    if (!order || !photo || otp.length !== 4) return;
+    setPodBusy('verify');
+    try {
+      const form = new FormData();
+      form.append('otp', otp);
+      form.append('photo', photo as unknown as Blob);
+      await apiUpload(`/delivery/assignments/${order.id}/proof`, form);
+      setPodVerified(true);
+      toast('Delivery code verified.');
+    } catch (caught) {
+      toast(caught instanceof Error ? caught.message : 'Could not verify the delivery code.');
+    } finally {
+      setPodBusy(null);
+    }
+  };
 
   const masked = order ? order.accepted || order.status !== 'assigned' : false;
 
@@ -111,6 +188,7 @@ export default function AssignmentDetailScreen() {
 
   const isAssigned = order.status === 'assigned';
   const isDone = order.status === 'delivered';
+  const isOut = order.status === 'out_for_delivery';
 
   const confirm: Record<Exclude<PendingAction, null>, { title: string; description: string; label: string }> = {
     accept: {
@@ -298,6 +376,86 @@ export default function AssignmentDetailScreen() {
         ) : null}
       </Card>
 
+      {isOut ? (
+        <Card style={styles.itemsCard}>
+          <View style={styles.podHead}>
+            <Ionicons name="shield-checkmark-outline" size={18} color={colors.primaryDark} />
+            <AppText variant="card">Proof of delivery</AppText>
+          </View>
+          {podVerified ? (
+            <AppText variant="bodyMedium" tone="primary">
+              Verified — you can mark the order delivered now.
+            </AppText>
+          ) : !podSent ? (
+            <>
+              <AppText variant="caption" tone="muted">
+                Send a 4-digit code to the customer, then confirm it here with a photo of the
+                handover.
+              </AppText>
+              <Button
+                label="Send delivery code"
+                icon="paper-plane-outline"
+                loading={podBusy === 'send'}
+                onPress={() => void sendProofCode()}
+              />
+            </>
+          ) : (
+            <>
+              <TextField
+                label="Delivery code"
+                placeholder="4-digit code"
+                value={otp}
+                onChangeText={(value) => setOtp(value.replace(/\D/g, '').slice(0, 4))}
+                keyboardType="number-pad"
+                maxLength={4}
+              />
+              <Button
+                label={photo ? 'Retake proof photo' : 'Take proof photo'}
+                icon="camera-outline"
+                variant="ghost"
+                onPress={() => void pickProofPhoto()}
+              />
+              {photo ? (
+                <AppText variant="caption" tone="primary">
+                  Photo attached
+                </AppText>
+              ) : (
+                <AppText variant="caption" tone="muted">
+                  A photo is required to complete the delivery.
+                </AppText>
+              )}
+              <Button
+                label="Verify code"
+                loading={podBusy === 'verify'}
+                disabled={!photo || otp.length !== 4 || !!podBusy}
+                onPress={() => void verifyProof()}
+              />
+            </>
+          )}
+        </Card>
+      ) : null}
+
+      {order.batchId && batch && batch.orders.length > 1 ? (
+        <Card style={styles.itemsCard}>
+          <AppText variant="card">Paired delivery</AppText>
+          {batch.orders.map((paired) => (
+            <View key={paired.id} style={styles.batchRow}>
+              <Ionicons
+                name={paired.id === order.id ? 'radio-button-on' : 'radio-button-off'}
+                size={16}
+                color={paired.id === order.id ? colors.primary : colors.subtle}
+              />
+              <View style={{ flex: 1 }}>
+                <AppText variant="bodyMedium">{paired.orderNumber}</AppText>
+                <AppText variant="caption" tone="muted">
+                  {paired.address.line1} · {paired.address.pincode}
+                </AppText>
+              </View>
+            </View>
+          ))}
+        </Card>
+      ) : null}
+
       <Card style={styles.timelineCard}>
         <AppText variant="card">Status</AppText>
         {order.statusHistory.slice().reverse().map((entry) => (
@@ -341,10 +499,16 @@ export default function AssignmentDetailScreen() {
           </View>
         ) : (
           <Button
-            label={isAssigned ? 'Start delivery' : 'Mark as delivered'}
+            label={
+              isAssigned
+                ? 'Start delivery'
+                : podVerified
+                  ? 'Mark as delivered'
+                  : 'Verify proof to complete'
+            }
             style={{ width: '100%' }}
             loading={busy === `start:${order.id}` || busy === `complete:${order.id}`}
-            disabled={!!busy}
+            disabled={!!busy || (isOut && !podVerified)}
             onPress={() => setPending(isAssigned ? 'start' : 'complete')}
           />
         )}
@@ -419,6 +583,8 @@ const styles = StyleSheet.create({
     paddingVertical: 7,
   },
   itemName: { flex: 1 },
+  podHead: { flexDirection: 'row', alignItems: 'center', gap: 7 },
+  batchRow: { flexDirection: 'row', alignItems: 'center', gap: 9, paddingVertical: 6 },
   timelineCard: { marginHorizontal: 20, marginTop: 12, gap: 10 },
   timelineRow: { flexDirection: 'row', gap: 9, alignItems: 'flex-start' },
   timelineDot: {

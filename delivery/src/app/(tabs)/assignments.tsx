@@ -10,7 +10,7 @@ import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/States';
 import { ConfirmAction } from '@/components/ConfirmAction';
 import { colors } from '@/constants/design';
-import { apiErrorMessage, isApiError } from '@/lib/api';
+import { apiErrorMessage, apiRequest, isApiError } from '@/lib/api';
 import { RIDER_PAYOUT } from '@/lib/config';
 import {
   firstName,
@@ -44,10 +44,24 @@ export default function AssignmentsScreen() {
   const complete = useDeliveryStore((state) => state.complete);
   const [refreshing, setRefreshing] = useState(false);
   const [pending, setPending] = useState<PendingAction>(null);
+  const [weather, setWeather] = useState<{
+    mode: 'NORMAL' | 'RAIN' | 'HEAVY';
+    note: string;
+    surgeFee: string;
+    etaMinutes: number;
+  } | null>(null);
 
   useEffect(() => {
     void fetchAssignments();
   }, [fetchAssignments]);
+
+  useEffect(() => {
+    void apiRequest<{ mode: 'NORMAL' | 'RAIN' | 'HEAVY'; note: string; surgeFee: string; etaMinutes: number }>(
+      '/delivery/weather',
+    )
+      .then(setWeather)
+      .catch(() => setWeather(null));
+  }, []);
 
   const refresh = useCallback(async () => {
     setRefreshing(true);
@@ -146,6 +160,20 @@ export default function AssignmentsScreen() {
           </View>
         </View>
       </LinearGradient>
+
+      {weather && weather.mode !== 'NORMAL' ? (
+        <View style={styles.weatherBanner}>
+          <Ionicons name="rainy-outline" size={18} color="#92400E" />
+          <View style={{ flex: 1 }}>
+            <AppText variant="meta" style={{ fontWeight: '700', color: '#92400E' }}>
+              {weather.note || (weather.mode === 'HEAVY' ? 'Heavy weather' : 'Rain')}
+            </AppText>
+            <AppText variant="caption" style={{ color: '#92400E' }}>
+              Surge {money(Number(weather.surgeFee))} · allow ~{weather.etaMinutes} min per delivery
+            </AppText>
+          </View>
+        </View>
+      ) : null}
 
       {offline ? (
         <Card style={[styles.banner, { backgroundColor: '#FFFBEB', borderColor: '#FDE68A' }]}>
@@ -407,6 +435,16 @@ const styles = StyleSheet.create({
   },
   headerRow: { flexDirection: 'row', alignItems: 'center' },
   headerCopy: { flex: 1 },
+  weatherBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 9,
+    marginHorizontal: 20,
+    marginTop: 12,
+    padding: 11,
+    borderRadius: 12,
+    backgroundColor: '#FEF3C7',
+  },
   headerHint: { opacity: 0.85, marginTop: 3 },
   switchWrap: { alignItems: 'center', gap: 2 },
   banner: {
