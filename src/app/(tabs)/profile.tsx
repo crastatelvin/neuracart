@@ -214,6 +214,18 @@ export default function ProfileScreen() {
                 onPress={() => router.push('/addresses')}
               />
               <MenuRow
+                icon="wallet-outline"
+                title="Wallet & rewards"
+                subtitle="Balance, loyalty points, and referrals"
+                onPress={() => router.push('/wallet')}
+              />
+              <MenuRow
+                icon="repeat-outline"
+                title="Subscriptions"
+                subtitle="Repeat your regular basket"
+                onPress={() => router.push('/subscriptions')}
+              />
+              <MenuRow
                 icon="receipt-outline"
                 title="Order history"
                 subtitle="Past and active deliveries"
