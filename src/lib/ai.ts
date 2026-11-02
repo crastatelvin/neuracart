@@ -53,6 +53,17 @@ export function aiSmartSearch(query: string, limit = 12): Promise<Product[]> {
   }).then((data) => data.results);
 }
 
+export type SubstituteSuggestion = {
+  product: Product;
+  reason: string;
+};
+
+export function fetchSubstitutes(
+  productId: string,
+): Promise<{ items: SubstituteSuggestion[]; note: string | null; usedFallback: boolean }> {
+  return apiRequest(`/ai/substitutes?productId=${encodeURIComponent(productId)}`);
+}
+
 export function postAiSupport(message: string): Promise<SupportResponse> {
   return apiRequest<SupportResponse>('/ai/support', {
     method: 'POST',

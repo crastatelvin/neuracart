@@ -5,7 +5,6 @@ import { StatusBar } from 'expo-status-bar';
 import { useCallback, useState } from 'react';
 import {
   Alert,
-  Linking,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -86,12 +85,6 @@ export default function ProfileScreen() {
         },
       ],
     );
-  }
-
-  function openSupport() {
-    Linking.openURL(
-      `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent('LocalMart customer support')}`,
-    ).catch(() => showToast('Email is not available on this device', 'error'));
   }
 
   function showAbout() {
@@ -192,7 +185,11 @@ export default function ProfileScreen() {
               badge={addressCount ? String(addressCount) : undefined}
               onPress={() => router.push('/addresses')}
             />
-            <QuickAction icon="headset-outline" label="Support" onPress={openSupport} />
+            <QuickAction
+              icon="headset-outline"
+              label="Support"
+              onPress={() => router.push('/help')}
+            />
           </View>
 
           <View style={styles.section}>
@@ -296,8 +293,8 @@ export default function ProfileScreen() {
               <MenuRow
                 icon="chatbubble-ellipses-outline"
                 title="Help & support"
-                subtitle="We usually reply within a day"
-                onPress={openSupport}
+                subtitle="Answers from our help centre"
+                onPress={() => router.push('/help')}
               />
               <MenuRow
                 icon="shield-checkmark-outline"

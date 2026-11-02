@@ -496,6 +496,12 @@ async function seedV2(input: {
       topics: ['referrals', 'rewards'],
     },
     {
+      slug: 'order-tracking',
+      title: 'Where is my order?',
+      body: 'Open Orders and tap the active order to see the rider live on the map with an updated ETA. You get a push notification at confirmation, dispatch and delivery. If the dot stops moving for more than 10 minutes, message support from this screen.',
+      topics: ['orders', 'tracking', 'delivery'],
+    },
+    {
       slug: 'scratch-contact',
       title: 'Still need help?',
       body: 'The support assistant on this page answers instantly from these articles. For anything it cannot solve, email support@localmart.app and the store team will reply within a few hours.',

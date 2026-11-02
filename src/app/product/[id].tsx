@@ -22,6 +22,8 @@ import { Button } from '@/components/ui/Button';
 import { ErrorState } from '@/components/ui/States';
 import { QuantityStepper } from '@/components/ui/QuantityStepper';
 import { colors, radius, shadows } from '@/constants/design';
+import { fetchSubstitutes } from '@/lib/ai';
+import type { SubstituteSuggestion } from '@/lib/ai';
 import { apiErrorMessage, apiPath, apiRequest, apiRequestPage } from '@/lib/api';
 import { categoryLabel, money } from '@/lib/format';
 import type { Product } from '@/lib/types';
@@ -41,6 +43,8 @@ export default function ProductDetailScreen() {
 
   const [product, setProduct] = useState<Product | null>(null);
   const [related, setRelated] = useState<Product[]>([]);
+  const [substitutes, setSubstitutes] = useState<SubstituteSuggestion[]>([]);
+  const [substituteNote, setSubstituteNote] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -50,6 +54,20 @@ export default function ProductDetailScreen() {
     try {
       const result = await apiRequest<Product>(`/products/${productId}`, { auth: false });
       setProduct(result);
+      if (result.stock <= 0) {
+        void fetchSubstitutes(result.id)
+          .then((suggestions) => {
+            setSubstitutes(suggestions.items);
+            setSubstituteNote(suggestions.note);
+          })
+          .catch(() => {
+            setSubstitutes([]);
+            setSubstituteNote(null);
+          });
+      } else {
+        setSubstitutes([]);
+        setSubstituteNote(null);
+      }
       try {
         const categoryResult = await apiRequestPage<Product>(
           apiPath('/products', { category: result.category, limit: 8 }),
@@ -276,6 +294,43 @@ export default function ProductDetailScreen() {
           </View>
 
           <ProductReviews productId={product.id} />
+
+          {substitutes.length > 0 ? (
+            <View style={styles.related}>
+              <View style={styles.relatedHeading}>
+                <AppText variant="section">Try these instead</AppText>
+                <AppText variant="caption" tone="muted">
+                  {substituteNote ?? 'In stock and ready to deliver'}
+                </AppText>
+              </View>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.relatedRow}
+              >
+                {substitutes.map((suggestion) => {
+                  const suggestionQuantity =
+                    items.find((cartItem) => cartItem.product.id === suggestion.product.id)
+                      ?.quantity ?? 0;
+                  return (
+                    <ProductCard
+                      key={suggestion.product.id}
+                      product={suggestion.product}
+                      quantity={suggestionQuantity}
+                      horizontal
+                      onPress={() => router.push(`/product/${suggestion.product.id}`)}
+                      onAdd={() => {
+                        addItem(suggestion.product);
+                        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }}
+                      onIncrement={() => increment(suggestion.product.id)}
+                      onDecrement={() => decrement(suggestion.product.id)}
+                    />
+                  );
+                })}
+              </ScrollView>
+            </View>
+          ) : null}
 
           {related.length > 0 ? (
             <View style={styles.related}>
