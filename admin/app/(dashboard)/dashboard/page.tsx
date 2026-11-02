@@ -29,11 +29,38 @@ const SECONDARY: { key: 'totalCustomers' | 'averageOrderValue' | 'lowStockCount'
   { key: 'totalCustomers', label: 'Total customers', icon: 'users' },
 ];
 
+type Forecast = {
+  history: { date: string; orders: number; revenue: number }[];
+  forecast: { date: string; orders: number; revenue: number }[];
+  averages: { ordersPerDay: number; revenuePerDay: number };
+  nextPeriod: { days: number; orders: number; revenue: number };
+  basis: string;
+};
+
+type StockAlert = {
+  id: string;
+  name: string;
+  stock: number;
+  soldLast7Days: number;
+  coverDays: number | null;
+  reason: string;
+};
+
+type WeatherInfo = {
+  mode: 'NORMAL' | 'RAIN' | 'HEAVY';
+  note: string;
+  surgeFee: string;
+  etaMinutes: number;
+};
+
 export default function DashboardPage() {
   const toast = useToast();
   const [range, setRange] = useState<Range>('7d');
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [store, setStore] = useState<Store | null>(null);
+  const [forecast, setForecast] = useState<Forecast | null>(null);
+  const [stockAlerts, setStockAlerts] = useState<StockAlert[]>([]);
+  const [weather, setWeather] = useState<WeatherInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
@@ -45,12 +72,19 @@ export default function DashboardPage() {
       if (silent) setRefreshing(true);
       else setLoading(true);
       try {
-        const [nextStats, nextStore] = await Promise.all([
-          api<DashboardStats>(`/admin/stats?range=${nextRange}`),
-          api<Store>('/store'),
-        ]);
+        const [nextStats, nextStore, nextForecast, nextAlerts, nextWeather] =
+          await Promise.all([
+            api<DashboardStats>(`/admin/stats?range=${nextRange}`),
+            api<Store>('/store'),
+            api<Forecast>('/admin/forecast?days=7'),
+            api<StockAlert[]>('/admin/stock-alerts'),
+            api<WeatherInfo>('/admin/store/weather'),
+          ]);
         setStats(nextStats);
         setStore(nextStore);
+        setForecast(nextForecast);
+        setStockAlerts(nextAlerts);
+        setWeather(nextWeather);
         setError('');
       } catch (caught) {
         setStats(null);
@@ -284,6 +318,52 @@ export default function DashboardPage() {
               <div className="card">
                 <div className="card-header">
                   <div>
+                    <p className="card-title">Next 7 days · forecast</p>
+                    <p className="card-subtitle">{forecast?.basis ?? 'Based on recent order volume'}</p>
+                  </div>
+                  {forecast ? (
+                    <strong style={{ fontSize: 15, fontWeight: 750 }}>
+                      {formatINR(forecast.nextPeriod.revenue)}
+                    </strong>
+                  ) : null}
+                </div>
+                <div className="card-body">
+                  {forecast ? (
+                    <>
+                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                        {forecast.forecast.map((day) => (
+                          <div
+                            key={day.date}
+                            style={{
+                              flex: '1 1 74px',
+                              minWidth: 74,
+                              padding: '9px 10px',
+                              borderRadius: 10,
+                              background: '#F9FAFB',
+                              border: '1px solid var(--border, #E5E7EB)',
+                            }}
+                          >
+                            <div className="cell-sub">{formatDayLabel(day.date)}</div>
+                            <div style={{ fontWeight: 750, fontSize: 15 }}>{day.orders}</div>
+                            <div className="cell-sub">{formatINR(day.revenue)}</div>
+                          </div>
+                        ))}
+                      </div>
+                      <p className="card-subtitle" style={{ marginTop: 10 }}>
+                        Average {forecast.averages.ordersPerDay} orders ·{' '}
+                        {formatINR(forecast.averages.revenuePerDay)} per day. Treat as a
+                        planning hint, not a promise.
+                      </p>
+                    </>
+                  ) : (
+                    <p className="cell-sub">Forecast unavailable.</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="card">
+                <div className="card-header">
+                  <div>
                     <p className="card-title">Recent orders</p>
                     <p className="card-subtitle">Latest 5 orders, any status</p>
                   </div>
@@ -330,6 +410,74 @@ export default function DashboardPage() {
             </div>
 
             <div className="stack">
+              <div className="card">
+                <div className="card-header">
+                  <div>
+                    <p className="card-title">Weather &amp; surge</p>
+                    <p className="card-subtitle">Shown to customers at checkout</p>
+                  </div>
+                  <Link href="/settings" style={{ color: 'var(--green-700)', fontSize: 11.5, fontWeight: 650 }}>
+                    Edit
+                  </Link>
+                </div>
+                <div className="card-body">
+                  {weather ? (
+                    <div style={{ display: 'grid', gap: 7 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span
+                          className={`badge no-dot ${
+                            weather.mode === 'NORMAL'
+                              ? 'badge-green'
+                              : weather.mode === 'RAIN'
+                                ? 'badge-blue'
+                                : 'badge-red'
+                          }`}
+                        >
+                          {weather.mode === 'NORMAL' ? 'Clear' : weather.mode === 'RAIN' ? 'Rain' : 'Heavy'}
+                        </span>
+                        <span className="cell-sub">{weather.note}</span>
+                      </div>
+                      <div className="info-row">
+                        <span>Surge fee</span>
+                        <span>{formatINR(Number(weather.surgeFee))}</span>
+                      </div>
+                      <div className="info-row">
+                        <span>Delivery ETA</span>
+                        <span>~{weather.etaMinutes} min</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="cell-sub">Weather settings unavailable.</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="card">
+                <div className="card-header">
+                  <div>
+                    <p className="card-title">Restock alerts</p>
+                    <p className="card-subtitle">
+                      {stockAlerts.length} product{stockAlerts.length === 1 ? '' : 's'} under 3 days of cover
+                    </p>
+                  </div>
+                </div>
+                {stockAlerts.length === 0 ? (
+                  <EmptyState icon="check-circle" title="Cover looks healthy" text="Nothing is likely to run out this week at the current sales rate." />
+                ) : (
+                  <div className="low-stock-list">
+                    {stockAlerts.slice(0, 6).map((product) => (
+                      <Link href={`/products/${product.id}`} className="low-stock-row" key={product.id} title={product.reason}>
+                        <span className="low-stock-name">{product.name}</span>
+                        <span className="stock-chip">
+                          {product.coverDays === null ? `${product.stock} left` : `~${product.coverDays}d`}
+                        </span>
+                        <Icon name="arrow-up-right" size={12} />
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <div className="card">
                 <div className="card-header">
                   <p className="card-title">Orders by status</p>
