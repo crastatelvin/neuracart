@@ -297,9 +297,8 @@ export default function AssignmentsScreen() {
                   label="Complete delivery"
                   size="sm"
                   fullWidth={false}
-                  loading={isBusy('complete', order.id)}
                   disabled={!!busy}
-                  onPress={() => setPending({ kind: 'complete', order })}
+                  onPress={() => router.push(`/order/${order.id}`)}
                 />
               }
             />
