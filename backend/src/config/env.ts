@@ -19,8 +19,8 @@ const envSchema = z
 
     RESEND_API_KEY: z.string().default(''),
     EMAIL_FROM: z.string().default('onboarding@resend.dev'),
-    EMAIL_FROM_NAME: z.string().default('LocalMart'),
-    SUPPORT_EMAIL: z.string().default('support@localmart.app'),
+    EMAIL_FROM_NAME: z.string().default('NeuraCart'),
+    SUPPORT_EMAIL: z.string().default('support@neuracart.app'),
 
     CORS_ORIGINS: z
       .string()
@@ -66,8 +66,8 @@ const envSchema = z
     GEMINI_MODEL: z.string().default('gemini-3.8-flash'),
     GEMINI_EMBEDDING_MODEL: z.string().default('text-embedding-004'),
 
-    UPI_VPA: z.string().default('localmart@upi'),
-    UPI_PAYEE_NAME: z.string().default('LocalMart'),
+    UPI_VPA: z.string().default('neuracart@upi'),
+    UPI_PAYEE_NAME: z.string().default('NeuraCart'),
 
     WEATHER_LAT: z.coerce.number().default(12.9716),
     WEATHER_LON: z.coerce.number().default(77.5946),

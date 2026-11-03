@@ -114,7 +114,7 @@ export default function EditProfileScreen() {
           </View>
           <View style={{ gap: 2, alignItems: 'center' }}>
             <AppText variant="bodyMedium" style={{ fontWeight: '700' }}>
-              {user?.name || 'LocalMart customer'}
+              {user?.name || 'NeuraCart customer'}
             </AppText>
             <AppText variant="caption" tone="muted">
               Your profile details are private

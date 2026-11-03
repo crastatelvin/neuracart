@@ -1,11 +1,11 @@
-# LocalMart — Complete Project Plan (A → Z)
+# NeuraCart — Complete Project Plan (A → Z)
 
-> **Project name:** **LocalMart**  
+> **Project name:** **NeuraCart**  
 > **Tagline:** *Your neighbourhood market, delivered.*  
 > **Document version:** 1.0  
 > **Date:** 22 October 2026  
 > **Status:** Ready for build  
-> **Source analysed:** `localmart1_merged.md` / `localmart1_merged.pdf` — 209-page transcript of the “Fresh Cart” full-stack grocery delivery build, 13,105 lines, plus the demo walkthrough and architecture explanation.
+> **Source analysed:** `neuracart1_merged.md` / `neuracart1_merged.pdf` — 209-page transcript of the “Fresh Cart” full-stack grocery delivery build, 13,105 lines, plus the demo walkthrough and architecture explanation.
 
 ---
 
@@ -13,7 +13,7 @@
 
 ### 0.1 Purpose
 
-This document is the single source of truth for designing, building, testing, launching, and operating **LocalMart**. It converts the source tutorial into an implementation-ready plan, preserves every feature that was mentioned or demonstrated, closes the parts the tutorial did not finish, and defines the micro-details needed by designers, developers, testers, and ops.
+This document is the single source of truth for designing, building, testing, launching, and operating **NeuraCart**. It converts the source tutorial into an implementation-ready plan, preserves every feature that was mentioned or demonstrated, closes the parts the tutorial did not finish, and defines the micro-details needed by designers, developers, testers, and ops.
 
 ### 0.2 Conventions
 
@@ -70,12 +70,12 @@ Each step ends with tests and a working demo, never with “we’ll wire it late
 
 ## 1. Executive summary
 
-**LocalMart** is a full-stack grocery delivery platform for a **single neighbourhood store** selling **fruits, vegetables, and meat** within one city (launch city: Bengaluru). It consists of four deliverables that work end to end:
+**NeuraCart** is a full-stack grocery delivery platform for a **single neighbourhood store** selling **fruits, vegetables, and meat** within one city (launch city: Bengaluru). It consists of four deliverables that work end to end:
 
-1. **LocalMart Customer** — Expo/React Native mobile app. Customers log in with email OTP, browse and search products, filter by category, add to cart, choose an address, pay by COD (online in v1.1), place an order, and follow its status.
-2. **LocalMart Admin** — Next.js web panel. Store staff see today’s orders and revenue, confirm/cancel orders, move them through preparation, assign delivery partners, manage products and images, manage riders, and configure the store.
-3. **LocalMart Delivery** — Expo/React Native app for riders. Riders log in with email/password, see assignments, accept/start deliveries, mark them delivered, and track earnings (₹40 per completed delivery).
-4. **LocalMart API** — Node.js + Express + TypeScript + Prisma + PostgreSQL. JWT access/refresh auth, OTP email via Resend, RBAC for three roles, Multer + Sharp uploads, Zod validation, rate limiting, logging, emails, and the full order lifecycle.
+1. **NeuraCart Customer** — Expo/React Native mobile app. Customers log in with email OTP, browse and search products, filter by category, add to cart, choose an address, pay by COD (online in v1.1), place an order, and follow its status.
+2. **NeuraCart Admin** — Next.js web panel. Store staff see today’s orders and revenue, confirm/cancel orders, move them through preparation, assign delivery partners, manage products and images, manage riders, and configure the store.
+3. **NeuraCart Delivery** — Expo/React Native app for riders. Riders log in with email/password, see assignments, accept/start deliveries, mark them delivered, and track earnings (₹40 per completed delivery).
+4. **NeuraCart API** — Node.js + Express + TypeScript + Prisma + PostgreSQL. JWT access/refresh auth, OTP email via Resend, RBAC for three roles, Multer + Sharp uploads, Zod validation, rate limiting, logging, emails, and the full order lifecycle.
 
 **Core loop:** customer places order → admin confirms and prepares → admin assigns rider → rider starts and completes delivery → customer sees “Delivered”, COD is marked paid, rider earns ₹40, status emails are sent at each step.
 
@@ -103,29 +103,29 @@ Each step ends with tests and a working demo, never with “we’ll wire it late
 | Real-time tracking | Mentioned; `OrderTracking` model and schemas exist, no UI/logic | Polling MVP, map + push in v1.1 |
 | Deployment | Not covered | Full plan in §16 |
 
-### 2.2 Fresh Cart → LocalMart rename map
+### 2.2 Fresh Cart → NeuraCart rename map
 
-| Source | LocalMart |
+| Source | NeuraCart |
 |---|---|
-| Fresh Cart / freshcart | **LocalMart / localmart** |
-| `freshcart_db` | `localmart` (local Docker DB) |
-| `freshcart_admin` DB user | `localmart` dev / `localmart_admin` prod |
-| `driver1@freshcart.com` | `driver1@localmart.app` |
-| `admin@freshcart.com` | `admin@localmart.app` |
-| “Fresh Cart Admin” | “LocalMart Admin” |
-| “Fresh Cart — Delivery Partner Portal” | “LocalMart Delivery” |
-| App names `freshcart`, `ad-grocery` | customer: repo root `localmart`; API: `backend/`; admin: `admin/`; delivery: `delivery/` |
-| Package scope | `localmart-api` (backend); no workspace scope yet |
-| Store “Fresh Mart” | “LocalMart Central” |
-| Emails `onboarding@resend.dev` (dev) | `no-reply@localmart.app` (prod) |
+| Fresh Cart / freshcart | **NeuraCart / neuracart** |
+| `freshcart_db` | `neuracart` (local Docker DB) |
+| `freshcart_admin` DB user | `neuracart` dev / `neuracart_admin` prod |
+| `driver1@freshcart.com` | `driver1@neuracart.app` |
+| `admin@freshcart.com` | `admin@neuracart.app` |
+| “Fresh Cart Admin” | “NeuraCart Admin” |
+| “Fresh Cart — Delivery Partner Portal” | “NeuraCart Delivery” |
+| App names `freshcart`, `ad-grocery` | customer: repo root `neuracart`; API: `backend/`; admin: `admin/`; delivery: `delivery/` |
+| Package scope | `neuracart-api` (backend); no workspace scope yet |
+| Store “Fresh Mart” | “NeuraCart Central” |
+| Emails `onboarding@resend.dev` (dev) | `no-reply@neuracart.app` (prod) |
 
 ### 2.3 Brand
 
 | Element | Decision |
 |---|---|
-| Name | LocalMart |
+| Name | NeuraCart |
 | Tagline | Your neighbourhood market, delivered. |
-| Logo | Rounded green shopping bag with a white location pin cut-out; wordmark “LocalMart” |
+| Logo | Rounded green shopping bag with a white location pin cut-out; wordmark “NeuraCart” |
 | Primary | `#16A34A` (green-600) |
 | Primary dark | `#15803D` |
 | Primary light | `#DCFCE7` |
@@ -144,12 +144,12 @@ Each step ends with tests and a working demo, never with “we’ll wire it late
 
 ### 2.4 Domain and contact plan
 
-- Web/admin: `admin.localmart.app`
-- Marketing/legal: `localmart.app`
-- API: `api.localmart.app`
-- Support: `support@localmart.app`
-- Transactional: `no-reply@localmart.app` (Resend domain verification: SPF, DKIM, DMARC)
-- Privacy: `privacy@localmart.app`
+- Web/admin: `admin.neuracart.app`
+- Marketing/legal: `neuracart.app`
+- API: `api.neuracart.app`
+- Support: `support@neuracart.app`
+- Transactional: `no-reply@neuracart.app` (Resend domain verification: SPF, DKIM, DMARC)
+- Privacy: `privacy@neuracart.app`
 
 ---
 
@@ -206,7 +206,7 @@ Each step ends with tests and a working demo, never with “we’ll wire it late
 - Product low-stock alerts and daily sales email.
 - Saved/favourite products.
 - Ratings for products and riders.
-- Deep links (`localmart://order/:id`).
+- Deep links (`neuracart://order/:id`).
 - Admin httpOnly-cookie session hardening.
 
 ### 3.3 v2 (growth)
@@ -234,7 +234,7 @@ Each step ends with tests and a working demo, never with “we’ll wire it late
 
 ### 3.5 Launch assumptions
 
-1. One store: **LocalMart Central**, 14 MG Road, Bengaluru 560001, lat `12.9716`, lng `77.5946`.
+1. One store: **NeuraCart Central**, 14 MG Road, Bengaluru 560001, lat `12.9716`, lng `77.5946`.
 2. Delivery radius: **10 km** from store; MVP validates pincode against an allowlist, not polygons.
 3. Store hours: **08:00–22:00 IST**, seven days; orders outside hours are blocked with a clear message.
 4. Prices are **GST-inclusive**; no separate tax line.
@@ -410,7 +410,7 @@ Priority: **P0** = launch blocker, **P1** = launch, **P2** = v1.1.
 
 ### 6.3 J3 — Rider completes delivery
 
-1. Rider logs in `driver1@localmart.app` / seeded password.
+1. Rider logs in `driver1@neuracart.app` / seeded password.
 2. Assignments shows the new `ASSIGNED` order with payout ₹40.
 3. Opens detail; sees pickup store, drop address, 3 items, customer phone.
 4. Taps **Start Delivery** → confirm “Mark this order as out for delivery?” → `OUT_FOR_DELIVERY`; customer email sent.
@@ -543,7 +543,7 @@ If the rider declines or does not accept within 10 minutes (v1.1), the order ret
 
 ```
 ┌──────────────────────┐      ┌──────────────────────┐      ┌──────────────────────┐
-│  LocalMart Customer  │      │   LocalMart Admin    │      │  LocalMart Delivery  │
+│  NeuraCart Customer  │      │   NeuraCart Admin    │      │  NeuraCart Delivery  │
 │  Expo / React Native │      │  Next.js (browser)   │      │  Expo / React Native │
 │  iOS + Android       │      │  Desktop + tablet    │      │  iOS + Android       │
 └──────────┬───────────┘      └──────────┬───────────┘      └──────────┬───────────┘
@@ -551,7 +551,7 @@ If the rider declines or does not accept within 10 minutes (v1.1), the order ret
            └─────────────────────────────┼─────────────────────────────┘
                                          ▼
                          ┌───────────────────────────────┐
-                         │        LocalMart API          │
+                         │        NeuraCart API          │
                          │  Node + Express + TypeScript  │
                          │  Auth · RBAC · Validation     │
                          │  Orders · Products · Riders   │
@@ -609,7 +609,7 @@ HTTP request
 The repo intentionally stays flat for now; it is not a workspace monorepo yet. Paths in this plan map as follows: `apps/customer` → repo root, `apps/api` → `backend/`, `apps/admin` → `admin/`, `apps/delivery` → `delivery/`.
 
 ```text
-localmart/
+neuracart/
 ├── src/                          # Customer Expo app
 │   ├── app/                      # Expo Router routes
 │   │   ├── _layout.tsx
@@ -733,8 +733,8 @@ localmart/
 
 | Service | Local port | Staging | Production |
 |---|---|---|---|
-| API | 8000 | `api.staging.localmart.app` | `api.localmart.app` |
-| Admin | 3000 | `admin.staging.localmart.app` | `admin.localmart.app` |
+| API | 8000 | `api.staging.neuracart.app` | `api.neuracart.app` |
+| Admin | 3000 | `admin.staging.neuracart.app` | `admin.neuracart.app` |
 | Customer Expo | 8081 | EAS internal channel | App Store / Play Store |
 | Delivery Expo | 8082 | EAS internal channel | Play Store (internal/closed) |
 | PostgreSQL | 5432 | Neon branch | Neon primary |
@@ -1029,7 +1029,7 @@ model DeliveryPartner {
 
 model Store {
   id                 String   @id @default(uuid())
-  name               String   @default("LocalMart Central")
+  name               String   @default("NeuraCart Central")
   address            String
   city               String   @default("Bengaluru")
   state              String   @default("Karnataka")
@@ -1049,7 +1049,7 @@ model Store {
 }
 ```
 
-**Deliberate security hardening vs the source:** the tutorial stored OTP codes and refresh tokens in plaintext. LocalMart stores `OtpCode.codeHash` (SHA-256 with `OTP_PEPPER`) and `RefreshToken.tokenHash` (SHA-256), so a database read cannot be replayed as a login. This is why the field names differ from the video.
+**Deliberate security hardening vs the source:** the tutorial stored OTP codes and refresh tokens in plaintext. NeuraCart stores `OtpCode.codeHash` (SHA-256 with `OTP_PEPPER`) and `RefreshToken.tokenHash` (SHA-256), so a database read cannot be replayed as a login. This is why the field names differ from the video.
 
 **Current repo vs target schema:** the existing `backend/prisma/migrations/20261013061136_init` was created from the earlier design notes. It already has the 11 tables and the right relations, but it still uses plaintext `code`/`token`, lacks `lastLoginAt`, `earnings`, `idempotencyKey`, and store fee fields, and has a wrong `storeLongitude` default (`12.9716` instead of `77.5946`). One alignment migration will be added at the start of the auth step; until then, existing migrations are immutable history and the repo schema is authoritative for what is already deployed locally.
 
@@ -1121,17 +1121,17 @@ Any failure rolls back everything. The service then:
 `prisma/seed.ts` is idempotent (`upsert` by email/name) and refuses to run in production unless `ALLOW_SEED=true`.
 
 **Store**
-- `LocalMart Central`, 14 MG Road, Bengaluru, Karnataka 560001
-- Phone `+91 80 4000 1234`, email `store@localmart.app`
+- `NeuraCart Central`, 14 MG Road, Bengaluru, Karnataka 560001
+- Phone `+91 80 4000 1234`, email `store@neuracart.app`
 - Hours 08:00–22:00, delivery fee ₹40, free above ₹500
 
 **Users**
 
 | Role | Email | Password | Name |
 |---|---|---|---|
-| ADMIN | `admin@localmart.app` | OTP only | Asha Rao |
-| CUSTOMER | `customer@localmart.app` | OTP only | Sujan Anand |
-| DELIVERY_PARTNER | `driver1@localmart.app` … `driver10@localmart.app` | `LocalMart@123` (dev seed only) | Ravi Kumar, Anand Raj, Suresh Babu, Imran Khan, Vinay Gowda, Deepak Shetty, Manoj Naik, Arjun Rao, Karthik S, Naveen Reddy |
+| ADMIN | `admin@neuracart.app` | OTP only | Asha Rao |
+| CUSTOMER | `customer@neuracart.app` | OTP only | Sujan Anand |
+| DELIVERY_PARTNER | `driver1@neuracart.app` … `driver10@neuracart.app` | `NeuraCart@123` (dev seed only) | Ravi Kumar, Anand Raj, Suresh Babu, Imran Khan, Vinay Gowda, Deepak Shetty, Manoj Naik, Arjun Rao, Karthik S, Naveen Reddy |
 
 All riders: verified, available, bike/scooter/EV, vehicle numbers `KA-01-AB-1001` … `KA-01-AB-1010`, earnings ₹0 (except demo rider may show ₹40 after seeded completed order).
 
@@ -1177,7 +1177,7 @@ Product images live in `backend/prisma/seed/assets/` and are copied to `backend/
 
 | Item | Rule |
 |---|---|
-| Base URL | `https://api.localmart.app/api` (local `http://localhost:8000/api`) |
+| Base URL | `https://api.neuracart.app/api` (local `http://localhost:8000/api`) |
 | Content type | `application/json`; multipart only for product image endpoints |
 | Auth | `Authorization: Bearer <accessToken>` |
 | IDs | UUID v4 strings |
@@ -1301,7 +1301,7 @@ Product images live in `backend/prisma/seed/assets/` and are copied to `backend/
 
 Request:
 ```json
-{ "email": "customer@localmart.app" }
+{ "email": "customer@neuracart.app" }
 ```
 Rules: valid email, lowercase/trim; if user exists and `isActive=false` → 403 “Your account has been deactivated.”; invalidate previous unused OTPs; generate 6 digits; hash and store; expiry 10 min; send Resend email.
 
@@ -1326,7 +1326,7 @@ Same body as `/auth/verify-otp`, but the service passes `expectedRole = ADMIN`; 
 
 Request:
 ```json
-{ "email": "customer@localmart.app", "code": "508847" }
+{ "email": "customer@neuracart.app", "code": "508847" }
 ```
 Checks in order: user exists → active → latest OTP exists → attempts < 5 → not expired → hash matches → mark used → issue tokens.
 
@@ -1340,7 +1340,7 @@ Response `200`:
     "refreshToken": "eyJ...",
     "user": {
       "id": "uuid",
-      "email": "customer@localmart.app",
+      "email": "customer@neuracart.app",
       "name": "Sujan Anand",
       "phone": "+919876543210",
       "role": "customer"
@@ -1378,7 +1378,7 @@ Request `{ "name": "Sujan Anand", "phone": "+919876543210" }`; both optional but
 
 Request:
 ```json
-{ "email": "driver1@localmart.app", "password": "LocalMart@123" }
+{ "email": "driver1@neuracart.app", "password": "NeuraCart@123" }
 ```
 Rules: user must exist, role `DELIVERY_PARTNER`, active, verified rider profile, bcrypt compare, issue tokens. Response includes `deliveryProfile` (vehicle, availability, earnings). Errors: `401` “Invalid email or password” (do not reveal which), `403` “Account is not verified or inactive.”
 
@@ -1407,7 +1407,7 @@ Product DTO:
   "price": "250.00",
   "unit": "1 kg",
   "stock": 25,
-  "imageUrl": "https://api.localmart.app/uploads/products/mangoes.webp",
+  "imageUrl": "https://api.neuracart.app/uploads/products/mangoes.webp",
   "isFeatured": true,
   "isActive": true,
   "createdAt": "2026-10-20T10:00:00.000Z"
@@ -1609,7 +1609,7 @@ All values computed server-side; admin only.
 | `EMPTY_CART` | 400 | Your cart is empty | Place order |
 | `INVALID_TRANSITION` | 409 | Cannot change this order to that status | State machine |
 | `ADDRESS_REQUIRED` | 400 | Please select a delivery address | Checkout |
-| `STORE_CLOSED` | 400 | LocalMart is closed. Open 8 AM–10 PM | Hours |
+| `STORE_CLOSED` | 400 | NeuraCart is closed. Open 8 AM–10 PM | Hours |
 | `OUTSIDE_SERVICE_AREA` | 400 | We do not deliver to this pincode yet | Serviceability |
 | `UPLOAD_INVALID_TYPE` | 422 | Only JPG, PNG, and WebP images are allowed | MIME/magic |
 | `UPLOAD_TOO_LARGE` | 413 | Image must be under 5 MB | Multer limit |
@@ -1626,7 +1626,7 @@ All values computed server-side; admin only.
 ```env
 NODE_ENV=development
 PORT=8000
-DATABASE_URL=postgresql://localmart_admin:localmart_dev@localhost:5432/localmart_db?schema=public
+DATABASE_URL=postgresql://neuracart_admin:neuracart_dev@localhost:5432/neuracart_db?schema=public
 
 # JWT
 JWT_ACCESS_SECRET=replace-with-32-byte-random-string
@@ -1642,9 +1642,9 @@ OTP_PEPPER=replace-with-a-32-byte-random-string
 
 # Resend
 RESEND_API_KEY=re_xxxxxxxx
-EMAIL_FROM=no-reply@localmart.app
-EMAIL_FROM_NAME=LocalMart
-SUPPORT_EMAIL=support@localmart.app
+EMAIL_FROM=no-reply@neuracart.app
+EMAIL_FROM_NAME=NeuraCart
+SUPPORT_EMAIL=support@neuracart.app
 
 # CORS (comma-separated, no trailing slash)
 CORS_ORIGINS=http://localhost:3000,http://localhost:8081,http://localhost:8082
@@ -1845,7 +1845,7 @@ Controller: thin; always returns safe user (never `password`).
 
 #### Email service
 Resend client; templates as functions returning HTML + text:
-1. **OTP** — subject “Your LocalMart login code”; code in large type; “expires in 10 minutes”; “If you didn’t request this, ignore this email.”
+1. **OTP** — subject “Your NeuraCart login code”; code in large type; “expires in 10 minutes”; “If you didn’t request this, ignore this email.”
 2. **Order placed** — order number, items, total, address, ETA.
 3. **Confirmed** — “Your order is confirmed and being packed.”
 4. **Out for delivery** — rider name, “arriving in 30–60 minutes.”
@@ -1914,7 +1914,7 @@ Stack screens (outside tabs, header hidden):
 
 - Expo Router file-based routes; root `Stack` with `(auth)`, `(tabs)`, and stack screens.
 - Auth gate: while `isLoading`, show branded splash; if authenticated redirect to `/(tabs)`; else `/(auth)`.
-- Deep links: `localmart://product/:id`, `localmart://order/:id`, `https://localmart.app/order/:id` (v1.1).
+- Deep links: `neuracart://product/:id`, `neuracart://order/:id`, `https://neuracart.app/order/:id` (v1.1).
 - Tab bar: active `#16A34A`, inactive `#9CA3AF`, white background, top border `#F3F4F6`, height 70 + safe inset; Ionicons filled/outline pairs (`home`, `receipt`, `person`).
 - Hide tab bar on cart/checkout/order detail? Keep it visible except checkout to reduce accidental exits; cart and order detail keep tabs (source hides headers only).
 
@@ -1984,7 +1984,7 @@ interface AuthState {
   signOut(): Promise<void>;
 }
 ```
-- Keys: `localmart.accessToken`, `localmart.refreshToken`, `localmart.user`.
+- Keys: `neuracart.accessToken`, `neuracart.refreshToken`, `neuracart.user`.
 - On boot: read tokens → `GET /auth/me` → set user; on 401 try refresh once → else clear.
 - On sign out: call `POST /auth/logout` with refresh token (best effort), clear tokens, reset cart, navigate to `(auth)`.
 
@@ -2004,7 +2004,7 @@ interface CartState {
   getItemQuantity(productId: string): number;
 }
 ```
-- Persist to AsyncStorage under `localmart.cart.<userId>`; hydrate after login; clear on sign out.
+- Persist to AsyncStorage under `neuracart.cart.<userId>`; hydrate after login; clear on sign out.
 - Reconcile with server: on checkout, server recalculates; if price changed, show a modal “Prices updated” before placing (v1.1).
 - Constants `FREE_DELIVERY_ABOVE = 500`, `DELIVERY_FEE = 40` come from `/store`, fallback constants only for offline display.
 
@@ -2028,14 +2028,14 @@ interface CartState {
 ### 13.5 Screen-by-screen specification
 
 #### S1 — Splash / auth gate (`app/index.tsx`)
-- Full-screen white, centered LocalMart logo, subtle green gradient background (`#F0FDF4` → white), activity indicator.
+- Full-screen white, centered NeuraCart logo, subtle green gradient background (`#F0FDF4` → white), activity indicator.
 - Runs `loadStoredAuth()`; minimum display 400 ms to avoid flash.
 - Routes: authenticated → `/(tabs)`; otherwise `/(auth)`.
 - Error: if `/me` fails due to network, show “Retry” and “Sign in” buttons rather than silently logging out.
 
 #### S2 — Email entry (`(auth)/index.tsx`)
 **Layout**
-- Green hero (`#16A34A`) with safe-area top, 32px bottom padding: white rounded logo tile 80×80, “LocalMart” 36/700 white, subtitle “Fresh groceries from your neighbourhood, at your door.”
+- Green hero (`#16A34A`) with safe-area top, 32px bottom padding: white rounded logo tile 80×80, “NeuraCart” 36/700 white, subtitle “Fresh groceries from your neighbourhood, at your door.”
 - Category chips: Fruits, Vegetables, Meat (white/20 background, white text, 12px).
 - White form sheet with 24px top radius, overlapping hero by 12px: “Get started” 24/700; “Enter your email to receive a one-time password.”
 - Email field with mail icon, placeholder `you@example.com`, `keyboardType=email-address`, `autoCapitalize=none`, `autoCorrect=false`, `autoComplete=email`, `returnKeyType=next`.
@@ -2252,7 +2252,7 @@ app/(dashboard)/settings      Store settings
 ```
 
 **Sidebar** (240px, white, border-right):
-- Logo + “LocalMart Admin”.
+- Logo + “NeuraCart Admin”.
 - Nav: Dashboard, Orders (badge with pending count), Products, Delivery partners, Settings.
 - Bottom: store open/closed toggle, admin avatar/menu (email, Sign out).
 - Active item: green-50 background, green-700 text, left 3px green bar.
@@ -2267,7 +2267,7 @@ app/(dashboard)/settings      Store settings
 
 ### 14.2 Login (`/login`)
 
-- Centered card 440px on `bg-gray-50`; logo, “LocalMart Admin”, “Sign in to manage your store.”
+- Centered card 440px on `bg-gray-50`; logo, “NeuraCart Admin”, “Sign in to manage your store.”
 - Step 1: email field, “Continue with email”; disabled until valid email; loading spinner.
 - Step 2: “Check your mail”, “We sent a 6-digit code to {email}”, OTP input (6 digits, single input with spacing or 6 boxes), “Verify & sign in”, “Resend OTP” (60 s), “Change email”.
 - Errors: inline red text; 403 non-admin → “Access denied. Admins only.”; 429 → rate-limit message.
@@ -2419,7 +2419,7 @@ app/(dashboard)/settings      Store settings
 ```ts
 const API = axios.create({ baseURL: process.env.NEXT_PUBLIC_API_URL, timeout: 15000 });
 API.interceptors.request.use(config => {
-  const token = localStorage.getItem('localmart.admin.access');
+  const token = localStorage.getItem('neuracart.admin.access');
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
@@ -2429,11 +2429,11 @@ API.interceptors.response.use(
     const original = error.config;
     if (error.response?.status === 401 && !original._retry) {
       original._retry = true;
-      const refresh = localStorage.getItem('localmart.admin.refresh');
+      const refresh = localStorage.getItem('neuracart.admin.refresh');
       if (!refresh) throw error;
       const { data } = await axios.post(`${BASE}/auth/refresh`, { refreshToken: refresh });
-      localStorage.setItem('localmart.admin.access', data.data.accessToken);
-      localStorage.setItem('localmart.admin.refresh', data.data.refreshToken);
+      localStorage.setItem('neuracart.admin.access', data.data.accessToken);
+      localStorage.setItem('neuracart.admin.refresh', data.data.refreshToken);
       return API(original);
     }
     throw error;
@@ -2443,7 +2443,7 @@ API.interceptors.response.use(
 - Single-flight refresh (queue concurrent 401s).
 - On refresh failure: clear storage, redirect `/login`.
 - `lib/auth.ts`: `sendAdminOtp`, `verifyAdminOtp` (calls the admin-only endpoints and still rejects any non-admin response), `getStoredUser`, `isAuthenticated`, `logoutAdmin`.
-- Store keys namespaced `localmart.admin.*`.
+- Store keys namespaced `neuracart.admin.*`.
 
 ---
 
@@ -2467,12 +2467,12 @@ Tabs: Assignments (bicycle icon), History (receipt), Profile (person). Active ti
 
 ### 15.2 Login
 
-- Green hero with LocalMart Delivery logo and “Delivery Partner Portal”.
+- Green hero with NeuraCart Delivery logo and “Delivery Partner Portal”.
 - Email field (`keyboardType=email-address`), password field with eye toggle, “Sign in” button.
 - “Forgot password? Contact the store” (no self-service reset in MVP).
 - Errors: “Invalid email or password.” (generic), “Your account is not verified. Contact the store.”, “Account deactivated.”
 - On success: store tokens + rider profile; navigate to Assignments.
-- Demo credential: `driver1@localmart.app` / `LocalMart@123` (seed only; never in production builds).
+- Demo credential: `driver1@neuracart.app` / `NeuraCart@123` (seed only; never in production builds).
 
 ### 15.3 Assignments (`assignments.tsx`)
 
@@ -2493,7 +2493,7 @@ Tabs: Assignments (bicycle icon), History (receipt), Profile (person). Active ti
 
 - Header: back, order #, status badge.
 - Payout card: “You earn ₹40 for this delivery”.
-- Pickup card: “Pickup from LocalMart Central”, store address, “Open maps”, “Call store”.
+- Pickup card: “Pickup from NeuraCart Central”, store address, “Open maps”, “Call store”.
 - Drop card: customer name, full address, landmark, “Open maps”, “Call customer” (phone from API), delivery notes.
 - Items checklist: name × qty; checkbox per item for rider confidence (local only).
 - Timeline/status.
@@ -2539,7 +2539,7 @@ interface DeliveryState {
   loadEarnings(period): Promise<void>;
 }
 ```
-- Tokens stored under `localmart.delivery.*`; separate from customer app.
+- Tokens stored under `neuracart.delivery.*`; separate from customer app.
 - API client same refresh-queue behavior as customer app.
 - On 401 refresh failure → login.
 - Poll assignments every 30 s while foreground and online (v1.1); push notification for new assignment.
@@ -2682,7 +2682,7 @@ interface DeliveryState {
 - Collect: email, name, phone, addresses, order history, rider location (only during delivery).
 - Purpose: fulfil orders, support, fraud prevention, legal compliance.
 - Retention: orders 3 years (tax), OTP 24 h, refresh tokens 30 days after expiry, tracking 30 days, logs 30 days.
-- User rights: access, correction, deletion (anonymise where tax retention applies), contact `privacy@localmart.app`.
+- User rights: access, correction, deletion (anonymise where tax retention applies), contact `privacy@neuracart.app`.
 - Consent: terms/privacy at signup; marketing opt-in separate (none in MVP).
 - Rider location: disclosed in rider app; only while on delivery; not sold.
 - Payment data: never stored; Razorpay handles card data (PCI DSS).
@@ -2858,8 +2858,8 @@ Every screen must define four states: **loading** (skeleton), **empty** (illustr
 **Steps**
 ```bash
 # 1. Clone and install
-git clone https://github.com/crastatelvin/localmart.git
-cd localmart
+git clone https://github.com/crastatelvin/neuracart.git
+cd neuracart
 npm install
 cd backend && npm install && cd ..
 
@@ -2893,26 +2893,26 @@ services:
   postgres:
     image: postgres:15-alpine
     environment:
-      POSTGRES_USER: localmart_admin
-      POSTGRES_PASSWORD: localmart_dev
-      POSTGRES_DB: localmart_db
+      POSTGRES_USER: neuracart_admin
+      POSTGRES_PASSWORD: neuracart_dev
+      POSTGRES_DB: neuracart_db
     ports: ["5432:5432"]
-    volumes: ["localmart_pg:/var/lib/postgresql/data"]
+    volumes: ["neuracart_pg:/var/lib/postgresql/data"]
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U localmart_admin -d localmart_db"]
+      test: ["CMD-SHELL", "pg_isready -U neuracart_admin -d neuracart_db"]
       interval: 5s
       timeout: 5s
       retries: 10
 volumes:
-  localmart_pg:
+  neuracart_pg:
 ```
 
 **Database bootstrap (without Docker)**
 ```sql
-CREATE USER localmart_admin WITH PASSWORD 'localmart_dev';
-CREATE DATABASE localmart_db OWNER localmart_admin;
-GRANT ALL PRIVILEGES ON DATABASE localmart_db TO localmart_admin;
-ALTER USER localmart_admin CREATEDB;
+CREATE USER neuracart_admin WITH PASSWORD 'neuracart_dev';
+CREATE DATABASE neuracart_db OWNER neuracart_admin;
+GRANT ALL PRIVILEGES ON DATABASE neuracart_db TO neuracart_admin;
+ALTER USER neuracart_admin CREATEDB;
 ```
 
 ### 18.2 Environment matrix
@@ -2924,7 +2924,7 @@ ALTER USER localmart_admin CREATEDB;
 | `JWT_ACCESS_SECRET` | dev random | secret manager | secret manager |
 | `CORS_ORIGINS` | localhost ports | staging domains | prod domains |
 | `ENABLE_ONLINE_PAYMENTS` | false | true (test keys) | true (live keys) |
-| `EMAIL_FROM` | onboarding@resend.dev | no-reply@staging.localmart.app | no-reply@localmart.app |
+| `EMAIL_FROM` | onboarding@resend.dev | no-reply@staging.neuracart.app | no-reply@neuracart.app |
 | `UPLOAD_DIR` | ./uploads | S3 bucket | S3 bucket + CDN |
 | `LOG_LEVEL` | debug | info | info |
 | `SENTRY_DSN` | empty | staging project | prod project |
@@ -3185,9 +3185,9 @@ Plus part-time QA/ops in week 4.
 
 ## 22. Source bug log — do not repeat
 
-The tutorial hit these issues live. Each is a checklist item for LocalMart.
+The tutorial hit these issues live. Each is a checklist item for NeuraCart.
 
-| # | Source issue | LocalMart prevention |
+| # | Source issue | NeuraCart prevention |
 |---|---|---|
 | B-01 | Free-delivery threshold spoken as ₹230, coded as ₹500 | Single constant from `/store`; UI and server read the same value; boundary test at ₹500 |
 | B-02 | `sendSuccess` argument order differed between modules | One typed helper signature; lint rule/contract test |
@@ -3201,7 +3201,7 @@ The tutorial hit these issues live. Each is a checklist item for LocalMart.
 | B-10 | Prisma 7/8 breaking changes | Pin `prisma@5.22.0` and `@prisma/client@5.22.0`; upgrade ticket |
 | B-11 | `localhost` API unreachable from phone | LAN IP env + CORS docs; runtime banner in dev if API unreachable |
 | B-12 | Resend `MAIL_FROM` invalid (`mail`) | Env validation at boot; send test email in CI staging smoke |
-| B-13 | `onboarding@resend.dev` only delivers to account owner | Verify `localmart.app` domain before launch |
+| B-13 | `onboarding@resend.dev` only delivers to account owner | Verify `neuracart.app` domain before launch |
 | B-14 | Missing default exports (`service`, `controller`, `router`) | Module template + lint/test import smoke |
 | B-15 | `getPaginationMeta` missing export | Shared response util with tests |
 | B-16 | Order detail catch called `router.back()` and hid errors | Show error state with retry; log; never swallow |
@@ -3285,7 +3285,7 @@ The tutorial hit these issues live. Each is a checklist item for LocalMart.
 - [ ] Terms, Privacy, Refund, Delivery policies live.
 - [ ] Cookie/consent (admin analytics) if applicable.
 - [ ] Vendor DPAs (Resend, Neon, Render, Sentry).
-- [ ] Trademark/domain check for “LocalMart”.
+- [ ] Trademark/domain check for “NeuraCart”.
 - [ ] Insurance/liability for delivery ops (consult local advisor).
 
 ---
@@ -3362,7 +3362,7 @@ eas update --branch production --message "fix: ..."
 
 ### 25.2 Appendix B — Source feature traceability
 
-| Source feature | LocalMart section |
+| Source feature | NeuraCart section |
 |---|---|
 | Three roles: customer/admin/delivery | §4 |
 | Single store, fruits/vegetables/meat | §1, §3.5, §8 |
@@ -3442,7 +3442,7 @@ eas update --branch production --message "fix: ..."
 
 ### 25.5 Appendix E — Final acceptance statement
 
-LocalMart v1.0 is accepted when:
+NeuraCart v1.0 is accepted when:
 
 1. A new customer can install the app, verify email, add groceries, save an address, place a COD order, and see it progress to **Delivered**.
 2. A store admin can log in, see the order, confirm it, prepare it, assign a verified rider, and see the final status.
@@ -3450,11 +3450,11 @@ LocalMart v1.0 is accepted when:
 4. Stock decreases on order and restores on cancellation; totals always equal the server calculation; the free-delivery boundary at ₹500 is correct.
 5. Emails arrive for every milestone; no OTP or token appears in logs.
 6. All P0 tests pass; no high/critical security findings; monitoring and backups are live; the runbook is published.
-7. Every customer-facing string says **LocalMart**, not Fresh Cart.
+7. Every customer-facing string says **NeuraCart**, not Fresh Cart.
 
 ---
 
-*End of plan — LocalMart v1.0.*
+*End of plan — NeuraCart v1.0.*
 
 ---
 ---
@@ -3484,7 +3484,7 @@ LocalMart v1.0 is accepted when:
 - **P0 — Platform hooks.** ✅ Gemini client w/ rate limiting + fallbacks; in-process event bus + SSE endpoint (`/api/updates`); env plumbing; `plan.md` §26 (this document).
 - **P1 — Data delta.** ✅ Prisma migration for every new model/field (§26.3); idempotent seed extension (recipes, help articles, slots, wallet, loyalty defaults).
 - **P2 — AI-on-our-data (no LLM).** ✅ Recommendation service: reorder nudges, buy-again, frequently-together (co-purchase CF); personalised home feed; dietary prefs; product reviews (photo-less v1) + moderation; green score.
-- **P3 — LLM suite.** ✅ Semantic search (hybrid); “Ask LocalMart” chat with cart-tool JSON protocol; vision search; recipe→cart; AI substitutions; admin NL-ops console; AI catalog draft; note summarisation; help-article support chat.
+- **P3 — LLM suite.** ✅ Semantic search (hybrid); “Ask NeuraCart” chat with cart-tool JSON protocol; vision search; recipe→cart; AI substitutions; admin NL-ops console; AI catalog draft; note summarisation; help-article support chat.
 - **P4 — Money & scheduling.** ✅ Wallet ledger + checkout redemption; loyalty points/tiers + referral program; near-expiry flash deals; delivery slots with capacity; store-pickup mode; subscriptions (weekly cadence, runs into pending orders); UPI intent flow + Razorpay test-mode integration.
 - **P5 — Logistics.** ✅ Rider live GPS (expo-location → tracking endpoint → rider/customer UI); smart dispatch suggestions; 2-order batching; proof-of-delivery (photo + 4-digit OTP); weather surge mode.
 - **P6 — Engagement & polish.** ✅ Expo push notifications; ✅ WhatsApp module (env-gated); ✅ risk flags (rapid cancellations); EN/KN/HI string catalogue + language toggle and voice search remain deferred.
@@ -3529,7 +3529,7 @@ Admin: `GET /admin/forecast?days=7`, `GET /admin/stock-alerts`, `POST /admin/ai/
 
 ## 26.6 New environment variables (all optional at boot)
 
-`GEMINI_API_KEY` (unlocks AI suite; without it everything runs on fallbacks), `GEMINI_MODEL=gemini-3.8-flash`, `GEMINI_EMBEDDING_MODEL=text-embedding-004`, `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `UPI_VPA=localmart@upi`, `UPI_PAYEE_NAME=LocalMart`, `WEATHER_LAT=12.9716`, `WEATHER_LON=77.5946`, `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_ID`, `SLOT_WINDOW_DEFAULTS=08-10,10-12,16-18,18-20`, `LOYALTY_EARN_RATE=0.02` (pts/₹), `REFERRAL_REWARD=50`, `FLASH_DEAL_MAX_PCT=40`. Frontends inherit existing env patterns (no changes needed except optional `EXPO_PUBLIC_*` mirrors if ever needed).
+`GEMINI_API_KEY` (unlocks AI suite; without it everything runs on fallbacks), `GEMINI_MODEL=gemini-3.8-flash`, `GEMINI_EMBEDDING_MODEL=text-embedding-004`, `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `UPI_VPA=neuracart@upi`, `UPI_PAYEE_NAME=NeuraCart`, `WEATHER_LAT=12.9716`, `WEATHER_LON=77.5946`, `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_ID`, `SLOT_WINDOW_DEFAULTS=08-10,10-12,16-18,18-20`, `LOYALTY_EARN_RATE=0.02` (pts/₹), `REFERRAL_REWARD=50`, `FLASH_DEAL_MAX_PCT=40`. Frontends inherit existing env patterns (no changes needed except optional `EXPO_PUBLIC_*` mirrors if ever needed).
 
 ## 26.7 Risks & mitigations
 
@@ -3555,5 +3555,5 @@ Every phase ships with: `backend: npm run typecheck + build`, customer/admin/del
 
 ---
 
-*End of plan — LocalMart v2 scope.*
+*End of plan — NeuraCart v2 scope.*
 

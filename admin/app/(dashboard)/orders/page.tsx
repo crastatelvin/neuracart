@@ -202,7 +202,7 @@ export default function OrdersPage() {
       });
       void load({ silent: true });
       void loadCounts();
-      window.dispatchEvent(new Event('localmart:refresh-shell'));
+      window.dispatchEvent(new Event('neuracart:refresh-shell'));
       toast.success(`${order.orderNumber} confirmed.`);
     } catch (caught) {
       toast.error(caught instanceof Error ? caught.message : 'Could not confirm the order.');
@@ -220,7 +220,7 @@ export default function OrdersPage() {
       });
       void load({ silent: true });
       void loadCounts();
-      window.dispatchEvent(new Event('localmart:refresh-shell'));
+      window.dispatchEvent(new Event('neuracart:refresh-shell'));
       toast.success(`${order.orderNumber} is being prepared.`);
     } catch (caught) {
       toast.error(caught instanceof Error ? caught.message : 'Could not update the order.');
@@ -249,7 +249,7 @@ export default function OrdersPage() {
       await api(`/orders/${cancelTarget.id}/cancel`, { method: 'POST', body: { reason } });
       void load({ silent: true });
       void loadCounts();
-      window.dispatchEvent(new Event('localmart:refresh-shell'));
+      window.dispatchEvent(new Event('neuracart:refresh-shell'));
       toast.success(`${cancelTarget.orderNumber} cancelled.`);
       setCancelTarget(null);
       setCancelReason('');

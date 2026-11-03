@@ -162,7 +162,7 @@ export const aiService = {
 
     if (isAiCallable()) {
       const prompt = [
-        'You are the LocalMart shopping assistant, a friendly neighbourhood grocer chat.',
+        'You are the NeuraCart shopping assistant, a friendly neighbourhood grocer chat.',
         'Genuine Indian grocery context. Prices are INR. Keep replies under 60 words.',
         'Only recommend products from this catalog — never invent products:',
         catalogueForPrompt(catalog),
@@ -478,8 +478,8 @@ export const aiService = {
           .join('\n\n');
         const reply = await geminiChat(
           [
-            'You are the LocalMart support assistant. Answer the customer in 1–3 short sentences.',
-            'Ground every claim on these help articles; do not invent policies. If the articles do not cover it, say support@localmart.app will help.',
+            'You are the NeuraCart support assistant. Answer the customer in 1–3 short sentences.',
+            'Ground every claim on these help articles; do not invent policies. If the articles do not cover it, say support@neuracart.app will help.',
             '',
             context,
             '',
@@ -500,8 +500,8 @@ export const aiService = {
 
     const reply =
       ranked.length > 0
-        ? `${ranked[0].article.body}\n\n(From “${ranked[0].article.title}” — ask support@localmart.app for anything else.)`
-        : 'I could not find a matching help article in offline mode. Email support@localmart.app and the store team will sort it quickly.';
+        ? `${ranked[0].article.body}\n\n(From “${ranked[0].article.title}” — ask support@neuracart.app for anything else.)`
+        : 'I could not find a matching help article in offline mode. Email support@neuracart.app and the store team will sort it quickly.';
     await logJob('support', ranked.length > 0 && false ? 'ok' : 'fallback', null, Date.now() - started);
     return {
       reply,

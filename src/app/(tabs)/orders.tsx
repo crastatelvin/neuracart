@@ -149,7 +149,7 @@ export default function OrdersScreen() {
             <EmptyState
               icon="receipt-outline"
               title="No orders yet"
-              description="Your order history will appear here once you place your first LocalMart order."
+              description="Your order history will appear here once you place your first NeuraCart order."
               actionLabel="Start shopping"
               onAction={() => router.replace('/(tabs)')}
             />

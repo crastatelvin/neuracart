@@ -1,4 +1,4 @@
-This repository is **LocalMart**, a full-stack grocery delivery platform. The customer Expo app lives at the repo root (`src/app/` routes). The API lives in `backend/` (Express 5 + Prisma 5.22 + PostgreSQL). The store manager panel lives in `admin/` (Next.js, `http://localhost:3000`); the rider app lives in `delivery/` (Expo, routes in `delivery/src/app/`). The complete specification is `plan.md`; read it before changing architecture, schema, API contracts, or business rules.
+This repository is **NeuraCart**, a full-stack grocery delivery platform. The customer Expo app lives at the repo root (`src/app/` routes). The API lives in `backend/` (Express 5 + Prisma 5.22 + PostgreSQL). The store manager panel lives in `admin/` (Next.js, `http://localhost:3000`); the rider app lives in `delivery/` (Expo, routes in `delivery/src/app/`). The complete specification is `plan.md`; read it before changing architecture, schema, API contracts, or business rules.
 
 Prioritize mobile-first patterns, performance, and cross-platform compatibility.
 

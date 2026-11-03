@@ -1,7 +1,7 @@
 {
-  "name": "localmart-api",
+  "name": "neuracart-api",
   "version": "1.0.0",
-  "description": "LocalMart backend API — Express, Prisma, PostgreSQL",
+  "description": "NeuraCart backend API — Express, Prisma, PostgreSQL",
   "main": "dist/server.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only --exit-child -r tsconfig-paths/register src/server.ts",

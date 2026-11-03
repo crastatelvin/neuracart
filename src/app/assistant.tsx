@@ -131,7 +131,7 @@ export default function AssistantScreen() {
       <StatusBar style="dark" />
       <View style={{ paddingTop: insets.top }}>
         <ScreenHeader
-          title="LocalMart Assistant"
+          title="NeuraCart Assistant"
           subtitle="Shopping help that turns into a cart"
           onBack={() => router.back()}
         />

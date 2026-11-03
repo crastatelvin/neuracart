@@ -75,7 +75,7 @@ export default function LoginScreen() {
           <View style={styles.hero}>
             <BrandMark size={56} light />
             <AppText variant="title" tone="white" style={styles.heroTitle}>
-              LocalMart Delivery
+              NeuraCart Delivery
             </AppText>
             <AppText variant="bodyMedium" tone="white" style={styles.heroSub}>
               Delivery Partner Portal
@@ -95,7 +95,7 @@ export default function LoginScreen() {
               autoCapitalize="none"
               autoComplete="email"
               textContentType="emailAddress"
-              placeholder="driver@localmart.app"
+              placeholder="driver@neuracart.app"
               value={email}
               onChangeText={(value) => {
                 setEmail(value);

@@ -5,10 +5,10 @@ import { Platform } from 'react-native';
 const isWeb = Platform.OS === 'web';
 
 export const storageKeys = {
-  accessToken: 'localmart.accessToken',
-  refreshToken: 'localmart.refreshToken',
-  user: 'localmart.user',
-  cartPrefix: 'localmart.cart.',
+  accessToken: 'neuracart.accessToken',
+  refreshToken: 'neuracart.refreshToken',
+  user: 'neuracart.user',
+  cartPrefix: 'neuracart.cart.',
 } as const;
 
 export const secureStorage = {

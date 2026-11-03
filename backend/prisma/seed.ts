@@ -15,7 +15,7 @@ import { hashPassword } from '../src/utils/password';
 import { env } from '../src/config/env';
 
 const prisma = new PrismaClient();
-const DEV_PASSWORD = 'LocalMart@123';
+const DEV_PASSWORD = 'NeuraCart@123';
 const IMAGE_DIR = path.resolve(__dirname, '../uploads/seed');
 
 type ProductSeed = {
@@ -50,16 +50,16 @@ const PRODUCTS: ProductSeed[] = [
 ];
 
 const RIDERS = [
-  ['Ravi Kumar', 'driver1@localmart.app', 'BIKE', 'KA-01-AB-1001'],
-  ['Anand Raj', 'driver2@localmart.app', 'SCOOTER', 'KA-01-AB-1002'],
-  ['Suresh Babu', 'driver3@localmart.app', 'BIKE', 'KA-01-AB-1003'],
-  ['Imran Khan', 'driver4@localmart.app', 'EV', 'KA-01-AB-1004'],
-  ['Vinay Gowda', 'driver5@localmart.app', 'BIKE', 'KA-01-AB-1005'],
-  ['Deepak Shetty', 'driver6@localmart.app', 'SCOOTER', 'KA-01-AB-1006'],
-  ['Manoj Naik', 'driver7@localmart.app', 'BIKE', 'KA-01-AB-1007'],
-  ['Arjun Rao', 'driver8@localmart.app', 'EV', 'KA-01-AB-1008'],
-  ['Karthik S', 'driver9@localmart.app', 'BIKE', 'KA-01-AB-1009'],
-  ['Naveen Reddy', 'driver10@localmart.app', 'SCOOTER', 'KA-01-AB-1010'],
+  ['Marcus Lindqvist', 'driver1@neuracart.app', 'BIKE', 'KA-01-AB-1001'],
+  ['Diego Fernández', 'driver2@neuracart.app', 'SCOOTER', 'KA-01-AB-1002'],
+  ["Liam O'Connor", 'driver3@neuracart.app', 'BIKE', 'KA-01-AB-1003'],
+  ['Yuki Tanaka', 'driver4@neuracart.app', 'EV', 'KA-01-AB-1004'],
+  ['Noah Bergström', 'driver5@neuracart.app', 'BIKE', 'KA-01-AB-1005'],
+  ['Mateo Rossi', 'driver6@neuracart.app', 'SCOOTER', 'KA-01-AB-1006'],
+  ['Kwame Mensah', 'driver7@neuracart.app', 'BIKE', 'KA-01-AB-1007'],
+  ['Oliver Haas', 'driver8@neuracart.app', 'EV', 'KA-01-AB-1008'],
+  ['Hugo Laurent', 'driver9@neuracart.app', 'BIKE', 'KA-01-AB-1009'],
+  ['Ethan Brooks', 'driver10@neuracart.app', 'SCOOTER', 'KA-01-AB-1010'],
 ] as const;
 
 function slugify(value: string): string {
@@ -103,7 +103,7 @@ async function ensureProductImage(product: ProductSeed): Promise<string | null> 
           <circle cx="100" cy="520" r="140" fill="rgba(255,255,255,0.12)"/>
           <text x="400" y="310" text-anchor="middle" font-family="sans-serif" font-size="54" font-weight="700" fill="#ffffff">${label}</text>
           <text x="400" y="370" text-anchor="middle" font-family="sans-serif" font-size="30" fill="#ffffff">${product.unit}</text>
-          <text x="400" y="540" text-anchor="middle" font-family="sans-serif" font-size="26" fill="#ffffff">LocalMart</text>
+          <text x="400" y="540" text-anchor="middle" font-family="sans-serif" font-size="26" fill="#ffffff">NeuraCart</text>
         </svg>
       `;
       await sharp(Buffer.from(svg)).webp({ quality: 82 }).toFile(filePath);
@@ -327,7 +327,7 @@ async function seedV2(input: {
         userId: customer.id,
         type: 'GIFT',
         amount: new Prisma.Decimal(150),
-        note: 'Welcome credit — thanks for joining LocalMart!',
+        note: 'Welcome credit — thanks for joining NeuraCart!',
       },
     });
   }
@@ -480,7 +480,7 @@ async function seedV2(input: {
     {
       slug: 'wallet-refunds',
       title: 'What happens to refunds?',
-      body: 'Cancellations of prepaid orders are credited instantly to your LocalMart wallet, which applies automatically at your next checkout. COD refunds are settled by the store.',
+      body: 'Cancellations of prepaid orders are credited instantly to your NeuraCart wallet, which applies automatically at your next checkout. COD refunds are settled by the store.',
       topics: ['payments', 'refund', 'wallet'],
     },
     {
@@ -504,7 +504,7 @@ async function seedV2(input: {
     {
       slug: 'scratch-contact',
       title: 'Still need help?',
-      body: 'The support assistant on this page answers instantly from these articles. For anything it cannot solve, email support@localmart.app and the store team will reply within a few hours.',
+      body: 'The support assistant on this page answers instantly from these articles. For anything it cannot solve, email support@neuracart.app and the store team will reply within a few hours.',
       topics: ['support'],
     },
   ];
@@ -591,13 +591,13 @@ async function main(): Promise<void> {  if (
 
   const riderPasswordHash = await hashPassword(DEV_PASSWORD);
   const admin = await upsertUser({
-    email: 'admin@localmart.app',
-    name: 'Asha Rao',
+    email: 'admin@neuracart.app',
+    name: 'Daniel Okafor',
     role: Role.ADMIN,
   });
   const customer = await upsertUser({
-    email: 'customer@localmart.app',
-    name: 'Sujan Anand',
+    email: 'customer@neuracart.app',
+    name: 'Amelia Novak',
     role: Role.CUSTOMER,
     phone: '+91 98765 43210',
   });
@@ -630,9 +630,9 @@ async function main(): Promise<void> {  if (
   }
 
   await prisma.store.upsert({
-    where: { id: 'store_localmart_central' },
+    where: { id: 'store_neuracart_central' },
     update: {
-      name: 'LocalMart Central',
+      name: 'NeuraCart Central',
       address: '14 MG Road',
       city: 'Bengaluru',
       state: 'Karnataka',
@@ -640,7 +640,7 @@ async function main(): Promise<void> {  if (
       latitude: 12.9716,
       longitude: 77.5946,
       phone: '+91 80 4000 1234',
-      email: 'store@localmart.app',
+      email: 'store@neuracart.app',
       openTime: '08:00',
       closeTime: '22:00',
       deliveryFee: new Prisma.Decimal(40),
@@ -648,8 +648,8 @@ async function main(): Promise<void> {  if (
       isOpen: true,
     },
     create: {
-      id: 'store_localmart_central',
-      name: 'LocalMart Central',
+      id: 'store_neuracart_central',
+      name: 'NeuraCart Central',
       address: '14 MG Road',
       city: 'Bengaluru',
       state: 'Karnataka',
@@ -657,7 +657,7 @@ async function main(): Promise<void> {  if (
       latitude: 12.9716,
       longitude: 77.5946,
       phone: '+91 80 4000 1234',
-      email: 'store@localmart.app',
+      email: 'store@neuracart.app',
       openTime: '08:00',
       closeTime: '22:00',
       deliveryFee: new Prisma.Decimal(40),
@@ -725,9 +725,9 @@ async function main(): Promise<void> {  if (
   await seedV2({ customer, products });
 
   console.log('Seed complete.');
-  console.log('Admin:    admin@localmart.app');
-  console.log('Customer: customer@localmart.app');
-  console.log('Rider:    driver1@localmart.app / LocalMart@123');
+  console.log('Admin:    admin@neuracart.app');
+  console.log('Customer: customer@neuracart.app');
+  console.log('Rider:    driver1@neuracart.app / NeuraCart@123');
   console.log('Products: 19');
 }
 

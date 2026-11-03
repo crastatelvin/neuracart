@@ -19,8 +19,8 @@ export type RefreshPayload = {
 type AccessTokenPayload = JwtPayload & AccessPayload & { type: 'access' };
 type RefreshTokenPayload = JwtPayload & RefreshPayload & { type: 'refresh' };
 
-const ISSUER = 'localmart-api';
-const AUDIENCE = 'localmart-clients';
+const ISSUER = 'neuracart-api';
+const AUDIENCE = 'neuracart-clients';
 
 function parseDurationMs(value: string): number {
   const match = /^(\d+)([smhd])$/.exec(value.trim());

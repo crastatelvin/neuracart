@@ -4,8 +4,8 @@ import { ToastProvider } from '@/components/Toast';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'LocalMart Admin',
-  description: 'Manage the LocalMart neighbourhood market.',
+  title: 'NeuraCart Admin',
+  description: 'Manage the NeuraCart neighbourhood market.',
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

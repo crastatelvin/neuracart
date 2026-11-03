@@ -37,7 +37,7 @@ export function BrandMark({
             variant="title"
             style={{ color: light ? colors.white : colors.primaryDeep, letterSpacing: -0.8 }}
           >
-            LocalMart
+            NeuraCart
           </AppText>
           <AppText
             variant="caption"

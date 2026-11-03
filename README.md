@@ -1,8 +1,8 @@
-# LocalMart
+# NeuraCart
 
 **Your neighbourhood market, delivered.**
 
-LocalMart is a full-stack grocery delivery platform for a single neighbourhood store selling **fruits, vegetables, and meat** in Bengaluru. Four apps work together end to end:
+NeuraCart is a full-stack grocery delivery platform for a single neighbourhood store selling **fruits, vegetables, and meat** in Bengaluru. Four apps work together end to end:
 
 | App | Stack | Status |
 |---|---|---|
@@ -20,7 +20,7 @@ LocalMart is a full-stack grocery delivery platform for a single neighbourhood s
 ## Repository layout
 
 ```text
-localmart/
+neuracart/
 ├── src/                    # Customer Expo app (Expo Router routes in src/app/)
 ├── backend/                # Express + Prisma API
 │   ├── prisma/             # schema, migrations, seed
@@ -60,7 +60,7 @@ cd delivery && npm install && cd ..         # delivery app
 docker compose up -d
 ```
 
-This starts PostgreSQL 18 with database/user/password all set to `localmart`.
+This starts PostgreSQL 18 with database/user/password all set to `neuracart`.
 
 ### 3. Configure the API
 
@@ -100,13 +100,13 @@ On a physical phone, set `EXPO_PUBLIC_API_URL=http://<your-LAN-IP>:8000` in the 
 
 | Role | Email | Credential |
 |---|---|---|
-| Admin | `admin@localmart.app` | email OTP (dev code returned by the API) |
-| Customer | `customer@localmart.app` | email OTP (dev code returned by the API) |
-| Riders | `driver1@localmart.app` … `driver10@localmart.app` | `LocalMart@123` |
+| Admin | `admin@neuracart.app` | email OTP (dev code returned by the API) |
+| Customer | `customer@neuracart.app` | email OTP (dev code returned by the API) |
+| Riders | `driver1@neuracart.app` … `driver10@neuracart.app` | `NeuraCart@123` |
 
 ## v2 features
 
-- **AI suite** — hybrid semantic search, “Ask LocalMart” chat with cart proposals, vision search, recipe→cart, substitutions, admin NL-ops console and catalog drafts. Every AI path has a deterministic fallback when `GEMINI_API_KEY` is absent.
+- **AI suite** — hybrid semantic search, “Ask NeuraCart” chat with cart proposals, vision search, recipe→cart, substitutions, admin NL-ops console and catalog drafts. Every AI path has a deterministic fallback when `GEMINI_API_KEY` is absent.
 - **Money** — wallet ledger with checkout redemption, loyalty points and tiers, referral codes, near-expiry flash deals, UPI intent with admin verification, and Razorpay test mode when keys are configured.
 - **Scheduling** — two-hour delivery slots with capacity, store pickup, and recurring subscriptions that generate orders on demand.
 - **Logistics** — rider live GPS, smart dispatch suggestions, two-order batches, proof of delivery (4-digit OTP + photo), and weather surge pricing driven by open-meteo or a manual override.

@@ -217,8 +217,8 @@ async function sendProofOtp(orderId: string, riderId: string) {
   await sendEmail({
     to: order.customer.email,
     subject: `Delivery code for ${order.orderNumber}`,
-    text: `Your LocalMart delivery code is ${code}. Share it with the rider when your order arrives.`,
-    html: `<p>Your LocalMart delivery code is <strong>${code}</strong>.</p><p>Share it with the rider when your order arrives.</p>`,
+    text: `Your NeuraCart delivery code is ${code}. Share it with the rider when your order arrives.`,
+    html: `<p>Your NeuraCart delivery code is <strong>${code}</strong>.</p><p>Share it with the rider when your order arrives.</p>`,
   });
   return { sent: true, ...(env.isProd ? {} : { devOtp: code }) };
 }

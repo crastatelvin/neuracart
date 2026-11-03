@@ -1,15 +1,15 @@
 {
   "expo": {
-    "name": "LocalMart Delivery",
-    "slug": "localmart-delivery",
+    "name": "NeuraCart Delivery",
+    "slug": "neuracart-delivery",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "localmart-delivery",
+    "scheme": "neuracart-delivery",
     "userInterfaceStyle": "light",
     "ios": {
       "icon": "./assets/images/icon.png",
-      "bundleIdentifier": "com.localmart.rider",
+      "bundleIdentifier": "com.neuracart.rider",
       "supportsTablet": true
     },
     "android": {
@@ -20,7 +20,7 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.localmart.rider"
+      "package": "com.neuracart.rider"
     },
     "web": {
       "output": "static",
@@ -40,13 +40,13 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "LocalMart Delivery shares your live location with customers while you are on a delivery."
+          "locationWhenInUsePermission": "NeuraCart Delivery shares your live location with customers while you are on a delivery."
         }
       ],
       [
         "expo-image-picker",
         {
-          "photosPermission": "LocalMart Delivery uses your camera to capture proof of delivery."
+          "photosPermission": "NeuraCart Delivery uses your camera to capture proof of delivery."
         }
       ],
       "expo-notifications"

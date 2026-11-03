@@ -75,7 +75,7 @@ export default function ProfileScreen() {
 
   function confirmSignOut() {
     Alert.alert(
-      'Sign out of LocalMart?',
+      'Sign out of NeuraCart?',
       'Your cart is saved per account and will be cleared on this device when you sign out.',
       [
         { text: 'Stay signed in', style: 'cancel' },
@@ -93,7 +93,7 @@ export default function ProfileScreen() {
 
   function showAbout() {
     Alert.alert(
-      'LocalMart',
+      'NeuraCart',
       `Your neighbourhood market, delivered.\n\nVersion ${Constants.expoConfig?.version ?? '1.0.0'}\nBengaluru, India\n\nQuestions? ${SUPPORT_EMAIL}`,
     );
   }
@@ -101,7 +101,7 @@ export default function ProfileScreen() {
   function showPrivacy() {
     Alert.alert(
       'Privacy, simply put',
-      'We use your email and delivery address only to operate your LocalMart account and fulfil orders. OTPs and refresh tokens are stored securely. We never sell your personal data.',
+      'We use your email and delivery address only to operate your NeuraCart account and fulfil orders. OTPs and refresh tokens are stored securely. We never sell your personal data.',
     );
   }
 
@@ -319,7 +319,7 @@ export default function ProfileScreen() {
           />
 
           <AppText variant="caption" tone="subtle" style={styles.footer}>
-            LocalMart · Made for Bengaluru · v{Constants.expoConfig?.version ?? '1.0.0'}
+            NeuraCart · Made for Bengaluru · v{Constants.expoConfig?.version ?? '1.0.0'}
           </AppText>
         </View>
       </ScrollView>

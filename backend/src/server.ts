@@ -12,7 +12,7 @@ async function start(): Promise<void> {
   logger.info('Database connected');
 
   server = app.listen(env.PORT, () => {
-    logger.info('LocalMart API listening', {
+    logger.info('NeuraCart API listening', {
       port: env.PORT,
       environment: env.NODE_ENV,
       health: `http://localhost:${env.PORT}/health`,
@@ -28,7 +28,7 @@ async function start(): Promise<void> {
 async function shutdown(signal: string): Promise<void> {
   if (shuttingDown) return;
   shuttingDown = true;
-  logger.info('Shutting down LocalMart API', { signal });
+  logger.info('Shutting down NeuraCart API', { signal });
 
   const forceExit = setTimeout(() => {
     logger.error('Graceful shutdown timed out');
@@ -64,7 +64,7 @@ process.on('uncaughtException', (error) => {
 });
 
 start().catch((error) => {
-  logger.error('Failed to start LocalMart API', {
+  logger.error('Failed to start NeuraCart API', {
     error: error instanceof Error ? error : new Error(String(error)),
   });
   void prisma.$disconnect().finally(() => process.exit(1));

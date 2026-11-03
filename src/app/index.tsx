@@ -61,7 +61,7 @@ export default function AuthGateScreen() {
         <View style={styles.brand}>
           <BrandMark size={78} light />
           <AppText variant="display" tone="white" style={styles.wordmark}>
-            LocalMart
+            NeuraCart
           </AppText>
           <AppText variant="body" style={styles.tagline}>
             Your neighbourhood market, delivered.

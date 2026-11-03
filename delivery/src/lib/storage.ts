@@ -6,9 +6,9 @@ const isWeb = Platform.OS === 'web';
 
 /** Delivery tokens are deliberately namespaced away from the customer app. */
 export const storageKeys = {
-  accessToken: 'localmart.delivery.accessToken',
-  refreshToken: 'localmart.delivery.refreshToken',
-  profile: 'localmart.delivery.profile',
+  accessToken: 'neuracart.delivery.accessToken',
+  refreshToken: 'neuracart.delivery.refreshToken',
+  profile: 'neuracart.delivery.profile',
 } as const;
 
 export const secureStorage = {

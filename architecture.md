@@ -1,4 +1,4 @@
-# LocalMart — System Architecture
+# NeuraCart — System Architecture
 
 > The authoritative specification is [`plan.md`](./plan.md). This diagram was extracted from the original design images (where the product was called LocalCart) and is kept as an architecture reference.
 

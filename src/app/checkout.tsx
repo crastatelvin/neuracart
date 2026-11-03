@@ -165,7 +165,7 @@ export default function CheckoutScreen() {
       return;
     }
     if (!store.isOpen) {
-      setOrderError('LocalMart is closed right now. Please order during opening hours.');
+      setOrderError('NeuraCart is closed right now. Please order during opening hours.');
       return;
     }
     if (!isPickup && availableWindows.length > 0 && !selectedSlotId) {

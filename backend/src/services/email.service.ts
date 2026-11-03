@@ -50,11 +50,11 @@ export async function sendOtpEmail(email: string, code: string): Promise<void> {
   const minutes = env.OTP_EXPIRES_IN_MINUTES;
   await sendEmail({
     to: email,
-    subject: 'Your LocalMart login code',
-    text: `Your LocalMart login code is ${code}. It expires in ${minutes} minutes. If you did not request this, ignore this email.`,
+    subject: 'Your NeuraCart login code',
+    text: `Your NeuraCart login code is ${code}. It expires in ${minutes} minutes. If you did not request this, ignore this email.`,
     html: `
       <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#14532d">
-        <h1 style="font-size:24px;margin:0 0 8px">LocalMart</h1>
+        <h1 style="font-size:24px;margin:0 0 8px">NeuraCart</h1>
         <p style="color:#4b5563;margin:0 0 24px">Your neighbourhood market, delivered.</p>
         <p>Use this code to sign in:</p>
         <p style="font-size:36px;letter-spacing:8px;font-weight:700;background:#dcfce7;padding:16px;text-align:center;border-radius:12px">${code}</p>
@@ -107,7 +107,7 @@ const ORDER_EMAIL_COPY: Record<
   DELIVERED: {
     subject: 'Order delivered',
     heading: 'Delivered — enjoy!',
-    body: 'Thanks for shopping with LocalMart.',
+    body: 'Thanks for shopping with NeuraCart.',
   },
   CANCELLED: {
     subject: 'Order cancelled',
@@ -133,7 +133,7 @@ ${copy.body}
 Need help? ${env.SUPPORT_EMAIL}`;
   await sendEmail({
     to: input.to,
-    subject: `LocalMart ${input.orderNumber}: ${copy.subject}`,
+    subject: `NeuraCart ${input.orderNumber}: ${copy.subject}`,
     text,
     html: `
       <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#14532d">
@@ -157,10 +157,10 @@ export async function sendRiderAssignmentEmail(input: {
 }): Promise<void> {
   await sendEmail({
     to: input.to,
-    subject: `LocalMart ${input.orderNumber}: new delivery assignment`,
+    subject: `NeuraCart ${input.orderNumber}: new delivery assignment`,
     text: `Hi ${input.riderName},
 
-A new order is ready for you to accept in the LocalMart Delivery app.
+A new order is ready for you to accept in the NeuraCart Delivery app.
 
 Order: ${input.orderNumber}
 Deliver to: ${input.deliveryArea}
@@ -172,7 +172,7 @@ Open the app to accept or decline this assignment.`,
       <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#14532d">
         <h1 style="font-size:24px;margin:0 0 8px">New delivery assignment</h1>
         <p>Hi ${input.riderName},</p>
-        <p>A new order is ready for you in the LocalMart Delivery app.</p>
+        <p>A new order is ready for you in the NeuraCart Delivery app.</p>
         <table style="width:100%;background:#f0fdf4;border-radius:12px;padding:12px;border-collapse:separate;border-spacing:8px">
           <tr><td style="color:#4b5563">Order</td><td style="font-weight:700">${input.orderNumber}</td></tr>
           <tr><td style="color:#4b5563">Deliver to</td><td style="font-weight:700">${input.deliveryArea}</td></tr>
@@ -193,14 +193,14 @@ export async function sendRiderDeclinedEmail(input: {
 }): Promise<void> {
   await sendEmail({
     to: input.to,
-    subject: `LocalMart ${input.orderNumber}: rider declined`,
+    subject: `NeuraCart ${input.orderNumber}: rider declined`,
     text: `Rider ${input.riderName} declined order ${input.orderNumber}. The order is back in the preparing queue and needs another rider.`,
     html: `
       <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#14532d">
         <h1 style="font-size:24px;margin:0 0 8px">Rider declined an assignment</h1>
         <p>Order <strong>${input.orderNumber}</strong> needs another rider.</p>
         <p>${input.riderName} declined the assignment. The order is back in the preparing queue.</p>
-        <p style="color:#6b7280;font-size:13px">Open the LocalMart admin panel to reassign it.</p>
+        <p style="color:#6b7280;font-size:13px">Open the NeuraCart admin panel to reassign it.</p>
       </div>
     `,
   });
@@ -217,11 +217,11 @@ export async function sendDeliveryPartnerWelcomeEmail(input: {
     : `Your temporary password is: ${input.password}`;
   await sendEmail({
     to: input.to,
-    subject: 'Welcome to LocalMart Delivery',
-    text: `Hi ${input.name},\n\nYour LocalMart Delivery partner account is ready.\n\n${credentials}\n\nSupport: ${env.SUPPORT_EMAIL}`,
+    subject: 'Welcome to NeuraCart Delivery',
+    text: `Hi ${input.name},\n\nYour NeuraCart Delivery partner account is ready.\n\n${credentials}\n\nSupport: ${env.SUPPORT_EMAIL}`,
     html: `
       <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#14532d">
-        <h1 style="font-size:24px;margin:0 0 8px">Welcome to LocalMart Delivery</h1>
+        <h1 style="font-size:24px;margin:0 0 8px">Welcome to NeuraCart Delivery</h1>
         <p>Hi ${input.name},</p>
         <p>Your delivery partner account is ready.</p>
         <p style="background:#f0fdf4;padding:16px;border-radius:12px">${credentials}</p>

@@ -54,7 +54,7 @@ const productReviews: RequestHandler = async (req, res, next) => {
           response: review.response,
           isVerified: review.isVerified,
           createdAt: review.createdAt,
-          author: review.user.name ?? 'LocalMart customer',
+          author: review.user.name ?? 'NeuraCart customer',
         })),
         summary: {
           count: summary.count,

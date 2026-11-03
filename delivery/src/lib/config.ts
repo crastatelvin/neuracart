@@ -15,10 +15,10 @@ export const API_BASE = `${API_ROOT}/api`;
 export const RIDER_PAYOUT = 40;
 export const MAX_ACTIVE_ASSIGNMENTS = 3;
 export const SUPPORT_PHONE = '+918040001234';
-export const SUPPORT_EMAIL = 'support@localmart.app';
+export const SUPPORT_EMAIL = 'support@neuracart.app';
 
 export const STORE_PREVIEW = {
-  name: 'LocalMart Central',
+  name: 'NeuraCart Central',
   address: '14, 100 Feet Road, Indiranagar',
   city: 'Bengaluru',
   state: 'Karnataka',
@@ -29,6 +29,6 @@ export const STORE_PREVIEW = {
 } as const;
 
 export const DEMO_CREDENTIALS = {
-  email: 'driver1@localmart.app',
-  password: 'LocalMart@123',
+  email: 'driver1@neuracart.app',
+  password: 'NeuraCart@123',
 } as const;

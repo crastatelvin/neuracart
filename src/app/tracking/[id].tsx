@@ -270,7 +270,7 @@ export default function TrackingScreen() {
                   {riderLocated ? 'Your rider is on the map' : 'Delivery route'}
                 </AppText>
                 <AppText variant="caption" tone="muted">
-                  {order.deliveryPartner?.name || 'LocalMart rider'} · {formatAddress(order.address, false)}
+                  {order.deliveryPartner?.name || 'NeuraCart rider'} · {formatAddress(order.address, false)}
                 </AppText>
               </View>
               <IconButton
@@ -333,7 +333,7 @@ export default function TrackingScreen() {
                 <View style={styles.legendRow}>
                   <View style={[styles.legendDot, { backgroundColor: colors.primary }]} />
                   <AppText variant="caption" tone="muted">
-                    LocalMart route
+                    NeuraCart route
                   </AppText>
                 </View>
                 {!riderLocated ? (

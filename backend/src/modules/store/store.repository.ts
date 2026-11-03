@@ -12,7 +12,7 @@ export const storeRepository = {
     if (existing) return existing;
     return prisma.store.create({
       data: {
-        name: 'LocalMart Central',
+        name: 'NeuraCart Central',
         address: '14, 100 Feet Road, Indiranagar',
         city: 'Bengaluru',
         state: 'Karnataka',

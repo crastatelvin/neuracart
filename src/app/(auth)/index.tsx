@@ -82,7 +82,7 @@ export default function EmailScreen() {
 
         <View style={styles.sheet}>
           <View style={styles.heading}>
-            <AppText variant="title">Welcome to LocalMart</AppText>
+            <AppText variant="title">Welcome to NeuraCart</AppText>
             <AppText variant="body" tone="muted">
               Sign in or create your account with an email address.
             </AppText>
@@ -123,7 +123,7 @@ export default function EmailScreen() {
             accessibilityRole="button"
             accessibilityLabel="Fill demo customer email"
             onPress={() => {
-              setEmail('customer@localmart.app');
+              setEmail('customer@neuracart.app');
               setError(null);
             }}
             style={({ pressed }) => [styles.demo, pressed && { opacity: 0.75 }]}
@@ -136,7 +136,7 @@ export default function EmailScreen() {
                 Demo customer account
               </AppText>
               <AppText variant="caption" tone="muted">
-                Tap to use customer@localmart.app
+                Tap to use customer@neuracart.app
               </AppText>
             </View>
             <Ionicons name="chevron-forward" size={17} color={colors.subtle} />
@@ -150,7 +150,7 @@ export default function EmailScreen() {
           </View>
 
           <AppText variant="caption" tone="subtle" style={styles.terms}>
-            By continuing, you agree to LocalMart’s Terms of Service and Privacy Policy.
+            By continuing, you agree to NeuraCart’s Terms of Service and Privacy Policy.
           </AppText>
         </View>
       </ScrollView>

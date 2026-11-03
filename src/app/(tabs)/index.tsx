@@ -320,7 +320,7 @@ export default function HomeScreen() {
             <BrandMark size={36} light />
             <View style={{ gap: 0 }}>
               <AppText variant="section" tone="white" style={{ letterSpacing: -0.5 }}>
-                LocalMart
+                NeuraCart
               </AppText>
               <AppText variant="caption" style={{ color: 'rgba(255,255,255,0.7)' }}>
                 {t('home.tagline')}
@@ -399,7 +399,7 @@ export default function HomeScreen() {
 
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Open the LocalMart assistant"
+          accessibilityLabel="Open the NeuraCart assistant"
           onPress={() => router.push('/assistant')}
           style={({ pressed }) => [styles.assistantPill, pressed && { opacity: 0.9 }]}
         >

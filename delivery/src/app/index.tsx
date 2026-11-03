@@ -40,7 +40,7 @@ export default function AuthGateScreen() {
           <BrandMark size={72} light />
           <View style={styles.wordmark}>
             <AppText variant="display" tone="white" style={styles.logo}>
-              LocalMart
+              NeuraCart
             </AppText>
             <AppText variant="bodyMedium" tone="white" style={styles.tagline}>
               Delivery Partner Portal
@@ -58,7 +58,7 @@ export default function AuthGateScreen() {
         )}
       </View>
       <AppText variant="caption" tone="white" style={styles.footer}>
-        LocalMart · Your neighbourhood market, delivered
+        NeuraCart · Your neighbourhood market, delivered
       </AppText>
     </LinearGradient>
   );

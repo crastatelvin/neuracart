@@ -142,7 +142,7 @@ export default function ProfileScreen() {
         </Card>
 
         <AppText variant="caption" tone="subtle" style={styles.version}>
-          LocalMart Delivery v{appVersion}
+          NeuraCart Delivery v{appVersion}
         </AppText>
 
         <Card style={[styles.signOutCard, styles.signOutContent]}>
@@ -154,7 +154,7 @@ export default function ProfileScreen() {
 
       <ConfirmAction
         open={confirmSignOut}
-        title="Sign out of LocalMart Delivery?"
+        title="Sign out of NeuraCart Delivery?"
         description="You will need to sign in again to receive new assignments."
         confirmLabel="Sign out"
         tone="danger"

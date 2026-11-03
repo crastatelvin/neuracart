@@ -462,7 +462,7 @@ export default function DeliveryPartnersPage() {
           {mode?.kind === 'create' ? (
             <div className="field full">
               <label className="label" htmlFor="email">Email <span className="required">*</span></label>
-              <input className="input" id="email" type="email" value={form.email} placeholder="arun@localmart.app" onChange={(event) => update('email', event.target.value)} />
+              <input className="input" id="email" type="email" value={form.email} placeholder="arun@neuracart.app" onChange={(event) => update('email', event.target.value)} />
               <FieldError>{fieldErrors.email}</FieldError>
             </div>
           ) : (

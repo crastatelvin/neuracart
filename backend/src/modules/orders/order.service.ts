@@ -63,7 +63,7 @@ function notifyOrder(order: OrderWithRelations, status: OrderStatus): void {
   if (order.customer.phone) {
     void sendWhatsAppMessage(
       order.customer.phone,
-      `LocalMart ${order.orderNumber}: your order is now ${label}.`,
+      `NeuraCart ${order.orderNumber}: your order is now ${label}.`,
     );
   }
   publish(`user:${order.customerId}`, 'order.status', {
@@ -468,7 +468,7 @@ export const orderService = {
             }
             if (!isStoreOpenNow(store)) {
               throw new AppError(
-                `LocalMart is closed. Orders are accepted ${store.openTime}–${store.closeTime} IST.`,
+                `NeuraCart is closed. Orders are accepted ${store.openTime}–${store.closeTime} IST.`,
                 400,
                 'STORE_CLOSED',
               );

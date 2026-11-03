@@ -1,6 +1,6 @@
 // Pure-logic tests: no database, no network. Run with `npm test`.
 process.env.NODE_ENV = 'test';
-process.env.DATABASE_URL ??= 'postgresql://localmart:localmart@localhost:5432/localmart';
+process.env.DATABASE_URL ??= 'postgresql://neuracart:neuracart@localhost:5432/neuracart';
 process.env.JWT_ACCESS_SECRET ??= 'test-access-secret-that-is-long-enough';
 process.env.JWT_REFRESH_SECRET ??= 'test-refresh-secret-that-is-long-enough';
 process.env.OTP_PEPPER ??= 'test-otp-pepper-that-is-long-enough';

@@ -1,6 +1,6 @@
 # LocalCart — Grocery Delivery App (source design notes)
 
-> **Historical source extraction.** These notes were transcribed from the original 11 planning images, which called the product **LocalCart**. The project is now **LocalMart**. This file is preserved for traceability; the authoritative specification is [`../../plan.md`](../../plan.md).
+> **Historical source extraction.** These notes were transcribed from the original 11 planning images, which called the product **LocalCart**. The project is now **NeuraCart**. This file is preserved for traceability; the authoritative specification is [`../../plan.md`](../../plan.md).
 
 **Original source notes.** Extracted from the 11 planning images, transcribed as-is.
 

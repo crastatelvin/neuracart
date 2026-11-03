@@ -108,7 +108,7 @@ export default function LoginPage() {
         <span className="login-logo">
           <BrandMark size={38} />
           <span style={{ display: 'block' }}>
-            <span className="brand-name">LocalMart</span>
+            <span className="brand-name">NeuraCart</span>
             <span className="brand-sub">Your neighbourhood market</span>
           </span>
         </span>
@@ -145,7 +145,7 @@ export default function LoginPage() {
           {(step === 'otp' ? redirecting : false) ? null : null}
 
           <h1>
-            {step === 'email' ? 'LocalMart Admin' : 'Check your mail'}
+            {step === 'email' ? 'NeuraCart Admin' : 'Check your mail'}
           </h1>
           <p>
             {step === 'email'
@@ -162,7 +162,7 @@ export default function LoginPage() {
                   className="input"
                   type="email"
                   autoComplete="email"
-                  placeholder="admin@localmart.app"
+                  placeholder="admin@neuracart.app"
                   value={email}
                   onChange={(event) => {
                     setEmail(event.target.value);

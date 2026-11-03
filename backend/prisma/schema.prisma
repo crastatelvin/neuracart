@@ -310,7 +310,7 @@ model OrderTracking {
 
 model Store {
   id                    String      @id @default(uuid())
-  name                  String      @default("LocalMart Central")
+  name                  String      @default("NeuraCart Central")
   address               String
   city                  String      @default("Bengaluru")
   state                 String      @default("Karnataka")

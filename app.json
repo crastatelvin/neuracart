@@ -1,15 +1,15 @@
 {
   "expo": {
-    "name": "LocalMart",
-    "slug": "localmart",
+    "name": "NeuraCart",
+    "slug": "neuracart",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "localmart",
+    "scheme": "neuracart",
     "userInterfaceStyle": "light",
     "ios": {
       "icon": "./assets/expo.icon",
-      "bundleIdentifier": "com.localmart.customer"
+      "bundleIdentifier": "com.neuracart.customer"
     },
     "android": {
       "adaptiveIcon": {
@@ -19,7 +19,7 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.localmart.customer"
+      "package": "com.neuracart.customer"
     },
     "web": {
       "output": "static",

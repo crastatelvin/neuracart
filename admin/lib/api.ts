@@ -4,9 +4,9 @@ export const API_BASE = (
   process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api'
 ).replace(/\/$/, '');
 
-const ACCESS_KEY = 'localmart.admin.accessToken';
-const REFRESH_KEY = 'localmart.admin.refreshToken';
-const USER_KEY = 'localmart.admin.user';
+const ACCESS_KEY = 'neuracart.admin.accessToken';
+const REFRESH_KEY = 'neuracart.admin.refreshToken';
+const USER_KEY = 'neuracart.admin.user';
 
 export class ApiError extends Error {
   status: number;
@@ -144,7 +144,7 @@ async function execute<T>(
   } catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') throw error;
     throw new ApiError(
-      'We could not reach the LocalMart API. Check that the backend is running.',
+      'We could not reach the NeuraCart API. Check that the backend is running.',
     );
   }
 

@@ -15,7 +15,7 @@ export function buildUpiIntent(params: {
     pn: env.UPI_PAYEE_NAME,
     am: Number(params.amount).toFixed(2),
     cu: 'INR',
-    tn: `LocalMart ${params.orderNumber}`,
+    tn: `NeuraCart ${params.orderNumber}`,
   });
   return `upi://pay?${query.toString()}`;
 }

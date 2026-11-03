@@ -31,7 +31,7 @@ const NAV: NavItem[] = [
   { href: '/settings', label: 'Settings', icon: 'settings' },
 ];
 
-const SHELL_REFRESH = 'localmart:refresh-shell';
+const SHELL_REFRESH = 'neuracart:refresh-shell';
 
 const TITLES: { prefix: string; title: string; subtitle: string }[] = [
   { prefix: '/dashboard', title: 'Dashboard', subtitle: 'Store performance at a glance' },
@@ -139,7 +139,7 @@ export function Shell({ children }: { children: ReactNode }) {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
           <Spinner />
-          Loading LocalMart Admin…
+          Loading NeuraCart Admin…
         </div>
       </div>
     );
@@ -164,7 +164,7 @@ export function Shell({ children }: { children: ReactNode }) {
         <Link href="/dashboard" className="sidebar-brand">
           <BrandMark size={38} />
           <span>
-            <span className="brand-name">LocalMart</span>
+            <span className="brand-name">NeuraCart</span>
             <span className="brand-sub">Admin</span>
           </span>
         </Link>

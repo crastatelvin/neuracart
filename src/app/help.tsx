@@ -23,7 +23,7 @@ import { postAiSupport } from '@/lib/ai';
 import { translate } from '@/lib/i18n';
 import { useLanguageStore } from '@/store/language';
 
-const SUPPORT_EMAIL = 'support@localmart.app';
+const SUPPORT_EMAIL = 'support@neuracart.app';
 
 const STARTERS = ['help.starter1', 'help.starter2', 'help.starter3', 'help.starter4'];
 
@@ -135,7 +135,7 @@ export default function HelpScreen() {
                 accessibilityLabel="Email support"
                 onPress={() =>
                   void Linking.openURL(
-                    `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent('LocalMart support')}`,
+                    `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent('NeuraCart support')}`,
                   )
                 }
                 style={styles.emailRow}

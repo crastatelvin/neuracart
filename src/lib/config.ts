@@ -13,13 +13,13 @@ export const API_BASE = `${API_ROOT}/api`;
 
 export const FREE_DELIVERY_ABOVE = 500;
 export const DELIVERY_FEE = 40;
-export const SUPPORT_EMAIL = 'support@localmart.app';
+export const SUPPORT_EMAIL = 'support@neuracart.app';
 export const SUPPORT_PHONE = '+918040001234';
 export const MAX_ADDRESSES = 10;
 
 export const STORE_FALLBACK = {
   id: 'fallback',
-  name: 'LocalMart Central',
+  name: 'NeuraCart Central',
   address: '14, 100 Feet Road, Indiranagar',
   city: 'Bengaluru',
   state: 'Karnataka',

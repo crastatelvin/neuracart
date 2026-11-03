@@ -179,7 +179,7 @@ export default function OrderDetailPage() {
       });
       setAction(null);
       await load();
-      window.dispatchEvent(new Event('localmart:refresh-shell'));
+      window.dispatchEvent(new Event('neuracart:refresh-shell'));
       toast.success(`${order.orderNumber} moved to ${STATUS_LABEL[action.status].toLowerCase()}.`);
     } catch (caught) {
       toast.error(caught instanceof Error ? caught.message : 'Could not update the order.');
@@ -201,7 +201,7 @@ export default function OrderDetailPage() {
       setCancelOpen(false);
       setCancelReason('');
       await load();
-      window.dispatchEvent(new Event('localmart:refresh-shell'));
+      window.dispatchEvent(new Event('neuracart:refresh-shell'));
       toast.success(`${order.orderNumber} cancelled.`);
     } catch (caught) {
       setCancelError(caught instanceof Error ? caught.message : 'Could not cancel.');
@@ -235,7 +235,7 @@ export default function OrderDetailPage() {
       });
       setAssignOpen(false);
       await load();
-      window.dispatchEvent(new Event('localmart:refresh-shell'));
+      window.dispatchEvent(new Event('neuracart:refresh-shell'));
       toast.success(`${partner.name ?? 'Rider'} assigned to ${order.orderNumber}.`);
     } catch (caught) {
       toast.error(caught instanceof Error ? caught.message : 'Could not assign the rider.');

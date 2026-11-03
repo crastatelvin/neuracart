@@ -1,12 +1,12 @@
 services:
   postgres:
     image: postgres:18
-    container_name: localmart-db
+    container_name: neuracart-db
     restart: unless-stopped
     environment:
-      POSTGRES_USER: localmart
-      POSTGRES_PASSWORD: localmart
-      POSTGRES_DB: localmart
+      POSTGRES_USER: neuracart
+      POSTGRES_PASSWORD: neuracart
+      POSTGRES_DB: neuracart
     ports:
       - '5432:5432'
     volumes:
@@ -14,8 +14,8 @@ services:
       # parent. mounting /var/lib/postgresql/data makes the entrypoint abort.
       - pgdata:/var/lib/postgresql
     healthcheck:
-      # -d localmart skips the default template database check
-      test: ['CMD-SHELL', 'pg_isready -U localmart -d localmart']
+      # -d neuracart skips the default template database check
+      test: ['CMD-SHELL', 'pg_isready -U neuracart -d neuracart']
       interval: 10s
       timeout: 5s
       retries: 5

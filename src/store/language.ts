@@ -3,7 +3,7 @@ import { create } from 'zustand';
 import { isLanguage } from '@/lib/i18n';
 import type { Language } from '@/lib/i18n';
 
-const STORAGE_KEY = 'localmart.language';
+const STORAGE_KEY = 'neuracart.language';
 
 type LanguageState = {
   language: Language;

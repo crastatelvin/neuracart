@@ -318,7 +318,7 @@ export default function OrderDetailScreen() {
                 <AppText variant="caption" tone="muted">
                   {canTrack
                     ? 'Bringing your order to your door'
-                    : 'Delivered your LocalMart order'}
+                    : 'Delivered your NeuraCart order'}
                 </AppText>
                 {order.accepted && canTrack ? (
                   <Badge label="Assignment accepted" tone="green" icon="checkmark" />

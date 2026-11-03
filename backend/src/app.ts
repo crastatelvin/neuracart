@@ -110,7 +110,7 @@ const healthHandler: express.RequestHandler = async (_req, res) => {
       {
         status: 'ok',
         message: 'Server is running',
-        service: 'localmart-api',
+        service: 'neuracart-api',
         environment: env.NODE_ENV,
         database: 'up',
         uptimeSeconds: Math.floor(process.uptime()),
