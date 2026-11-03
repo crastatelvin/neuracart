@@ -1,6 +1,6 @@
-import { Platform } from 'react-native';
+import { Appearance, Platform, StyleSheet } from 'react-native';
 
-export const colors = {
+export const lightColors = {
   primary: '#16A34A',
   primaryDark: '#15803D',
   primaryDeep: '#14532D',
@@ -21,7 +21,81 @@ export const colors = {
   warningSoft: '#FFFBEB',
   white: '#FFFFFF',
   overlay: 'rgba(17, 24, 39, 0.45)',
-} as const;
+};
+
+export type ThemeColors = typeof lightColors;
+export type ThemeScheme = 'light' | 'dark';
+
+export const darkColors: ThemeColors = {
+  ...lightColors,
+  primary: '#22C55E',
+  primaryDark: '#4ADE80',
+  primaryDeep: '#14532D',
+  primarySoft: '#0C2318',
+  primaryMuted: '#12301F',
+  background: '#0B1220',
+  card: '#111A2B',
+  text: '#F3F4F6',
+  textSecondary: '#CBD5E1',
+  muted: '#94A3B8',
+  subtle: '#64748B',
+  border: '#1B2536',
+  borderStrong: '#243044',
+  input: '#0E1626',
+  danger: '#F87171',
+  dangerSoft: '#2A1013',
+  warning: '#FBBF24',
+  warningSoft: '#2A1D07',
+  white: '#FFFFFF',
+  overlay: 'rgba(0, 0, 0, 0.6)',
+};
+
+let activeScheme: ThemeScheme =
+  Appearance.getColorScheme() === 'dark' ? 'dark' : 'light';
+
+export function setActiveScheme(scheme: ThemeScheme): void {
+  activeScheme = scheme;
+}
+
+export function activeColors(): ThemeColors {
+  return activeScheme === 'dark' ? darkColors : lightColors;
+}
+
+/**
+ * `colors` stays a drop-in replacement for the old palette: every read resolves
+ * against the active scheme, so inline `colors.x` usages follow the theme as
+ * soon as the screen re-renders.
+ */
+export const colors: ThemeColors = new Proxy({} as ThemeColors, {
+  get: (_target, key) => activeColors()[key as keyof ThemeColors],
+  has: (_target, key) => key in lightColors,
+  ownKeys: () => Object.keys(lightColors),
+  getOwnPropertyDescriptor: () => ({ enumerable: true, configurable: true }),
+});
+
+/**
+ * Builds a StyleSheet per scheme and hands back a proxy, so module-level
+ * `styles = StyleSheet.create(...)` keeps working unchanged while switching.
+ */
+export function themedStyles<T extends StyleSheet.NamedStyles<T>>(
+  factory: (colors: ThemeColors) => T,
+): T {
+  const cache = new Map<ThemeScheme, T>();
+  const sheet = (): T => {
+    const cached = cache.get(activeScheme);
+    if (cached) return cached;
+    const created = factory(activeColors());
+    cache.set(activeScheme, created);
+    return created;
+  };
+
+  return new Proxy({} as T, {
+    get: (_target, key) => sheet()[key as keyof T],
+    has: (_target, key) => key in sheet(),
+    ownKeys: () => Reflect.ownKeys(sheet()),
+    getOwnPropertyDescriptor: () => ({ enumerable: true, configurable: true }),
+  });
+}
 
 export const spacing = {
   xxs: 2,

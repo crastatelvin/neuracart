@@ -1,7 +1,7 @@
 import { View, StyleSheet, Modal, Pressable } from 'react-native';
 import { AppText } from '@/components/ui/AppText';
 import { Button } from '@/components/ui/Button';
-import { colors, radius, shadows } from '@/constants/design';
+import { radius, shadows, themedStyles } from '@/constants/design';
 
 /**
  * Bottom-confirmation used for every consequential rider action
@@ -58,7 +58,7 @@ export function ConfirmAction({
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles((colors) => StyleSheet.create({
   backdrop: {
     flex: 1,
     justifyContent: 'flex-end',
@@ -77,4 +77,4 @@ const styles = StyleSheet.create({
   description: { marginBottom: 6 },
   row: { flexDirection: 'row', gap: 10, marginTop: 4 },
   grow: { flex: 1 },
-});
+}));

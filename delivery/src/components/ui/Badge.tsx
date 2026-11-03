@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { colors, radius } from '@/constants/design';
+import { colors, radius, themedStyles } from '@/constants/design';
 import { AppText } from './AppText';
 import type { IconName } from './types';
 
@@ -71,7 +71,7 @@ export function IconButton({
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles((colors) => StyleSheet.create({
   badge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -86,4 +86,4 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderColor: colors.border,
   },
-});
+}));

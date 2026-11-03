@@ -6,7 +6,7 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/ui/AppText';
 import { BrandMark } from '@/components/ui/BrandMark';
 import { Button } from '@/components/ui/Button';
-import { colors } from '@/constants/design';
+import { colors, themedStyles } from '@/constants/design';
 import { useDeliveryStore } from '@/store/delivery';
 
 export default function AuthGateScreen() {
@@ -69,7 +69,7 @@ export default function AuthGateScreen() {
   }
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles((colors) => StyleSheet.create({
   fill: { flex: 1 },
   center: {
     flex: 1,
@@ -83,4 +83,4 @@ const styles = StyleSheet.create({
   logo: { letterSpacing: -1.2 },
   tagline: { opacity: 0.9 },
   footer: { textAlign: 'center', opacity: 0.75, paddingBottom: 18 },
-});
+}));

@@ -1,4 +1,4 @@
-import { Platform, StyleSheet } from 'react-native';
+import { Appearance, Platform, StyleSheet } from 'react-native';
 
 export const lightColors = {
   primary: '#16A34A',
@@ -50,7 +50,8 @@ export const darkColors: ThemeColors = {
   overlay: 'rgba(0, 0, 0, 0.6)',
 };
 
-let activeScheme: ThemeScheme = 'light';
+let activeScheme: ThemeScheme =
+  Appearance.getColorScheme() === 'dark' ? 'dark' : 'light';
 
 export function setActiveScheme(scheme: ThemeScheme): void {
   activeScheme = scheme;

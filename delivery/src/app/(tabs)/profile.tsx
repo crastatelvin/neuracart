@@ -2,16 +2,17 @@ import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { Linking, StyleSheet, Switch, View } from 'react-native';
+import { Linking, Pressable, StyleSheet, Switch, View } from 'react-native';
 import { AppText } from '@/components/ui/AppText';
 import { Card } from '@/components/ui/Card';
 import { ConfirmAction } from '@/components/ConfirmAction';
-import { colors } from '@/constants/design';
+import { colors, radius, themedStyles } from '@/constants/design';
 import { SUPPORT_PHONE } from '@/lib/config';
 import { formatDate, initials, money } from '@/lib/format';
 import { useState } from 'react';
 import { useDeliveryStore } from '@/store/delivery';
 import { useToastStore } from '@/store/toast';
+import { useThemeStore } from '@/store/theme';
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -19,6 +20,8 @@ export default function ProfileScreen() {
   const signOut = useDeliveryStore((state) => state.signOut);
   const setAvailability = useDeliveryStore((state) => state.setAvailability);
   const toast = useToastStore((state) => state.show);
+  const themeMode = useThemeStore((state) => state.mode);
+  const setThemeMode = useThemeStore((state) => state.setMode);
   const [confirmSignOut, setConfirmSignOut] = useState(false);
 
   const toggleAvailability = async (value: boolean) => {
@@ -126,6 +129,33 @@ export default function ProfileScreen() {
           />
         </Card>
 
+        <Card style={styles.rowCard}>
+          <View style={{ flex: 1, gap: 8 }}>
+            <AppText variant="card">Appearance</AppText>
+            <View style={styles.themeRow}>
+              {(['light', 'dark', 'system'] as const).map((mode) => {
+                const active = themeMode === mode;
+                return (
+                  <Pressable
+                    key={mode}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: active }}
+                    onPress={() => setThemeMode(mode)}
+                    style={[styles.themeChip, active && styles.themeChipActive]}
+                  >
+                    <AppText
+                      variant="caption"
+                      style={{ fontWeight: '600', color: active ? colors.white : colors.textSecondary }}
+                    >
+                      {mode === 'light' ? 'Light' : mode === 'dark' ? 'Dark' : 'System'}
+                    </AppText>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
+        </Card>
+
         <Card style={styles.helpCard}>
           <View style={styles.helpRow}>
             <Ionicons name="call-outline" size={17} color={colors.primaryDark} />
@@ -177,7 +207,17 @@ function titleCase(value: string): string {
   return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles((colors) => StyleSheet.create({
+  themeRow: { flexDirection: 'row', gap: 6 },
+  themeChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: radius.pill,
+    backgroundColor: colors.input,
+    borderWidth: 1,
+    borderColor: colors.borderStrong,
+  },
+  themeChipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
   screen: { flex: 1, backgroundColor: colors.background },
   header: {
     alignItems: 'center',
@@ -224,4 +264,4 @@ const styles = StyleSheet.create({
   version: { textAlign: 'center', marginTop: 6 },
   signOutCard: { borderColor: '#FECACA', backgroundColor: colors.dangerSoft },
   signOutContent: { alignItems: 'center', paddingVertical: 13 },
-});
+}));

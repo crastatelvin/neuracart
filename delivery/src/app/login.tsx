@@ -13,7 +13,7 @@ import { AppText } from '@/components/ui/AppText';
 import { BrandMark } from '@/components/ui/BrandMark';
 import { Button } from '@/components/ui/Button';
 import { TextField } from '@/components/ui/TextField';
-import { colors, radius } from '@/constants/design';
+import { radius, themedStyles } from '@/constants/design';
 import { DEMO_CREDENTIALS } from '@/lib/config';
 import { apiErrorMessage, isApiError } from '@/lib/api';
 import { useDeliveryStore } from '@/store/delivery';
@@ -162,7 +162,7 @@ export default function LoginScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles((colors) => StyleSheet.create({
   fill: { flex: 1 },
   scroll: {
     flexGrow: 1,
@@ -187,4 +187,4 @@ const styles = StyleSheet.create({
   cardHint: { marginTop: -8 },
   reset: { textAlign: 'center' },
   demo: { alignItems: 'center', paddingVertical: 2 },
-});
+}));

@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/States';
 import { ConfirmAction } from '@/components/ConfirmAction';
-import { colors } from '@/constants/design';
+import { colors, themedStyles } from '@/constants/design';
 import { apiErrorMessage, apiRequest, isApiError } from '@/lib/api';
 import { RIDER_PAYOUT } from '@/lib/config';
 import {
@@ -424,7 +424,7 @@ function OrderCard({
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles((colors) => StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
   content: { paddingBottom: 32 },
   header: {
@@ -478,4 +478,4 @@ const styles = StyleSheet.create({
   doneMain: { flex: 1 },
   doneRight: { alignItems: 'flex-end', gap: 2 },
   footnote: { textAlign: 'center', marginTop: 24 },
-});
+}));

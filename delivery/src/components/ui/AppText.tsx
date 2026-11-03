@@ -23,7 +23,7 @@ const variants: Record<Variant, TextStyle> = {
   bodyMedium: { fontSize: 14, lineHeight: 21, fontWeight: fonts.medium },
   meta: { fontSize: 12, lineHeight: 17, fontWeight: fonts.medium },
   caption: { fontSize: 11, lineHeight: 15, fontWeight: fonts.medium },
-  price: { fontSize: 18, lineHeight: 23, fontWeight: fonts.bold, color: colors.primaryDark },
+  price: { fontSize: 18, lineHeight: 23, fontWeight: fonts.bold },
   button: { fontSize: 16, lineHeight: 21, fontWeight: fonts.semibold },
 };
 
@@ -33,21 +33,26 @@ type Props = TextProps & {
   children?: ReactNode;
 };
 
-const tones: Record<NonNullable<Props['tone']>, TextStyle> = {
-  default: { color: colors.text },
-  muted: { color: colors.muted },
-  primary: { color: colors.primaryDark },
-  danger: { color: colors.danger },
-  white: { color: colors.white },
-  subtle: { color: colors.subtle },
-};
-
 export function AppText({ variant = 'body', tone = 'default', style, ...props }: Props) {
+  const toneColor = {
+    default: colors.text,
+    muted: colors.muted,
+    primary: colors.primaryDark,
+    danger: colors.danger,
+    white: colors.white,
+    subtle: colors.subtle,
+  }[tone];
+
   return (
     <Text
       maxFontSizeMultiplier={1.3}
       {...props}
-      style={[variants[variant], tones[tone], style]}
+      style={[
+        variants[variant],
+        variant === 'price' && { color: colors.primaryDark },
+        { color: toneColor },
+        style,
+      ]}
     />
   );
 }

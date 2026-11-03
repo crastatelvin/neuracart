@@ -20,7 +20,7 @@ import { ConfirmAction } from '@/components/ConfirmAction';
 import { EmptyState } from '@/components/ui/States';
 import { TextField } from '@/components/ui/TextField';
 import { apiRequest, apiUpload } from '@/lib/api';
-import { colors, radius } from '@/constants/design';
+import { colors, radius, themedStyles } from '@/constants/design';
 import { STORE_PREVIEW } from '@/lib/config';
 import {
   STATUS_META,
@@ -528,7 +528,7 @@ export default function AssignmentDetailScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles((colors) => StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
   content: { paddingBottom: 120 },
   center: {
@@ -609,4 +609,4 @@ const styles = StyleSheet.create({
   stickyRow: { flexDirection: 'row', gap: 10 },
   grow: { flex: 1, width: undefined },
   doneCard: { paddingVertical: 12 },
-});
+}));

@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StyleSheet, View } from 'react-native';
-import { colors, radius, shadows } from '@/constants/design';
+import { colors, radius, shadows, themedStyles } from '@/constants/design';
 import { useToastStore } from '@/store/toast';
 import { AppText } from './AppText';
 
@@ -30,7 +30,7 @@ export function ToastHost() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles((colors) => StyleSheet.create({
   wrap: { position: 'absolute', left: 20, right: 20, alignItems: 'center', zIndex: 100 },
   toast: {
     flexDirection: 'row',
@@ -43,4 +43,4 @@ const styles = StyleSheet.create({
     ...shadows.floating,
   },
   text: { flexShrink: 1 },
-});
+}));

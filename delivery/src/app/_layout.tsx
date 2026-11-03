@@ -7,6 +7,7 @@ import { registerRiderPush } from '@/lib/push';
 import { setSessionExpiredHandler } from '@/lib/session';
 import { ToastHost } from '@/components/ui/ToastHost';
 import { useDeliveryStore } from '@/store/delivery';
+import { useResolvedScheme, useThemeHydrated } from '@/store/theme';
 
 void SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
@@ -16,6 +17,8 @@ setSessionExpiredHandler(() => {
 
 export default function DeliveryLayout() {
   const status = useDeliveryStore((state) => state.status);
+  useThemeHydrated();
+  const scheme = useResolvedScheme();
 
   useEffect(() => {
     return () => setSessionExpiredHandler(null);
@@ -32,8 +35,8 @@ export default function DeliveryLayout() {
 
   return (
     <>
-      <StatusBar style="light" />
-      <Stack screenOptions={{ headerShown: false }}>
+      <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
+      <Stack key={scheme} screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" />
         <Stack.Screen name="login" />
         <Stack.Screen name="(tabs)" />

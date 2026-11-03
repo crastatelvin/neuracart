@@ -6,7 +6,7 @@ import {
   View,
   type TextInputProps,
 } from 'react-native';
-import { colors, layout, radius } from '@/constants/design';
+import { colors, layout, radius, themedStyles } from '@/constants/design';
 import { AppText } from './AppText';
 import type { IconName } from './types';
 
@@ -90,7 +90,7 @@ export function TextField({
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles((colors) => StyleSheet.create({
   wrapper: { gap: 7 },
   labelRow: { flexDirection: 'row', alignItems: 'center' },
   label: { color: colors.textSecondary, fontWeight: '600' },
@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     paddingTop: 13,
   },
-  focused: { borderColor: colors.primary, backgroundColor: colors.white },
+  focused: { borderColor: colors.primary, backgroundColor: colors.card },
   errorShell: { borderColor: colors.danger, backgroundColor: colors.dangerSoft },
   disabledShell: { opacity: 0.7 },
   icon: { marginRight: 9 },
@@ -125,4 +125,4 @@ const styles = StyleSheet.create({
   multilineInput: { textAlignVertical: 'top', minHeight: 80, paddingTop: 0 },
   accessory: { marginLeft: 8 },
   helper: { marginLeft: 2 },
-});
+}));

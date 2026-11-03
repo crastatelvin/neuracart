@@ -5,7 +5,7 @@ import { AppText } from '@/components/ui/AppText';
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/States';
-import { colors, radius } from '@/constants/design';
+import { colors, radius, themedStyles } from '@/constants/design';
 import { RIDER_PAYOUT } from '@/lib/config';
 import { formatDate, money } from '@/lib/format';
 import type { EarningsPeriod } from '@/lib/types';
@@ -200,7 +200,7 @@ export default function HistoryScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles((colors) => StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
   content: { paddingBottom: 32 },
   header: { paddingHorizontal: 20, paddingTop: 62, paddingBottom: 20 },
@@ -238,4 +238,4 @@ const styles = StyleSheet.create({
   rowMain: { flex: 1, gap: 2 },
   rowRight: {},
   footnote: { textAlign: 'center', marginTop: 22 },
-});
+}));
