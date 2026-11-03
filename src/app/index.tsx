@@ -1,3 +1,4 @@
+import { colors, radius, themedStyles } from '@/constants/design';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -8,7 +9,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppText } from '@/components/ui/AppText';
 import { BrandMark } from '@/components/ui/BrandMark';
 import { Button } from '@/components/ui/Button';
-import { colors, radius } from '@/constants/design';
 import { useAuthStore } from '@/store/auth';
 
 export default function AuthGateScreen() {
@@ -99,7 +99,7 @@ export default function AuthGateScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles((colors) => StyleSheet.create({
   fill: { flex: 1 },
   content: {
     flex: 1,
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
   loading: { alignItems: 'center', gap: 12, marginBottom: 10 },
   errorCard: {
     width: '100%',
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
     borderRadius: radius.xxl,
     padding: 20,
     gap: 10,
@@ -139,4 +139,4 @@ const styles = StyleSheet.create({
   },
   errorText: { marginBottom: 6 },
   footer: { color: 'rgba(255,255,255,0.66)' },
-});
+}));

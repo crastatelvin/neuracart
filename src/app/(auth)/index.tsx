@@ -1,3 +1,4 @@
+import { colors, radius, shadows, themedStyles } from '@/constants/design';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -17,7 +18,6 @@ import { AppText } from '@/components/ui/AppText';
 import { BrandMark } from '@/components/ui/BrandMark';
 import { Button } from '@/components/ui/Button';
 import { TextField } from '@/components/ui/TextField';
-import { colors, radius, shadows } from '@/constants/design';
 import { apiErrorMessage } from '@/lib/api';
 import { fetchGoogleStatus, startGoogleSignIn } from '@/lib/oauth';
 import { useAuthStore } from '@/store/auth';
@@ -220,7 +220,7 @@ export default function EmailScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles((colors) => StyleSheet.create({
   dividerRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -262,7 +262,7 @@ const styles = StyleSheet.create({
   sheet: {
     marginTop: -28,
     marginHorizontal: 16,
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
     borderRadius: radius.xxl,
     padding: 22,
     gap: 22,
@@ -291,5 +291,5 @@ const styles = StyleSheet.create({
   infoRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 7, paddingHorizontal: 2 },
   infoText: { flex: 1 },
   terms: { textAlign: 'center', lineHeight: 16 },
-});
+}));
 

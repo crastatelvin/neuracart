@@ -1,6 +1,6 @@
+import { radius, shadows, themedStyles } from '@/constants/design';
 import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import type { ReactNode } from 'react';
-import { colors, radius, shadows } from '@/constants/design';
 
 export function Card({
   children,
@@ -14,7 +14,7 @@ export function Card({
   return <View style={[styles.card, padded && styles.padded, style]}>{children}</View>;
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles((colors) => StyleSheet.create({
   card: {
     backgroundColor: colors.card,
     borderRadius: radius.xl,
@@ -23,4 +23,4 @@ const styles = StyleSheet.create({
     ...shadows.card,
   },
   padded: { padding: 16 },
-});
+}));

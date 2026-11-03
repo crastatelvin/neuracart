@@ -1,3 +1,4 @@
+import { colors, radius, themedStyles } from '@/constants/design';
 import { Ionicons } from '@expo/vector-icons';
 import * as Crypto from 'expo-crypto';
 import { useFocusEffect, useRouter } from 'expo-router';
@@ -19,7 +20,6 @@ import { Card } from '@/components/ui/Card';
 import { ScreenHeader } from '@/components/ui/Header';
 import { ErrorState } from '@/components/ui/States';
 import { TextField } from '@/components/ui/TextField';
-import { colors, radius } from '@/constants/design';
 import { apiErrorMessage, apiRequest, isApiError } from '@/lib/api';
 import { MAX_ADDRESSES } from '@/lib/config';
 import { money } from '@/lib/format';
@@ -218,7 +218,7 @@ export default function CheckoutScreen() {
   if (items.length === 0) {
     return (
       <View style={styles.fill}>
-        <StatusBar style="dark" />
+        <StatusBar style="auto" />
         <ScreenHeader title="Checkout" onBack={() => router.back()} />
         <ErrorState
           title="Your cart is empty"
@@ -231,7 +231,7 @@ export default function CheckoutScreen() {
 
   return (
     <View style={styles.fill}>
-      <StatusBar style="dark" />
+      <StatusBar style="auto" />
       <ScreenHeader
         title="Checkout"
         subtitle={`${items.length} ${items.length === 1 ? 'line item' : 'line items'} · ${isPickup ? 'store pickup' : paymentMethod === 'online' ? 'UPI' : 'cash on delivery'}`}
@@ -703,7 +703,7 @@ export default function CheckoutScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles((colors) => StyleSheet.create({
   fill: { flex: 1, backgroundColor: colors.background },
   content: { padding: 20, gap: 16, paddingBottom: 30 },
   sectionHeading: {
@@ -731,7 +731,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 11,
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
     borderWidth: 1.5,
     borderColor: colors.primaryMuted,
     borderStyle: 'dashed',
@@ -757,7 +757,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     borderWidth: 1.5,
     borderColor: colors.border,
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
   },
   choiceActive: { borderColor: colors.primary, backgroundColor: colors.primarySoft },
   dayRow: { flexDirection: 'row', gap: 8 },
@@ -769,7 +769,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     borderWidth: 1.5,
     borderColor: colors.border,
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
   },
   dayChipActive: { borderColor: colors.primary, backgroundColor: colors.primarySoft },
   slotGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
@@ -781,7 +781,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     borderWidth: 1.5,
     borderColor: colors.border,
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
   },
   slotChipActive: { borderColor: colors.primary, backgroundColor: colors.primarySoft },
   paymentList: { gap: 10 },
@@ -789,7 +789,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 11,
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
     borderWidth: 1.5,
     borderColor: colors.border,
     borderRadius: radius.lg,
@@ -862,4 +862,4 @@ const styles = StyleSheet.create({
   payRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   placeButton: { flex: 1 },
   closedNote: { textAlign: 'center', marginTop: 5 },
-});
+}));

@@ -1,3 +1,4 @@
+import { colors, radius, themedStyles } from '@/constants/design';
 import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
 import { useFocusEffect, useRouter } from 'expo-router';
@@ -15,7 +16,6 @@ import { AppText } from '@/components/ui/AppText';
 import { Card } from '@/components/ui/Card';
 import { ScreenHeader } from '@/components/ui/Header';
 import { TextField } from '@/components/ui/TextField';
-import { colors, radius } from '@/constants/design';
 import { apiErrorMessage, apiRequest } from '@/lib/api';
 import { money } from '@/lib/format';
 import { useToastStore } from '@/store/toast';
@@ -125,7 +125,7 @@ export default function WalletScreen() {
 
   return (
     <View style={styles.fill}>
-      <StatusBar style="dark" />
+      <StatusBar style="auto" />
       <ScreenHeader
         title="Wallet & rewards"
         subtitle="Balance, points and referrals"
@@ -319,7 +319,7 @@ export default function WalletScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles((colors) => StyleSheet.create({
   fill: { flex: 1, backgroundColor: colors.background },
   content: { padding: 20, gap: 14, paddingBottom: 30 },
   center: { alignItems: 'center', gap: 9, paddingVertical: 26 },
@@ -380,4 +380,4 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-});
+}));

@@ -1,6 +1,6 @@
+import { colors, radius, spacing, themedStyles } from '@/constants/design';
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
-import { colors, radius, spacing } from '@/constants/design';
 import { formatAddress } from '@/lib/format';
 import type { Address } from '@/lib/types';
 import { AppText } from './ui/AppText';
@@ -104,9 +104,9 @@ export function AddressCard({
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles((colors) => StyleSheet.create({
   card: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
     borderRadius: radius.lg,
     borderWidth: 1.5,
     borderColor: colors.border,
@@ -142,4 +142,4 @@ const styles = StyleSheet.create({
   },
   actionLink: { flexDirection: 'row', alignItems: 'center', gap: 4, flex: 1 },
   iconActions: { flexDirection: 'row', gap: 8 },
-});
+}));

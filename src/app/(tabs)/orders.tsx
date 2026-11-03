@@ -1,3 +1,4 @@
+import { colors, radius, themedStyles } from '@/constants/design';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -14,7 +15,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { OrderCard } from '@/components/OrderCard';
 import { AppText } from '@/components/ui/AppText';
 import { EmptyState, ErrorState } from '@/components/ui/States';
-import { colors, radius } from '@/constants/design';
 import { apiErrorMessage, apiPath, apiRequestPage } from '@/lib/api';
 import type { Order, Pagination } from '@/lib/types';
 import { cartItemCount, useCartStore } from '@/store/cart';
@@ -86,7 +86,7 @@ export default function OrdersScreen() {
 
   return (
     <View style={styles.fill}>
-      <StatusBar style="dark" />
+      <StatusBar style="auto" />
       <View style={[styles.header, { paddingTop: insets.top + 14 }]}>
         <View style={styles.headerRow}>
           <View style={{ flex: 1, gap: 3 }}>
@@ -176,7 +176,7 @@ export default function OrdersScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles((colors) => StyleSheet.create({
   fill: { flex: 1, backgroundColor: colors.background },
   header: {
     paddingHorizontal: 20,
@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 14,
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
     borderWidth: 1,
     borderColor: colors.border,
     alignItems: 'center',
@@ -226,4 +226,4 @@ const styles = StyleSheet.create({
   content: { padding: 20, flexGrow: 1 },
   loading: { paddingVertical: 60, alignItems: 'center', gap: 12 },
   footer: { paddingVertical: 24, alignItems: 'center' },
-});
+}));

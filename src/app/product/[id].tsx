@@ -1,3 +1,4 @@
+import { colors, radius, shadows, themedStyles } from '@/constants/design';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
@@ -21,7 +22,6 @@ import { BottomBar } from '@/components/ui/BottomBar';
 import { Button } from '@/components/ui/Button';
 import { ErrorState } from '@/components/ui/States';
 import { QuantityStepper } from '@/components/ui/QuantityStepper';
-import { colors, radius, shadows } from '@/constants/design';
 import { fetchSubstitutes } from '@/lib/ai';
 import type { SubstituteSuggestion } from '@/lib/ai';
 import { apiErrorMessage, apiPath, apiRequest, apiRequestPage } from '@/lib/api';
@@ -100,7 +100,7 @@ export default function ProductDetailScreen() {
   if (loading) {
     return (
       <View style={styles.fill}>
-        <StatusBar style="dark" />
+        <StatusBar style="auto" />
         <View style={[styles.loadingHeader, { paddingTop: insets.top + 10 }]}>
           <Pressable
             onPress={() => router.back()}
@@ -124,7 +124,7 @@ export default function ProductDetailScreen() {
   if (error || !product) {
     return (
       <View style={styles.fill}>
-        <StatusBar style="dark" />
+        <StatusBar style="auto" />
         <View style={[styles.loadingHeader, { paddingTop: insets.top + 10 }]}>
           <Pressable
             onPress={() => router.back()}
@@ -437,14 +437,14 @@ function Perk({
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles((colors) => StyleSheet.create({
   fill: { flex: 1, backgroundColor: colors.background },
   loadingHeader: { paddingHorizontal: 20, paddingBottom: 10 },
   loadingBack: {
     width: 42,
     height: 42,
     borderRadius: 14,
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
     borderWidth: 1,
     borderColor: colors.border,
     alignItems: 'center',
@@ -469,7 +469,7 @@ const styles = StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 21,
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
     alignItems: 'center',
     justifyContent: 'center',
     ...shadows.card,
@@ -521,7 +521,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 11,
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: radius.lg,
@@ -543,4 +543,4 @@ const styles = StyleSheet.create({
   addActions: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   bottomPrice: { flex: 1, gap: 1 },
   addButton: { flex: 1.8 },
-});
+}));

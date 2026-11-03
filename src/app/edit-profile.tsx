@@ -1,3 +1,4 @@
+import { colors, themedStyles } from '@/constants/design';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -15,7 +16,6 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { ScreenHeader } from '@/components/ui/Header';
 import { TextField } from '@/components/ui/TextField';
-import { colors } from '@/constants/design';
 import { apiErrorMessage } from '@/lib/api';
 import { initials } from '@/lib/format';
 import { useAuthStore } from '@/store/auth';
@@ -95,7 +95,7 @@ export default function EditProfileScreen() {
       style={styles.fill}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <StatusBar style="dark" />
+      <StatusBar style="auto" />
       <ScreenHeader
         title="Edit profile"
         subtitle="Keep your delivery details up to date"
@@ -195,7 +195,7 @@ export default function EditProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles((colors) => StyleSheet.create({
   fill: { flex: 1, backgroundColor: colors.background },
   content: { padding: 20, gap: 16, paddingBottom: 28 },
   avatarBlock: { alignItems: 'center', gap: 9, paddingVertical: 4 },
@@ -217,4 +217,4 @@ const styles = StyleSheet.create({
   },
   formCard: { gap: 15 },
   privacyNote: { flexDirection: 'row', alignItems: 'flex-start', gap: 7, paddingHorizontal: 2 },
-});
+}));

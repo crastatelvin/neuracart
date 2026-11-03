@@ -1,3 +1,4 @@
+import { colors, radius, shadows, themedStyles } from '@/constants/design';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
@@ -17,7 +18,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ScreenHeader } from '@/components/ui/Header';
 import { AppText } from '@/components/ui/AppText';
 import { Button } from '@/components/ui/Button';
-import { colors, radius, shadows } from '@/constants/design';
 import { apiErrorMessage } from '@/lib/api';
 import { postAiChat, fetchAiChatSessions } from '@/lib/ai';
 import type { ChatTurn } from '@/lib/ai';
@@ -128,7 +128,7 @@ export default function AssistantScreen() {
 
   return (
     <View style={styles.fill}>
-      <StatusBar style="dark" />
+      <StatusBar style="auto" />
       <View style={{ paddingTop: insets.top }}>
         <ScreenHeader
           title="NeuraCart Assistant"
@@ -283,7 +283,7 @@ const SUGGESTIONS = {
   chips: ['Weekly veggies', 'Protein for dinner', 'Something sweet', 'Breakfast staples'],
 };
 
-const styles = StyleSheet.create({
+const styles = themedStyles((colors) => StyleSheet.create({
   fill: { flex: 1, backgroundColor: colors.background },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   feed: { padding: 16, paddingBottom: 24, gap: 12 },
@@ -298,7 +298,7 @@ const styles = StyleSheet.create({
     maxWidth: '82%',
   },
   bubbleAssistant: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
     borderRadius: radius.lg,
     borderBottomLeftRadius: 6,
     paddingHorizontal: 14,
@@ -336,7 +336,7 @@ const styles = StyleSheet.create({
     minHeight: 44,
     maxHeight: 110,
     borderRadius: radius.pill,
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
     borderWidth: 1,
     borderColor: colors.border,
     paddingHorizontal: 14,
@@ -362,4 +362,4 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
-});
+}));

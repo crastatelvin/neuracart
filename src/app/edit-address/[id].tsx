@@ -1,3 +1,4 @@
+import { colors, themedStyles } from '@/constants/design';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useCallback, useEffect, useState } from 'react';
@@ -6,7 +7,6 @@ import { AddressEditor } from '@/components/AddressEditor';
 import { AppText } from '@/components/ui/AppText';
 import { Button } from '@/components/ui/Button';
 import { ScreenHeader } from '@/components/ui/Header';
-import { colors } from '@/constants/design';
 import { apiErrorMessage, apiRequest } from '@/lib/api';
 import type { Address } from '@/lib/types';
 
@@ -42,7 +42,7 @@ export default function EditAddressScreen() {
   if (loading) {
     return (
       <View style={styles.fill}>
-        <StatusBar style="dark" />
+        <StatusBar style="auto" />
         <ScreenHeader title="Edit address" onBack={() => router.back()} />
         <View style={styles.center}>
           <ActivityIndicator color={colors.primary} />
@@ -57,7 +57,7 @@ export default function EditAddressScreen() {
   if (error || !address) {
     return (
       <View style={styles.fill}>
-        <StatusBar style="dark" />
+        <StatusBar style="auto" />
         <ScreenHeader title="Edit address" onBack={() => router.back()} />
         <View style={styles.center}>
           <AppText variant="section">Address unavailable</AppText>
@@ -104,8 +104,8 @@ export default function EditAddressScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles((colors) => StyleSheet.create({
   fill: { flex: 1, backgroundColor: colors.background },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, gap: 12 },
   errorText: { textAlign: 'center', maxWidth: 300 },
-});
+}));

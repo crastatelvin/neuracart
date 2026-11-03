@@ -1,3 +1,4 @@
+import { colors, radius, shadows, themedStyles } from '@/constants/design';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -19,7 +20,6 @@ import { ProductCard } from '@/components/ProductCard';
 import { AppText } from '@/components/ui/AppText';
 import { BrandMark } from '@/components/ui/BrandMark';
 import { EmptyState, ErrorState, ProductGridSkeleton } from '@/components/ui/States';
-import { colors, radius, shadows } from '@/constants/design';
 import { apiErrorMessage, apiPath, apiRequest, apiRequestPage } from '@/lib/api';
 import { money } from '@/lib/format';
 import { translate } from '@/lib/i18n';
@@ -434,7 +434,7 @@ export default function HomeScreen() {
       <View style={styles.bodyTop}>
         {promoVisible && !hasFilters ? (
           <LinearGradient
-            colors={['#FFFBEB', '#FEF3C7']}
+            colors={[colors.warningSoft, colors.warningSoft]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.promo}
@@ -443,10 +443,10 @@ export default function HomeScreen() {
               <Ionicons name="leaf" size={22} color={colors.warning} />
             </View>
             <View style={{ flex: 1, gap: 2 }}>
-              <AppText variant="bodyMedium" style={{ fontWeight: '700', color: '#92400E' }}>
+              <AppText variant="bodyMedium" style={{ fontWeight: '700', color: colors.warning }}>
                 {t('home.promoTitle')}
               </AppText>
-              <AppText variant="caption" style={{ color: '#A16207' }}>
+              <AppText variant="caption" style={{ color: colors.warning }}>
                 {t('home.promoBody')}
               </AppText>
             </View>
@@ -456,7 +456,7 @@ export default function HomeScreen() {
               onPress={() => setPromoVisible(false)}
               hitSlop={8}
             >
-              <Ionicons name="close" size={17} color="#B45309" />
+              <Ionicons name="close" size={17} color={colors.warning} />
             </Pressable>
           </LinearGradient>
         ) : null}
@@ -754,7 +754,7 @@ function formatHour(time: string): string {
   return `${hour % 12 || 12} ${suffix}`;
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles((colors) => StyleSheet.create({
   fill: { flex: 1, backgroundColor: colors.background },
   listContent: { paddingBottom: 12 },
   hero: {
@@ -788,7 +788,7 @@ const styles = StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 14,
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -829,7 +829,7 @@ const styles = StyleSheet.create({
     marginTop: 18,
     minHeight: 52,
     borderRadius: 16,
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 14,
@@ -842,7 +842,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
     borderRadius: radius.pill,
     paddingHorizontal: 12,
     paddingVertical: 7,
@@ -886,9 +886,9 @@ const styles = StyleSheet.create({
     paddingLeft: 6,
     paddingRight: 14,
     borderRadius: radius.pill,
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.borderStrong,
   },
   categoryActive: { backgroundColor: colors.primaryDark, borderColor: colors.primaryDark },
   categoryIcon: {
@@ -917,7 +917,7 @@ const styles = StyleSheet.create({
     gap: 5,
     padding: 12,
     borderRadius: radius.lg,
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
     borderWidth: 1.5,
     borderColor: colors.border,
   },
@@ -996,4 +996,4 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   cartCountText: { color: colors.white, fontSize: 9, fontWeight: '800', lineHeight: 11 },
-});
+}));

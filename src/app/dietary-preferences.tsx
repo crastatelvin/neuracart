@@ -1,3 +1,4 @@
+import { colors, radius, shadows, themedStyles } from '@/constants/design';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
@@ -15,7 +16,6 @@ import { ScreenHeader } from '@/components/ui/Header';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { AppText } from '@/components/ui/AppText';
-import { colors, radius, shadows } from '@/constants/design';
 import { apiErrorMessage, apiRequest } from '@/lib/api';
 import { useToastStore } from '@/store/toast';
 import { useLanguageStore } from '@/store/language';
@@ -104,7 +104,7 @@ export default function DietaryPreferencesScreen() {
 
   return (
     <View style={styles.fill}>
-      <StatusBar style="dark" />
+      <StatusBar style="auto" />
       <View style={{ paddingTop: insets.top }}>
         <ScreenHeader title="Dietary preferences" onBack={() => router.back()} />
       </View>
@@ -286,7 +286,7 @@ export default function DietaryPreferencesScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles((colors) => StyleSheet.create({
   fill: { flex: 1, backgroundColor: colors.background },
   content: { padding: 20, paddingBottom: 40, gap: 18 },
   loadingCard: { gap: 12 },
@@ -302,7 +302,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     borderWidth: 1,
     borderColor: colors.border,
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
     paddingHorizontal: 13,
     paddingVertical: 8,
   },
@@ -318,4 +318,4 @@ const styles = StyleSheet.create({
   },
   stepperValue: { color: colors.white, fontSize: 15, fontWeight: '800', minWidth: 18, textAlign: 'center' },
   saveButton: { marginTop: 4 },
-});
+}));

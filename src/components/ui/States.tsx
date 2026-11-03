@@ -1,6 +1,6 @@
+import { colors, radius, spacing, themedStyles } from '@/constants/design';
 import { Ionicons } from '@expo/vector-icons';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
-import { colors, radius, spacing } from '@/constants/design';
 import { AppText } from './AppText';
 import { Button } from './Button';
 import type { IconName } from './types';
@@ -121,7 +121,7 @@ export function ProductGridSkeleton() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles((colors) => StyleSheet.create({
   container: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -152,11 +152,11 @@ const styles = StyleSheet.create({
   },
   skeletonCard: {
     width: '47.8%',
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
     borderRadius: radius.xl,
     padding: 10,
     gap: 9,
     borderWidth: 1,
     borderColor: colors.border,
   },
-});
+}));

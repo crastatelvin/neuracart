@@ -1,3 +1,4 @@
+import { colors, radius, themedStyles } from '@/constants/design';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
@@ -15,7 +16,6 @@ import { BottomBar } from '@/components/ui/BottomBar';
 import { Button } from '@/components/ui/Button';
 import { ScreenHeader } from '@/components/ui/Header';
 import { TextField } from '@/components/ui/TextField';
-import { colors, radius } from '@/constants/design';
 import { apiErrorMessage } from '@/lib/api';
 import type { Address } from '@/lib/types';
 import { useToastStore } from '@/store/toast';
@@ -142,7 +142,7 @@ export function AddressEditor({ mode, address, onBack, onSubmit, onDelete }: Pro
       style={styles.fill}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <StatusBar style="dark" />
+      <StatusBar style="auto" />
       <ScreenHeader
         title={mode === 'add' ? 'Add address' : 'Edit address'}
         subtitle="We deliver across serviceable Bengaluru pincodes"
@@ -325,7 +325,7 @@ export function AddressEditor({ mode, address, onBack, onSubmit, onDelete }: Pro
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles((colors) => StyleSheet.create({
   fill: { flex: 1, backgroundColor: colors.background },
   content: { padding: 20, gap: 20, paddingBottom: 28 },
   section: { gap: 10 },
@@ -334,7 +334,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 46,
     borderRadius: radius.md,
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
     borderWidth: 1.5,
     borderColor: colors.border,
     flexDirection: 'row',
@@ -359,7 +359,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 11,
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: radius.lg,
@@ -388,4 +388,4 @@ const styles = StyleSheet.create({
     gap: 6,
     paddingVertical: 12,
   },
-});
+}));

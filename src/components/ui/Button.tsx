@@ -1,6 +1,6 @@
+import { colors, radius, layout, themedStyles } from '@/constants/design';
 import { ActivityIndicator, Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, layout, radius } from '@/constants/design';
 import { AppText } from './AppText';
 import type { IconName } from './types';
 
@@ -34,6 +34,14 @@ export function Button({
   accessibilityLabel,
 }: Props) {
   const inactive = disabled || loading;
+  const onColor = variant === 'primary' || variant === 'danger' ? colors.white : colors.primaryDark;
+  const textColor: Record<Variant, string> = {
+    primary: colors.white,
+    secondary: colors.primaryDark,
+    ghost: colors.primaryDark,
+    danger: colors.white,
+    light: colors.white,
+  };
   return (
     <Pressable
       accessibilityRole="button"
@@ -52,17 +60,14 @@ export function Button({
       ]}
     >
       {loading ? (
-        <ActivityIndicator
-          size="small"
-          color={variant === 'primary' || variant === 'danger' ? colors.white : colors.primaryDark}
-        />
+        <ActivityIndicator size="small" color={onColor} />
       ) : (
         <View style={styles.content}>
           {icon ? (
             <Ionicons
               name={icon}
               size={size === 'sm' ? 16 : 19}
-              color={iconColor[variant]}
+              color={textColor[variant]}
             />
           ) : null}
           <AppText
@@ -79,7 +84,7 @@ export function Button({
             <Ionicons
               name={iconRight}
               size={size === 'sm' ? 16 : 19}
-              color={iconColor[variant]}
+              color={textColor[variant]}
             />
           ) : null}
         </View>
@@ -88,35 +93,19 @@ export function Button({
   );
 }
 
-const textColor: Record<Variant, string> = {
-  primary: colors.white,
-  secondary: colors.primaryDark,
-  ghost: colors.primaryDark,
-  danger: colors.white,
-  light: colors.white,
-};
-
-const iconColor: Record<Variant, string> = {
-  primary: colors.white,
-  secondary: colors.primaryDark,
-  ghost: colors.primaryDark,
-  danger: colors.white,
-  light: colors.white,
-};
-
-const variantStyles = StyleSheet.create({
+const variantStyles = themedStyles((colors) => StyleSheet.create({
   primary: { backgroundColor: colors.primary },
   secondary: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
     borderWidth: 1.5,
     borderColor: colors.primary,
   },
   ghost: { backgroundColor: 'transparent' },
   danger: { backgroundColor: colors.danger },
   light: { backgroundColor: 'rgba(255,255,255,0.16)' },
-});
+}));
 
-const styles = StyleSheet.create({
+const styles = themedStyles((colors) => StyleSheet.create({
   base: {
     height: layout.buttonHeight,
     borderRadius: radius.md,
@@ -131,4 +120,4 @@ const styles = StyleSheet.create({
   smallLabel: { fontSize: 13 },
   disabled: { opacity: 0.5 },
   pressed: { transform: [{ scale: 0.985 }], opacity: 0.92 },
-});
+}));

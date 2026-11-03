@@ -1,3 +1,4 @@
+import { colors, radius, layout, themedStyles } from '@/constants/design';
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import {
@@ -6,7 +7,6 @@ import {
   View,
   type TextInputProps,
 } from 'react-native';
-import { colors, layout, radius } from '@/constants/design';
 import { AppText } from './AppText';
 import type { IconName } from './types';
 
@@ -90,7 +90,7 @@ export function TextField({
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles((colors) => StyleSheet.create({
   wrapper: { gap: 7 },
   labelRow: { flexDirection: 'row', alignItems: 'center' },
   label: { color: colors.textSecondary, fontWeight: '600' },
@@ -125,4 +125,4 @@ const styles = StyleSheet.create({
   multilineInput: { textAlignVertical: 'top', minHeight: 80, paddingTop: 0 },
   accessory: { marginLeft: 8 },
   helper: { marginLeft: 2 },
-});
+}));

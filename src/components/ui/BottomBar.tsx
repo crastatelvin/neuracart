@@ -1,7 +1,7 @@
+import { spacing, shadows, layout, themedStyles } from '@/constants/design';
 import type { ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors, layout, shadows, spacing } from '@/constants/design';
 
 export function BottomBar({
   children,
@@ -24,9 +24,9 @@ export function BottomBar({
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles((colors) => StyleSheet.create({
   bar: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
     borderTopWidth: 1,
     borderTopColor: colors.border,
     paddingHorizontal: layout.gutter,
@@ -37,4 +37,4 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     ...shadows.floating,
   },
-});
+}));

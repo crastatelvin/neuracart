@@ -1,3 +1,4 @@
+import { colors, radius, shadows, themedStyles } from '@/constants/design';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -17,7 +18,6 @@ import { Card } from '@/components/ui/Card';
 import { ScreenHeader } from '@/components/ui/Header';
 import { ErrorState } from '@/components/ui/States';
 import { StatusPill, StatusTimeline } from '@/components/OrderBits';
-import { colors, radius, shadows } from '@/constants/design';
 import { apiErrorMessage, apiRequest } from '@/lib/api';
 import { STATUS_META, formatAddress, formatDate, initials, isActiveOrder, relativeTime } from '@/lib/format';
 import type { Order } from '@/lib/types';
@@ -139,7 +139,7 @@ export default function TrackingScreen() {
   if (loading) {
     return (
       <View style={styles.fill}>
-        <StatusBar style="dark" />
+        <StatusBar style="auto" />
         <ScreenHeader title="Live tracking" onBack={() => router.back()} />
         <View style={styles.center}>
           <ActivityIndicator color={colors.primary} />
@@ -154,7 +154,7 @@ export default function TrackingScreen() {
   if (!order || error) {
     return (
       <View style={styles.fill}>
-        <StatusBar style="dark" />
+        <StatusBar style="auto" />
         <ScreenHeader title="Live tracking" onBack={() => router.back()} />
         <ErrorState
           title="Tracking is unavailable"
@@ -172,7 +172,7 @@ export default function TrackingScreen() {
 
   return (
     <View style={styles.fill}>
-      <StatusBar style="dark" />
+      <StatusBar style="auto" />
       <ScreenHeader
         title="Live tracking"
         subtitle={`#${order.orderNumber} · ${statusMeta.label}`}
@@ -469,7 +469,7 @@ function MapPin({
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles((colors) => StyleSheet.create({
   fill: { flex: 1, backgroundColor: colors.background },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 },
   content: { padding: 20, gap: 14, paddingBottom: 30 },
@@ -513,7 +513,7 @@ const styles = StyleSheet.create({
   liveDotRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   liveDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: colors.primary },
   mapCard: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
     borderRadius: radius.xl,
     borderWidth: 1,
     borderColor: colors.border,
@@ -590,7 +590,7 @@ const styles = StyleSheet.create({
   pinProminent: { width: 38, height: 38, borderRadius: 19 },
   pinLabel: {
     marginTop: 3,
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
     paddingHorizontal: 5,
     paddingVertical: 1,
     borderRadius: 5,
@@ -644,4 +644,4 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   helpNote: { flexDirection: 'row', alignItems: 'flex-start', gap: 7, paddingHorizontal: 2 },
-});
+}));

@@ -1,9 +1,9 @@
+import { colors, radius, shadows, themedStyles } from '@/constants/design';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { ProductCard } from '@/components/ProductCard';
 import { AppText } from '@/components/ui/AppText';
-import { colors, radius, shadows } from '@/constants/design';
 import { money } from '@/lib/format';
 import { cardToProduct, URGENCY_LABEL, URGENCY_TONE } from '@/lib/recs';
 import type { RecsHome, RecipeSummary } from '@/lib/types';
@@ -248,7 +248,7 @@ function ProductRail({
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles((colors) => StyleSheet.create({
   wrap: { gap: 18, marginBottom: 18 },
   block: { gap: 10 },
   headlineBanner: {
@@ -272,7 +272,7 @@ const styles = StyleSheet.create({
   chip: {
     width: 168,
     borderRadius: radius.md,
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
     borderWidth: 1,
     borderColor: colors.border,
     padding: 11,
@@ -312,7 +312,7 @@ const styles = StyleSheet.create({
   recipeCard: {
     width: 216,
     borderRadius: radius.lg,
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
     borderWidth: 1,
     borderColor: colors.border,
     padding: 11,
@@ -335,4 +335,4 @@ const styles = StyleSheet.create({
     paddingVertical: 7,
   },
   recipeCtaText: { color: colors.white, fontSize: 11.5, fontWeight: '800' },
-});
+}));

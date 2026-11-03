@@ -1,3 +1,4 @@
+import { colors, radius, themedStyles } from '@/constants/design';
 import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
 import * as Haptics from 'expo-haptics';
@@ -23,7 +24,6 @@ import { Card } from '@/components/ui/Card';
 import { ScreenHeader } from '@/components/ui/Header';
 import { ErrorState } from '@/components/ui/States';
 import { TextField } from '@/components/ui/TextField';
-import { colors, radius } from '@/constants/design';
 import { apiErrorMessage, apiRequest } from '@/lib/api';
 import { SUPPORT_EMAIL, SUPPORT_PHONE } from '@/lib/config';
 import {
@@ -200,7 +200,7 @@ export default function OrderDetailScreen() {
   if (loading) {
     return (
       <View style={styles.fill}>
-        <StatusBar style="dark" />
+        <StatusBar style="auto" />
         <ScreenHeader title="Order details" onBack={() => router.back()} />
         <View style={styles.loading}>
           <ActivityIndicator color={colors.primary} />
@@ -215,7 +215,7 @@ export default function OrderDetailScreen() {
   if (!order || error) {
     return (
       <View style={styles.fill}>
-        <StatusBar style="dark" />
+        <StatusBar style="auto" />
         <ScreenHeader title="Order details" onBack={() => router.back()} />
         <ErrorState
           title="We couldn’t load this order"
@@ -234,7 +234,7 @@ export default function OrderDetailScreen() {
 
   return (
     <View style={styles.fill}>
-      <StatusBar style="dark" />
+      <StatusBar style="auto" />
       <ScreenHeader
         title={`#${order.orderNumber}`}
         subtitle={formatDate(order.createdAt)}
@@ -632,7 +632,7 @@ function statusCopy(order: Order): string {
   }
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles((colors) => StyleSheet.create({
   fill: { flex: 1, backgroundColor: colors.background },
   loading: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 },
   content: { padding: 20, gap: 14, paddingBottom: 30 },
@@ -740,4 +740,4 @@ const styles = StyleSheet.create({
   cancelButton: { marginTop: 2 },
   footer: { textAlign: 'center', marginTop: 2 },
   sheetActions: { flexDirection: 'row', gap: 10 },
-});
+}));

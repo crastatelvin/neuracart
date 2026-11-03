@@ -1,3 +1,4 @@
+import { colors, radius, shadows, themedStyles } from '@/constants/design';
 import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 import { useFocusEffect, useRouter } from 'expo-router';
@@ -17,7 +18,6 @@ import { AppText } from '@/components/ui/AppText';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
-import { colors, radius, shadows } from '@/constants/design';
 import { apiPath, apiRequest, apiRequestPage } from '@/lib/api';
 import { SUPPORT_EMAIL } from '@/lib/config';
 import { firstName, initials } from '@/lib/format';
@@ -26,6 +26,7 @@ import type { Address, Order } from '@/lib/types';
 import { useAuthStore } from '@/store/auth';
 import { useLanguageStore } from '@/store/language';
 import { useToastStore } from '@/store/toast';
+import { useThemeStore } from '@/store/theme';
 
 type MenuRowProps = {
   icon: string;
@@ -42,6 +43,8 @@ export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const user = useAuthStore((state) => state.user);
   const language = useLanguageStore((state) => state.language);
+  const themeMode = useThemeStore((state) => state.mode);
+  const setThemeMode = useThemeStore((state) => state.setMode);
   const t = (key: string) => translate(language, key);
   const signOut = useAuthStore((state) => state.signOut);
   const showToast = useToastStore((state) => state.show);
@@ -113,7 +116,7 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.fill}>
-      <StatusBar style="dark" />
+      <StatusBar style="auto" />
       <ScrollView
         contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 28 }]}
         showsVerticalScrollIndicator={false}
@@ -247,6 +250,44 @@ export default function ProfileScreen() {
                 subtitle={t('profile.dietarySub')}
                 onPress={() => router.push('/dietary-preferences')}
               />
+              <View style={styles.menuRow}>
+                <View style={[styles.menuIcon, { backgroundColor: colors.primarySoft }]}>
+                  <Ionicons
+                    name={themeMode === 'dark' ? 'moon-outline' : 'sunny-outline'}
+                    size={19}
+                    color={colors.primaryDark}
+                  />
+                </View>
+                <View style={{ flex: 1, gap: 6 }}>
+                  <AppText variant="bodyMedium" style={{ fontWeight: '600' }}>
+                    {t('profile.appearance')}
+                  </AppText>
+                  <View style={styles.themeRow}>
+                    {(['light', 'dark', 'system'] as const).map((mode) => {
+                      const active = themeMode === mode;
+                      return (
+                        <Pressable
+                          key={mode}
+                          accessibilityRole="button"
+                          accessibilityState={{ selected: active }}
+                          onPress={() => setThemeMode(mode)}
+                          style={[styles.themeChip, active && styles.themeChipActive]}
+                        >
+                          <AppText
+                            variant="caption"
+                            style={{
+                              fontWeight: '600',
+                              color: active ? colors.white : colors.textSecondary,
+                            }}
+                          >
+                            {t(`theme.${mode}`)}
+                          </AppText>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                </View>
+              </View>
               <View style={styles.menuRow}>
                 <View style={[styles.menuIcon, { backgroundColor: colors.warningSoft }]}>
                   <Ionicons name="notifications-outline" size={19} color={colors.warning} />
@@ -420,7 +461,17 @@ function MenuRow({
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles((colors) => StyleSheet.create({
+  themeRow: { flexDirection: 'row', gap: 6 },
+  themeChip: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: radius.pill,
+    backgroundColor: colors.input,
+    borderWidth: 1,
+    borderColor: colors.borderStrong,
+  },
+  themeChipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
   fill: { flex: 1, backgroundColor: colors.background },
   content: {},
   header: {
@@ -497,7 +548,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     gap: 7,
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: radius.lg,
@@ -549,4 +600,4 @@ const styles = StyleSheet.create({
   menuTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 7 },
   signOut: { marginTop: 2 },
   footer: { textAlign: 'center', marginTop: 2 },
-});
+}));

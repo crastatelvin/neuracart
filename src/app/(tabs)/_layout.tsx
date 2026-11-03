@@ -1,7 +1,7 @@
+import { colors, fonts } from '@/constants/design';
 import { Ionicons } from '@expo/vector-icons';
 import { Redirect, Tabs } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors, fonts } from '@/constants/design';
 import { translate } from '@/lib/i18n';
 import { useLanguageStore } from '@/store/language';
 import { useAuthStore } from '@/store/auth';
@@ -37,7 +37,7 @@ export default function TabsLayout() {
           height: 68 + insets.bottom,
           paddingTop: 8,
           paddingBottom: Math.max(insets.bottom, 8),
-          backgroundColor: colors.white,
+          backgroundColor: colors.card,
           borderTopColor: colors.border,
           borderTopWidth: 1,
         },

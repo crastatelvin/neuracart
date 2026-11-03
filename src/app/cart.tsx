@@ -1,3 +1,4 @@
+import { colors, radius, themedStyles } from '@/constants/design';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
@@ -11,7 +12,6 @@ import { ScreenHeader } from '@/components/ui/Header';
 import { QuantityStepper } from '@/components/ui/QuantityStepper';
 import { EmptyState } from '@/components/ui/States';
 import { FreeDeliveryProgress, BillSummary } from '@/components/OrderBits';
-import { colors, radius } from '@/constants/design';
 import { money } from '@/lib/format';
 import {
   cartDeliveryFee,
@@ -54,7 +54,7 @@ export default function CartScreen() {
   if (items.length === 0) {
     return (
       <View style={styles.fill}>
-        <StatusBar style="dark" />
+        <StatusBar style="auto" />
         <ScreenHeader title="Your cart" onBack={() => router.back()} />
         <EmptyState
           icon="bag-handle-outline"
@@ -69,7 +69,7 @@ export default function CartScreen() {
 
   return (
     <View style={styles.fill}>
-      <StatusBar style="dark" />
+      <StatusBar style="auto" />
       <ScreenHeader
         title="Your cart"
         subtitle={`${count} ${count === 1 ? 'item' : 'items'} from ${store.name}`}
@@ -227,7 +227,7 @@ export default function CartScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles((colors) => StyleSheet.create({
   fill: { flex: 1, backgroundColor: colors.background },
   clearButton: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   content: { padding: 20, gap: 16, paddingBottom: 28 },
@@ -275,4 +275,4 @@ const styles = StyleSheet.create({
   },
   checkoutRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   checkoutButton: { flex: 1 },
-});
+}));

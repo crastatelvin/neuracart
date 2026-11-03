@@ -1,6 +1,6 @@
+import { colors, themedStyles } from '@/constants/design';
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, View } from 'react-native';
-import { colors } from '@/constants/design';
 import { AppText } from './AppText';
 
 export function BrandMark({
@@ -51,7 +51,7 @@ export function BrandMark({
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles((colors) => StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   mark: { alignItems: 'center', justifyContent: 'center' },
-});
+}));

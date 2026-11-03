@@ -1,3 +1,4 @@
+import { colors, radius, themedStyles } from '@/constants/design';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -15,7 +16,6 @@ import { AppText } from '@/components/ui/AppText';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { ScreenHeader } from '@/components/ui/Header';
-import { colors, radius } from '@/constants/design';
 import { apiErrorMessage, apiRequest } from '@/lib/api';
 import { money } from '@/lib/format';
 import type { Address } from '@/lib/types';
@@ -155,7 +155,7 @@ export default function SubscriptionsScreen() {
 
   return (
     <View style={styles.fill}>
-      <StatusBar style="dark" />
+      <StatusBar style="auto" />
       <ScreenHeader
         title="Subscriptions"
         subtitle="Repeat your regular basket"
@@ -379,7 +379,7 @@ export default function SubscriptionsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles((colors) => StyleSheet.create({
   fill: { flex: 1, backgroundColor: colors.background },
   content: { padding: 20, gap: 12, paddingBottom: 30 },
   center: { alignItems: 'center', gap: 9, paddingVertical: 24 },
@@ -390,7 +390,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     borderWidth: 1.5,
     borderColor: colors.border,
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
   },
   chipActive: { borderColor: colors.primary, backgroundColor: colors.primarySoft },
   addressRow: {
@@ -416,4 +416,4 @@ const styles = StyleSheet.create({
     paddingTop: 9,
   },
   subActions: { flexDirection: 'row', gap: 14 },
-});
+}));

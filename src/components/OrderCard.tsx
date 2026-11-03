@@ -1,7 +1,7 @@
+import { colors, radius, shadows, themedStyles } from '@/constants/design';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { colors, radius, shadows } from '@/constants/design';
 import { formatShortDate, money } from '@/lib/format';
 import type { Order } from '@/lib/types';
 import { AppText } from './ui/AppText';
@@ -90,9 +90,9 @@ export function OrderCard({ order, onPress }: { order: Order; onPress: () => voi
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles((colors) => StyleSheet.create({
   card: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
     borderRadius: radius.xl,
     borderWidth: 1,
     borderColor: colors.border,
@@ -135,4 +135,4 @@ const styles = StyleSheet.create({
     paddingTop: 10,
   },
   view: { flexDirection: 'row', alignItems: 'center', gap: 3 },
-});
+}));

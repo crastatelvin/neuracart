@@ -1,3 +1,4 @@
+import { spacing, themedStyles } from '@/constants/design';
 import type { ReactNode } from 'react';
 import {
   KeyboardAvoidingView,
@@ -8,7 +9,6 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors, spacing } from '@/constants/design';
 import { AppText } from './ui/AppText';
 import { IconButton } from './ui/Badge';
 
@@ -59,7 +59,7 @@ export function ModalSheet({
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles((colors) => StyleSheet.create({
   overlay: { flex: 1, justifyContent: 'flex-end' },
   backdrop: {
     position: 'absolute',
@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.overlay,
   },
   sheet: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
     borderTopLeftRadius: 26,
     borderTopRightRadius: 26,
     paddingHorizontal: spacing.xl,
@@ -87,4 +87,4 @@ const styles = StyleSheet.create({
   },
   header: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
   body: { gap: spacing.md },
-});
+}));

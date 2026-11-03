@@ -1,6 +1,6 @@
+import { colors, radius, themedStyles } from '@/constants/design';
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { colors, radius } from '@/constants/design';
 import { AppText } from './AppText';
 
 export function QuantityStepper({
@@ -58,7 +58,7 @@ export function QuantityStepper({
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles((colors) => StyleSheet.create({
   stepper: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -70,4 +70,4 @@ const styles = StyleSheet.create({
   stepperCompact: { padding: 2 },
   control: { alignItems: 'center', justifyContent: 'center', borderRadius: radius.pill },
   quantity: { textAlign: 'center', color: colors.primaryDeep },
-});
+}));

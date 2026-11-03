@@ -1,6 +1,6 @@
+import { colors, radius, themedStyles } from '@/constants/design';
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, View } from 'react-native';
-import { colors, radius } from '@/constants/design';
 import { ORDER_FLOW, STATUS_META, formatDate, money, statusProgress } from '@/lib/format';
 import type { Order, OrderStatus, OrderStatusHistory } from '@/lib/types';
 import { AppText } from './ui/AppText';
@@ -221,7 +221,7 @@ export function Divider() {
   return <View style={styles.divider} />;
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles((colors) => StyleSheet.create({
   pill: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 2,
     borderColor: colors.borderStrong,
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 1,
@@ -291,4 +291,4 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingTop: 2,
   },
-});
+}));

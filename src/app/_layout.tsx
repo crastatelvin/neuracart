@@ -1,3 +1,4 @@
+import { colors } from '@/constants/design';
 import '../global.css';
 
 import * as Linking from 'expo-linking';
@@ -8,7 +9,6 @@ import { useEffect } from 'react';
 import { Platform } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ToastHost } from '@/components/ui/ToastHost';
-import { colors } from '@/constants/design';
 import { apiRequest } from '@/lib/api';
 import { parseOAuthTokens } from '@/lib/oauth';
 import { registerForPush } from '@/lib/push';
@@ -17,6 +17,7 @@ import { useAuthStore } from '@/store/auth';
 import { useCartStore } from '@/store/cart';
 import { useConfigStore } from '@/store/config';
 import { applyServerLanguage, useLanguageStore } from '@/store/language';
+import { useResolvedScheme, useThemeHydrated } from '@/store/theme';
 
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
@@ -26,6 +27,8 @@ export default function RootLayout() {
   const loadStore = useConfigStore((state) => state.loadStore);
   const hydrateLanguage = useLanguageStore((state) => state.hydrate);
   const loadStoredAuth = useAuthStore((state) => state.loadStoredAuth);
+  useThemeHydrated();
+  const scheme = useResolvedScheme();
 
   useEffect(() => {
     void loadStore();
@@ -85,8 +88,9 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <StatusBar style="dark" />
+      <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       <Stack
+        key={scheme}
         screenOptions={{
           headerShown: false,
           contentStyle: { backgroundColor: colors.background },

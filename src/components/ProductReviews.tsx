@@ -1,8 +1,8 @@
+import { colors, radius, themedStyles } from '@/constants/design';
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/ui/AppText';
-import { colors, radius } from '@/constants/design';
 import { apiRequest } from '@/lib/api';
 import { formatDate } from '@/lib/format';
 import type { ProductReviewFeed } from '@/lib/types';
@@ -89,7 +89,7 @@ export function ProductReviews({ productId }: { productId: string }) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles((colors) => StyleSheet.create({
   block: {
     gap: 12,
     marginTop: 18,
@@ -109,4 +109,4 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   storeReplyLabel: { color: colors.primaryDark, fontWeight: '700' },
-});
+}));

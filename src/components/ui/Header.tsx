@@ -1,8 +1,8 @@
+import { colors, spacing, layout, themedStyles } from '@/constants/design';
 import { Ionicons } from '@expo/vector-icons';
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors, layout, spacing } from '@/constants/design';
 import { AppText } from './AppText';
 
 export function ScreenHeader({
@@ -107,7 +107,7 @@ export function SectionHeader({
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles((colors) => StyleSheet.create({
   header: {
     paddingHorizontal: layout.gutter,
     paddingBottom: spacing.md,
@@ -135,4 +135,4 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: spacing.md,
   },
-});
+}));

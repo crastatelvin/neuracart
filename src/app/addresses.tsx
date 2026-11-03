@@ -1,3 +1,4 @@
+import { colors, radius, themedStyles } from '@/constants/design';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -16,7 +17,6 @@ import { AppText } from '@/components/ui/AppText';
 import { IconButton } from '@/components/ui/Badge';
 import { ScreenHeader } from '@/components/ui/Header';
 import { EmptyState, ErrorState } from '@/components/ui/States';
-import { colors, radius } from '@/constants/design';
 import { apiErrorMessage, apiRequest } from '@/lib/api';
 import { MAX_ADDRESSES } from '@/lib/config';
 import type { Address } from '@/lib/types';
@@ -101,7 +101,7 @@ export default function AddressesScreen() {
 
   return (
     <View style={styles.fill}>
-      <StatusBar style="dark" />
+      <StatusBar style="auto" />
       <ScreenHeader
         title="Saved addresses"
         subtitle={
@@ -209,7 +209,7 @@ export default function AddressesScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles((colors) => StyleSheet.create({
   fill: { flex: 1, backgroundColor: colors.background },
   content: { padding: 20, gap: 14, flexGrow: 1 },
   center: { flex: 1, paddingVertical: 60, alignItems: 'center', justifyContent: 'center', gap: 12 },
@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: 7,
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
     borderRadius: radius.md,
     padding: 11,
     borderWidth: 1,
@@ -231,4 +231,4 @@ const styles = StyleSheet.create({
     gap: 6,
     paddingVertical: 14,
   },
-});
+}));

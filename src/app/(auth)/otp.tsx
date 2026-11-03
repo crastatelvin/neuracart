@@ -1,3 +1,4 @@
+import { colors, radius, shadows, themedStyles } from '@/constants/design';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -16,7 +17,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppText } from '@/components/ui/AppText';
 import { BrandMark } from '@/components/ui/BrandMark';
 import { Button } from '@/components/ui/Button';
-import { colors, radius, shadows } from '@/constants/design';
 import { apiErrorMessage } from '@/lib/api';
 import { useAuthStore } from '@/store/auth';
 import { useToastStore } from '@/store/toast';
@@ -129,7 +129,7 @@ export default function OtpScreen() {
       style={styles.fill}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <StatusBar style="dark" />
+      <StatusBar style="auto" />
       <ScrollView
         contentContainerStyle={[styles.scroll, { paddingTop: insets.top + 14 }]}
         keyboardShouldPersistTaps="handled"
@@ -252,14 +252,14 @@ export default function OtpScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles((colors) => StyleSheet.create({
   fill: { flex: 1, backgroundColor: colors.background },
   scroll: { flexGrow: 1, paddingHorizontal: 24, paddingBottom: 30, gap: 22 },
   back: {
     width: 42,
     height: 42,
     borderRadius: 14,
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
@@ -287,7 +287,7 @@ const styles = StyleSheet.create({
     maxWidth: 54,
     height: 62,
     borderRadius: 15,
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
     borderWidth: 1.5,
     borderColor: colors.borderStrong,
     textAlign: 'center',
@@ -327,4 +327,4 @@ const styles = StyleSheet.create({
     marginTop: 'auto',
   },
   expiry: { textAlign: 'center', lineHeight: 16 },
-});
+}));

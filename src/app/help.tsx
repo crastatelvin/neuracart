@@ -1,3 +1,4 @@
+import { colors, radius, shadows, themedStyles } from '@/constants/design';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
@@ -17,7 +18,6 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ScreenHeader } from '@/components/ui/Header';
 import { AppText } from '@/components/ui/AppText';
-import { colors, radius, shadows } from '@/constants/design';
 import { apiErrorMessage } from '@/lib/api';
 import { postAiSupport } from '@/lib/ai';
 import { translate } from '@/lib/i18n';
@@ -93,7 +93,7 @@ export default function HelpScreen() {
 
   return (
     <View style={styles.fill}>
-      <StatusBar style="dark" />
+      <StatusBar style="auto" />
       <View style={{ paddingTop: insets.top }}>
         <ScreenHeader
           title={t('help.title')}
@@ -209,7 +209,7 @@ export default function HelpScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles((colors) => StyleSheet.create({
   fill: { flex: 1, backgroundColor: colors.background },
   feed: { padding: 16, gap: 12, paddingBottom: 24 },
   intro: { gap: 12 },
@@ -276,4 +276,4 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-});
+}));
