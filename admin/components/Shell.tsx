@@ -53,6 +53,24 @@ export function Shell({ children }: { children: ReactNode }) {
   const [pendingCount, setPendingCount] = useState<number | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [togglingStore, setTogglingStore] = useState(false);
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+
+  useEffect(() => {
+    const current =
+      document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+    setTheme(current);
+  }, []);
+
+  const toggleTheme = () => {
+    const next = theme === 'dark' ? 'light' : 'dark';
+    setTheme(next);
+    document.documentElement.dataset.theme = next;
+    try {
+      localStorage.setItem('neuracart-theme', next);
+    } catch {
+      // Private mode: the choice lasts for this page only.
+    }
+  };
 
   useEffect(() => {
     const session = readSession();
@@ -256,6 +274,15 @@ export function Shell({ children }: { children: ReactNode }) {
             <p>{meta.subtitle}</p>
           </div>
           <div className="topbar-actions">
+            <button
+              className="icon-button"
+              onClick={toggleTheme}
+              aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              type="button"
+            >
+              <Icon name={theme === 'dark' ? 'sun' : 'moon'} size={16} />
+            </button>
             <Link href="/orders?status=pending" className="btn btn-sm btn-secondary">
               <Icon name="orders" size={14} />
               <span>
