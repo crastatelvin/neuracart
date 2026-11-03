@@ -137,7 +137,7 @@ export default function AiConsolePage() {
   };
 
   return (
-    <>
+    <main className="page">
       <PageHeader
         title="AI console"
         subtitle="Ask the data in plain words, dig into AI usage, and keep product embeddings fresh"
@@ -314,6 +314,6 @@ export default function AiConsolePage() {
           </div>
         </div>
       </div>
-    </>
+    </main>
   );
 }

@@ -33,5 +33,5 @@ export async function nextOrderNumber(
   const count = await tx.order.count({
     where: { createdAt: { gte: start, lt: end } },
   });
-  return `LM-${istDateKey(now)}-${String(count + 1).padStart(4, '0')}`;
+  return `NC-${istDateKey(now)}-${String(count + 1).padStart(4, '0')}`;
 }

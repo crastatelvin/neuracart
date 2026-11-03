@@ -297,7 +297,7 @@ const styles = themedStyles((colors) => StyleSheet.create({
     outlineWidth: 0,
     ...shadows.card,
   },
-  otpBoxFilled: { borderColor: colors.primary, backgroundColor: '#FCFFFD' },
+  otpBoxFilled: { borderColor: colors.primary, backgroundColor: colors.primarySoft },
   otpBoxError: { borderColor: colors.danger },
   errorBox: {
     flexDirection: 'row',

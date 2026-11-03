@@ -12,7 +12,7 @@ const booleanish = z.preprocess((value) => {
 
 export const productListQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
-  limit: z.coerce.number().int().min(1).max(50).default(20),
+  limit: z.coerce.number().int().min(1).max(200).default(20),
   category: category.optional(),
   featured: booleanish,
   search: z.string().trim().max(80).optional(),

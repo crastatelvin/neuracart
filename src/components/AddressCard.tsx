@@ -113,7 +113,7 @@ const styles = themedStyles((colors) => StyleSheet.create({
     padding: 14,
     gap: 10,
   },
-  selected: { borderColor: colors.primary, backgroundColor: '#FCFFFD' },
+  selected: { borderColor: colors.primary, backgroundColor: colors.primarySoft },
   top: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
   labelIcon: {
     width: 34,
