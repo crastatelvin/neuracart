@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="300" viewBox="0 0 1200 300" role="img" aria-label="NeuraCart AI loop: signal, context, guardrails, model or deterministic fallback, then action, all logged.">
+  <title>The NeuraCart AI loop</title>
+  <defs>
+    <linearGradient id="lbg" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#0B1220"/>
+      <stop offset="0.55" stop-color="#0A1A14"/>
+      <stop offset="1" stop-color="#0B1220"/>
+    </linearGradient>
+    <linearGradient id="hot" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#22C55E"/>
+      <stop offset="1" stop-color="#2DD4BF"/>
+    </linearGradient>
+    <style>
+      .t { font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif; }
+      .travel { animation: travel 7s linear infinite; }
+      .travel-2 { animation: travel 7s linear 2.3s infinite; }
+      .pulse { animation: pulse 3s ease-in-out infinite; }
+      @keyframes travel {
+        0% { transform: translateX(0); opacity: 0; }
+        8% { opacity: 1; }
+        92% { opacity: 1; }
+        100% { transform: translateX(716px); opacity: 0; }
+      }
+      @keyframes pulse { 0%, 100% { opacity: 0.35; } 50% { opacity: 0.9; } }
+      @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+    </style>
+  </defs>
+
+  <rect width="1200" height="300" rx="24" fill="url(#lbg)"/>
+  <rect x="0.5" y="0.5" width="1199" height="299" rx="24" fill="none" stroke="#22C55E" stroke-opacity="0.14"/>
+
+  <g class="t">
+    <text x="40" y="44" font-size="15" font-weight="800" fill="#F8FAFC">The AI loop</text>
+    <text x="142" y="44" font-size="11.5" fill="#64748B">one pipeline, five stages, zero hard dependency on a model</text>
+  </g>
+
+  <!-- connector rail -->
+  <path d="M236 134h716" stroke="#1E293B" stroke-width="2"/>
+  <g class="travel"><circle cx="236" cy="134" r="4" fill="#4ADE80"/></g>
+  <g class="travel-2"><circle cx="236" cy="134" r="3" fill="#2DD4BF" opacity="0.7"/></g>
+
+  <g class="t">
+    <!-- 1 -->
+    <rect x="40" y="80" width="196" height="108" rx="16" fill="#0F1B2E" stroke="#1E293B"/>
+    <circle cx="66" cy="106" r="11" fill="#052E1B"/>
+    <text x="62" y="110" font-size="10" font-weight="800" fill="#4ADE80">1</text>
+    <text x="86" y="111" font-size="14" font-weight="700" fill="#F1F5F9">Signal</text>
+    <text x="60" y="136" font-size="10.5" fill="#94A3B8">order placed</text>
+    <text x="60" y="152" font-size="10.5" fill="#94A3B8">stock low · rain · chat</text>
+    <text x="60" y="172" font-size="10" fill="#64748B">event or user prompt</text>
+
+    <!-- 2 -->
+    <rect x="268" y="80" width="196" height="108" rx="16" fill="#0F1B2E" stroke="#1E293B"/>
+    <circle cx="294" cy="106" r="11" fill="#052E1B"/>
+    <text x="290" y="110" font-size="10" font-weight="800" fill="#4ADE80">2</text>
+    <text x="314" y="111" font-size="14" font-weight="700" fill="#F1F5F9">Context</text>
+    <text x="288" y="136" font-size="10.5" fill="#94A3B8">catalogue · prices</text>
+    <text x="288" y="152" font-size="10.5" fill="#94A3B8">store rules · history</text>
+    <text x="288" y="172" font-size="10" fill="#64748B">bounded, typed input</text>
+
+    <!-- 3 -->
+    <rect x="496" y="80" width="196" height="108" rx="16" fill="#0F1B2E" stroke="#1E293B"/>
+    <circle cx="522" cy="106" r="11" fill="#052E1B"/>
+    <text x="518" y="110" font-size="10" font-weight="800" fill="#4ADE80">3</text>
+    <text x="542" y="111" font-size="14" font-weight="700" fill="#F1F5F9">Guardrails</text>
+    <text x="516" y="136" font-size="10.5" fill="#94A3B8">token bucket · budget</text>
+    <text x="516" y="152" font-size="10.5" fill="#94A3B8">read-only SQL · 50 rows</text>
+    <text x="516" y="172" font-size="10" fill="#64748B">fail closed, not open</text>
+
+    <!-- 4 -->
+    <rect x="724" y="80" width="196" height="108" rx="16" fill="#07170F" stroke="#22C55E" stroke-opacity="0.55"/>
+    <circle class="pulse" cx="750" cy="106" r="11" fill="#16A34A"/>
+    <text x="746" y="110" font-size="10" font-weight="800" fill="#ECFDF5">4</text>
+    <text x="770" y="111" font-size="14" font-weight="700" fill="#F8FAFC">Model</text>
+    <text x="744" y="136" font-size="10.5" fill="#A7F3D0">Gemini 3.8 Flash</text>
+    <text x="744" y="152" font-size="10.5" fill="#6EE7B7">or deterministic fallback</text>
+    <text x="744" y="172" font-size="10" fill="#64748B">same contract either way</text>
+
+    <!-- 5 -->
+    <rect x="952" y="80" width="196" height="108" rx="16" fill="#0F1B2E" stroke="#1E293B"/>
+    <circle cx="978" cy="106" r="11" fill="#052E1B"/>
+    <text x="974" y="110" font-size="10" font-weight="800" fill="#4ADE80">5</text>
+    <text x="998" y="111" font-size="14" font-weight="700" fill="#F1F5F9">Action</text>
+    <text x="972" y="136" font-size="10.5" fill="#94A3B8">answer · substitute</text>
+    <text x="972" y="152" font-size="10.5" fill="#94A3B8">forecast · route · draft</text>
+    <text x="972" y="172" font-size="10" fill="#64748B">typed result + audit log</text>
+  </g>
+
+  <g class="t">
+    <rect x="40" y="218" width="1108" height="46" rx="12" fill="#0C1A2B" stroke="#1E293B"/>
+    <text x="60" y="246" font-size="11" fill="#94A3B8">Every call is logged with latency and outcome · 429 backoff · circuit breaker · the app stays fully usable with no API key.</text>
+    <rect x="1006" y="228" width="122" height="26" rx="13" fill="#052E1B" stroke="#22C55E" stroke-opacity="0.35"/>
+    <text x="1022" y="245" font-size="10.5" font-weight="700" fill="#4ADE80">AI-native by design</text>
+  </g>
+</svg>

@@ -142,3 +142,22 @@ flowchart TB
 | Orange | Delivery App |
 | Red | Middleware |
 | Blue | API modules |
+## Theming
+
+Both Expo apps share one theming contract:
+
+```text
+store/theme.ts  (mode: light | dark | system, persisted)
+      │
+      ├── useResolvedScheme() → setActiveScheme('light' | 'dark')
+      │
+      └── constants/design.ts
+            ├── colors          (Proxy → active palette)
+            └── themedStyles()  (Proxy → lazily built StyleSheet per scheme)
+```
+
+Screens keep writing `styles.card` and `colors.text`; the proxies resolve against the active scheme at render time. The root layout keys the navigator by scheme so every mounted screen repaints on change. The admin panel uses the same idea with CSS variables and a `data-theme` attribute.
+
+## i18n
+
+`src/lib/i18n.ts` holds EN / KN / HI catalogues; `scripts/check-i18n.ts` enforces key parity. The language store persists the choice and applies the server preference on login. Coverage is intentionally limited to tabs, home, profile, and help; everything else falls back to English.

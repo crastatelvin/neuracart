@@ -1,0 +1,181 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="640" viewBox="0 0 1200 640" role="img" aria-label="NeuraCart system architecture: customer, admin and rider apps call one Express API, which talks to PostgreSQL, the AI layer and integrations.">
+  <title>NeuraCart system architecture</title>
+  <defs>
+    <linearGradient id="abg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0B1220"/>
+      <stop offset="1" stop-color="#0A1A14"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#22C55E"/>
+      <stop offset="1" stop-color="#2DD4BF"/>
+    </linearGradient>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 10 5 0 10Z" fill="#4ADE80"/>
+    </marker>
+    <marker id="arrowMuted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 10 5 0 10Z" fill="#475569"/>
+    </marker>
+    <style>
+      .t { font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif; }
+      .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    </style>
+  </defs>
+
+  <rect width="1200" height="640" rx="24" fill="url(#abg)"/>
+  <rect x="0.5" y="0.5" width="1199" height="639" rx="24" fill="none" stroke="#22C55E" stroke-opacity="0.14"/>
+
+  <g class="t">
+    <text x="48" y="58" font-size="25" font-weight="800" fill="#F8FAFC">NeuraCart · system architecture</text>
+    <text x="48" y="82" font-size="13" fill="#94A3B8">Three apps, one typed API, AI at the edges — with deterministic fallbacks when the model is unavailable.</text>
+  </g>
+
+  <!-- clients -->
+  <g class="t">
+    <!-- customer -->
+    <rect x="48" y="108" width="336" height="86" rx="16" fill="#0F1B2E" stroke="#1E293B"/>
+    <circle cx="82" cy="140" r="15" fill="#052E1B"/>
+    <path d="M76 140h12M82 134v12" stroke="#4ADE80" stroke-width="2" stroke-linecap="round"/>
+    <text x="108" y="136" font-size="15" font-weight="700" fill="#F1F5F9">Customer app</text>
+    <text x="108" y="156" font-size="11.5" fill="#94A3B8">Expo Router · 20 routes · EN/KN/HI</text>
+    <rect x="108" y="166" width="86" height="20" rx="10" fill="#052E1B"/>
+    <text x="118" y="180" font-size="10" fill="#4ADE80">iOS · Android · web</text>
+
+    <!-- admin -->
+    <rect x="408" y="108" width="336" height="86" rx="16" fill="#0F1B2E" stroke="#1E293B"/>
+    <circle cx="442" cy="140" r="15" fill="#0C2318"/>
+    <path d="M436 146v-8l6-4 6 4v8" stroke="#4ADE80" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <text x="468" y="136" font-size="15" font-weight="700" fill="#F1F5F9">Store manager</text>
+    <text x="468" y="156" font-size="11.5" fill="#94A3B8">Next.js 15 · 13 pages · live queue</text>
+    <rect x="468" y="166" width="74" height="20" rx="10" fill="#052E1B"/>
+    <text x="478" y="180" font-size="10" fill="#4ADE80">dark · light</text>
+
+    <!-- rider -->
+    <rect x="768" y="108" width="336" height="86" rx="16" fill="#0F1B2E" stroke="#1E293B"/>
+    <circle cx="802" cy="140" r="15" fill="#052E1B"/>
+    <path d="M795 143h14l-3-9h-8l-3 9Zm2-4h10" stroke="#4ADE80" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <text x="828" y="136" font-size="15" font-weight="700" fill="#F1F5F9">Rider app</text>
+    <text x="828" y="156" font-size="11.5" fill="#94A3B8">Expo · GPS · batches · proof of delivery</text>
+    <rect x="828" y="166" width="92" height="20" rx="10" fill="#052E1B"/>
+    <text x="838" y="180" font-size="10" fill="#4ADE80">foreground GPS</text>
+  </g>
+
+  <!-- arrows clients -> api -->
+  <g stroke="#4ADE80" stroke-width="2" marker-end="url(#arrow)" fill="none">
+    <path d="M216 198v42"/>
+    <path d="M576 198v42"/>
+    <path d="M936 198v42"/>
+  </g>
+  <g class="mono" fill="#64748B" font-size="10">
+    <text x="224" y="224">HTTPS / JSON</text>
+    <text x="584" y="224">JWT + refresh</text>
+    <text x="944" y="224">HTTPS / JSON</text>
+  </g>
+
+  <!-- API -->
+  <g class="t">
+    <rect x="48" y="248" width="744" height="150" rx="18" fill="#0C1A2B" stroke="#22C55E" stroke-opacity="0.35"/>
+    <text x="72" y="278" font-size="16" font-weight="800" fill="#F8FAFC">Express 5 API</text>
+    <text x="72" y="298" font-size="11.5" fill="#94A3B8">route → middleware → controller → service → repository → Prisma</text>
+
+    <g font-size="11" font-weight="600">
+      <rect x="72" y="316" width="84" height="28" rx="8" fill="#052E1B" stroke="#22C55E" stroke-opacity="0.3"/>
+      <text x="88" y="335" fill="#86EFAC">routes</text>
+      <rect x="166" y="316" width="106" height="28" rx="8" fill="#052E1B" stroke="#22C55E" stroke-opacity="0.3"/>
+      <text x="180" y="335" fill="#86EFAC">middleware</text>
+      <rect x="282" y="316" width="112" height="28" rx="8" fill="#052E1B" stroke="#22C55E" stroke-opacity="0.3"/>
+      <text x="296" y="335" fill="#86EFAC">controllers</text>
+      <rect x="404" y="316" width="98" height="28" rx="8" fill="#052E1B" stroke="#22C55E" stroke-opacity="0.3"/>
+      <text x="420" y="335" fill="#86EFAC">services</text>
+      <rect x="512" y="316" width="122" height="28" rx="8" fill="#052E1B" stroke="#22C55E" stroke-opacity="0.3"/>
+      <text x="528" y="335" fill="#86EFAC">repositories</text>
+      <rect x="644" y="316" width="76" height="28" rx="8" fill="#052E1B" stroke="#22C55E" stroke-opacity="0.3"/>
+      <text x="660" y="335" fill="#86EFAC">Prisma</text>
+    </g>
+
+    <text x="72" y="372" font-size="11" fill="#64748B">Zod validation · rate limits · refresh-token rotation · idempotent webhooks · request IDs</text>
+  </g>
+
+  <!-- API <-> AI -->
+  <g stroke="#4ADE80" stroke-width="2" marker-start="url(#arrow)" marker-end="url(#arrow)" fill="none">
+    <path d="M792 322h24"/>
+  </g>
+
+  <!-- AI -->
+  <g class="t">
+    <rect x="816" y="248" width="336" height="150" rx="18" fill="#07170F" stroke="#22C55E" stroke-opacity="0.45"/>
+    <circle cx="846" cy="278" r="5" fill="#4ADE80"/>
+    <text x="860" y="283" font-size="16" font-weight="800" fill="#F8FAFC">AI layer</text>
+    <text x="840" y="306" font-size="11.5" fill="#A7F3D0">Gemini 3.8 Flash · embeddings</text>
+    <text x="840" y="324" font-size="11.5" fill="#6EE7B7">deterministic fallback per feature</text>
+
+    <g font-size="10.5" font-weight="600">
+      <rect x="840" y="338" width="84" height="24" rx="7" fill="#052E1B" stroke="#22C55E" stroke-opacity="0.3"/>
+      <text x="852" y="354" fill="#86EFAC">token bucket</text>
+      <rect x="932" y="338" width="98" height="24" rx="7" fill="#052E1B" stroke="#22C55E" stroke-opacity="0.3"/>
+      <text x="944" y="354" fill="#86EFAC">circuit breaker</text>
+      <rect x="1038" y="338" width="88" height="24" rx="7" fill="#052E1B" stroke="#22C55E" stroke-opacity="0.3"/>
+      <text x="1052" y="354" fill="#86EFAC">audit log</text>
+    </g>
+    <text x="840" y="384" font-size="10.5" fill="#64748B">429 backoff · read-only SQL · 50-row cap</text>
+  </g>
+
+  <!-- arrows api -> data -->
+  <g stroke="#4ADE80" stroke-width="2" marker-end="url(#arrow)" fill="none">
+    <path d="M216 398v40"/>
+  </g>
+  <g stroke="#475569" stroke-width="2" stroke-dasharray="5 5" marker-end="url(#arrowMuted)" fill="none">
+    <path d="M576 398v40"/>
+    <path d="M936 398v40"/>
+  </g>
+  <g class="mono" fill="#64748B" font-size="10">
+    <text x="224" y="424">Prisma</text>
+    <text x="584" y="424">webhooks · jobs</text>
+    <text x="944" y="424">sharp</text>
+  </g>
+
+  <!-- data row -->
+  <g class="t">
+    <rect x="48" y="440" width="336" height="118" rx="16" fill="#0F1B2E" stroke="#1E293B"/>
+    <text x="72" y="472" font-size="14" font-weight="700" fill="#F1F5F9">PostgreSQL 16</text>
+    <text x="72" y="492" font-size="11.5" fill="#94A3B8">Prisma 5.22 · 11 tables · camelCase columns</text>
+    <text x="72" y="512" font-size="11.5" fill="#94A3B8">transactional order placement · stock guards</text>
+    <rect x="72" y="526" width="126" height="20" rx="10" fill="#052E1B"/>
+    <text x="82" y="540" font-size="10" fill="#4ADE80">single source of truth</text>
+
+    <rect x="408" y="440" width="336" height="118" rx="16" fill="#0F1B2E" stroke="#1E293B"/>
+    <text x="432" y="472" font-size="14" font-weight="700" fill="#F1F5F9">Integrations</text>
+    <g font-size="10.5" fill="#CBD5E1">
+      <rect x="432" y="486" width="72" height="22" rx="7" fill="#111A2B" stroke="#243044"/>
+      <text x="444" y="501">Resend</text>
+      <rect x="512" y="486" width="92" height="22" rx="7" fill="#111A2B" stroke="#243044"/>
+      <text x="524" y="501">WhatsApp</text>
+      <rect x="612" y="486" width="80" height="22" rx="7" fill="#111A2B" stroke="#243044"/>
+      <text x="624" y="501">Razorpay</text>
+      <rect x="700" y="486" width="20" height="22" rx="7" fill="#111A2B" stroke="#243044"/>
+      <text x="706" y="501">…</text>
+      <rect x="432" y="516" width="88" height="22" rx="7" fill="#111A2B" stroke="#243044"/>
+      <text x="444" y="531">FCM push</text>
+      <rect x="528" y="516" width="120" height="22" rx="7" fill="#111A2B" stroke="#243044"/>
+      <text x="540" y="531">Google OAuth</text>
+      <rect x="656" y="516" width="64" height="22" rx="7" fill="#111A2B" stroke="#243044"/>
+      <text x="668" y="531">weather</text>
+    </g>
+    <text x="432" y="550" font-size="10.5" fill="#64748B">every integration degrades to a local fallback</text>
+
+    <rect x="768" y="440" width="336" height="118" rx="16" fill="#0F1B2E" stroke="#1E293B"/>
+    <text x="792" y="472" font-size="14" font-weight="700" fill="#F1F5F9">Media</text>
+    <text x="792" y="492" font-size="11.5" fill="#94A3B8">local disk in dev · /uploads served by the API</text>
+    <text x="792" y="512" font-size="11.5" fill="#94A3B8">sharp resize · 5 MB cap · MIME allow-list</text>
+    <rect x="792" y="526" width="112" height="20" rx="10" fill="#052E1B"/>
+    <text x="802" y="540" font-size="10" fill="#4ADE80">swap for S3 in prod</text>
+  </g>
+
+  <!-- legend -->
+  <g class="t" font-size="10.5" fill="#64748B">
+    <path d="M48 594h30" stroke="#4ADE80" stroke-width="2" marker-end="url(#arrow)"/>
+    <text x="86" y="598">request path</text>
+    <path d="M190 594h30" stroke="#475569" stroke-width="2" stroke-dasharray="5 5" marker-end="url(#arrowMuted)"/>
+    <text x="228" y="598">async / optional</text>
+    <text x="1020" y="598">v2 · 2026</text>
+  </g>
+</svg>

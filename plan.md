@@ -3557,3 +3557,33 @@ Every phase ships with: `backend: npm run typecheck + build`, customer/admin/del
 
 *End of plan — NeuraCart v2 scope.*
 
+
+---
+
+## 27. v2.1 — showcase pass (November 2026)
+
+### 27.1 Identity
+- Product, packages, scheme, emails, storage keys, database, and seed data are **NeuraCart**.
+- Seed people use international names (manager `Daniel Okafor`, customer `Amelia Novak`, riders `Marcus Lindqvist`, `Diego Fernández`, `Yuki Tanaka`, …). Demo emails stay `@neuracart.app`.
+- New order numbers use the `NC-` prefix; historical `LM-` rows were migrated in place.
+
+### 27.2 Theming (whole project)
+- Admin: CSS variables + `[data-theme='dark']` overrides, pre-paint script, persistent top-bar toggle.
+- Customer and rider apps: one palette proxy in `constants/design.ts` (`lightColors` / `darkColors` / `activeScheme`) plus `themedStyles(factory)`. Module-level `StyleSheet.create` keeps working; each sheet is built lazily per scheme.
+- Mode is `light | dark | system`, persisted in `AsyncStorage` under `neuracart.theme`, with a three-chip control in each profile screen.
+- Status bar, tab bar, cards, inputs, badges, and illustrations all resolve through the palette.
+
+### 27.3 Google sign-in
+- `GET /auth/google/status` reports configuration; `GET /auth/google` starts the consent flow; `GET /auth/google/callback` exchanges the code, links or creates a customer, and redirects with one-time tokens.
+- OAuth state lives in an in-process TTL map (10 min) — acceptable for one API instance; move to Redis when scaling out.
+- Without `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`, the button is disabled with an inline hint and the API returns `503 GOOGLE_NOT_CONFIGURED`.
+
+### 27.4 i18n scope (explicit)
+- Translated today: tab bar, home, profile, help. Kannada and Hindi catalogues have key parity with English.
+- All other screens fall back to English. `npm run test:i18n` fails on key drift.
+
+### 27.5 AI showcase
+- README positions NeuraCart as an AI-native product: one loop (signal → context → guardrails → model/fallback → action), with a table of every AI feature and its deterministic fallback.
+- Animated SVG assets live in `docs/assets/`; screenshots in `docs/evidence/`.
+
+*End of plan — NeuraCart v2.1.*
