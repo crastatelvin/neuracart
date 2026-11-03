@@ -18,6 +18,8 @@ import { AppText } from '@/components/ui/AppText';
 import { colors, radius, shadows } from '@/constants/design';
 import { apiErrorMessage, apiRequest } from '@/lib/api';
 import { useToastStore } from '@/store/toast';
+import { useLanguageStore } from '@/store/language';
+import { LANGUAGES } from '@/lib/i18n';
 
 type Prefs = {
   dietTags: string[];
@@ -36,16 +38,11 @@ const DIET_OPTIONS: { tag: string; label: string; icon: string }[] = [
   { tag: 'JAIN', label: 'Jain friendly', icon: 'sparkles-outline' },
 ];
 
-const LANGUAGES: { code: string; label: string }[] = [
-  { code: 'en', label: 'English' },
-  { code: 'kn', label: 'ಕನ್ನಡ' },
-  { code: 'hi', label: 'हिन्दी' },
-];
-
 export default function DietaryPreferencesScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const showToast = useToastStore((state) => state.show);
+  const setLanguage = useLanguageStore((state) => state.setLanguage);
   const [prefs, setPrefs] = useState<Prefs | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -233,6 +230,7 @@ export default function DietaryPreferencesScreen() {
                         onPress={() => {
                           void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                           setPrefs({ ...prefs, language: language.code });
+                          setLanguage(language.code);
                         }}
                         style={({ pressed }) => [
                           styles.chip,

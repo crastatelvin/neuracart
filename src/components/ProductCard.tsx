@@ -31,7 +31,7 @@ export function ProductCard({
   const lowStock = !outOfStock && product.stock <= 5;
   return (
     <Pressable
-      accessibilityRole="button"
+      accessibilityRole="link"
       accessibilityLabel={`${product.name}, ${money(product.price)} per ${product.unit}`}
       onPress={onPress}
       style={({ pressed }) => [

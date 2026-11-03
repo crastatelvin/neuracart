@@ -20,15 +20,12 @@ import { AppText } from '@/components/ui/AppText';
 import { colors, radius, shadows } from '@/constants/design';
 import { apiErrorMessage } from '@/lib/api';
 import { postAiSupport } from '@/lib/ai';
+import { translate } from '@/lib/i18n';
+import { useLanguageStore } from '@/store/language';
 
 const SUPPORT_EMAIL = 'support@localmart.app';
 
-const STARTERS = [
-  'Where is my order?',
-  'How do refunds work?',
-  'Can I change my delivery slot?',
-  'How do I use my wallet?',
-];
+const STARTERS = ['help.starter1', 'help.starter2', 'help.starter3', 'help.starter4'];
 
 type Turn = {
   id: string;
@@ -40,6 +37,9 @@ type Turn = {
 export default function HelpScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const language = useLanguageStore((state) => state.language);
+  const t = (key: string, vars?: Record<string, string | number>) =>
+    translate(language, key, vars);
   const [turns, setTurns] = useState<Turn[]>([]);
   const [draft, setDraft] = useState('');
   const [sending, setSending] = useState(false);
@@ -82,7 +82,7 @@ export default function HelpScreen() {
           role: 'assistant',
           content:
             apiErrorMessage(caught) ||
-            `I could not reach support just now. Email ${SUPPORT_EMAIL} and we will help.`,
+            t('help.fallback', { email: SUPPORT_EMAIL }),
           articleSlugs: [],
         },
       ]);
@@ -96,8 +96,8 @@ export default function HelpScreen() {
       <StatusBar style="dark" />
       <View style={{ paddingTop: insets.top }}>
         <ScreenHeader
-          title="Help & support"
-          subtitle="Answers from our help centre"
+          title={t('help.title')}
+          subtitle={t('help.subtitle')}
           onBack={() => router.back()}
         />
       </View>
@@ -115,19 +115,18 @@ export default function HelpScreen() {
             <View style={[styles.bubbleAssistant, styles.intro]}>
               <Ionicons name="headset-outline" size={18} color={colors.primaryDark} />
               <AppText variant="body" tone="muted">
-                Ask about orders, refunds, slots or payments. If the help centre cannot
-                answer, email us and a human will pick it up.
+                {t('help.intro')}
               </AppText>
               <View style={styles.suggestionRow}>
                 {STARTERS.map((starter) => (
                   <Pressable
                     key={starter}
                     accessibilityRole="button"
-                    accessibilityLabel={`Ask: ${starter}`}
-                    onPress={() => void send(starter)}
+                    accessibilityLabel={`Ask: ${t(starter)}`}
+                    onPress={() => void send(t(starter))}
                     style={({ pressed }) => [styles.suggestion, pressed && { opacity: 0.85 }]}
                   >
-                    <AppText style={styles.suggestionText}>{starter}</AppText>
+                    <AppText style={styles.suggestionText}>{t(starter)}</AppText>
                   </Pressable>
                 ))}
               </View>
@@ -160,7 +159,7 @@ export default function HelpScreen() {
                 </AppText>
                 {turn.articleSlugs.length > 0 ? (
                   <AppText variant="caption" tone="muted" style={{ marginTop: 6 }}>
-                    Related: {turn.articleSlugs.join(', ')}
+                    {t('help.related', { slugs: turn.articleSlugs.join(', ') })}
                   </AppText>
                 ) : null}
               </View>
@@ -172,7 +171,7 @@ export default function HelpScreen() {
               <View style={[styles.bubbleAssistant, styles.typing]}>
                 <ActivityIndicator size="small" color={colors.primaryDark} />
                 <AppText variant="caption" tone="muted">
-                  Checking the help centre…
+                  {t('help.checking')}
                 </AppText>
               </View>
             </View>
@@ -183,7 +182,7 @@ export default function HelpScreen() {
           <TextInput
             value={draft}
             onChangeText={setDraft}
-            placeholder="Describe what went wrong"
+            placeholder={t('help.placeholder')}
             placeholderTextColor={colors.subtle}
             style={styles.input}
             accessibilityLabel="Message support"

@@ -21,8 +21,10 @@ import { colors, radius, shadows } from '@/constants/design';
 import { apiPath, apiRequest, apiRequestPage } from '@/lib/api';
 import { SUPPORT_EMAIL } from '@/lib/config';
 import { firstName, initials } from '@/lib/format';
+import { translate } from '@/lib/i18n';
 import type { Address, Order } from '@/lib/types';
 import { useAuthStore } from '@/store/auth';
+import { useLanguageStore } from '@/store/language';
 import { useToastStore } from '@/store/toast';
 
 type MenuRowProps = {
@@ -39,6 +41,8 @@ export default function ProfileScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const user = useAuthStore((state) => state.user);
+  const language = useLanguageStore((state) => state.language);
+  const t = (key: string) => translate(language, key);
   const signOut = useAuthStore((state) => state.signOut);
   const showToast = useToastStore((state) => state.show);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -116,9 +120,9 @@ export default function ProfileScreen() {
       >
         <View style={[styles.header, { paddingTop: insets.top + 14 }]}>
           <View style={{ flex: 1, gap: 3 }}>
-            <AppText variant="title">Profile</AppText>
+            <AppText variant="title">{t('tabs.profile')}</AppText>
             <AppText variant="body" tone="muted">
-              Your LocalMart corner
+              {t('profile.corner')}
             </AppText>
           </View>
           <View style={styles.headerMark}>
@@ -150,7 +154,7 @@ export default function ProfileScreen() {
                 <View style={styles.memberPill}>
                   <Ionicons name="sparkles" size={10} color="#FDE68A" />
                   <AppText variant="caption" style={{ color: '#FEF3C7', fontWeight: '700' }}>
-                    Neighbourhood member
+                    {t('profile.member')}
                   </AppText>
                 </View>
               </View>
@@ -165,67 +169,67 @@ export default function ProfileScreen() {
             </View>
 
             <View style={styles.stats}>
-              <Stat label="Orders" value={String(totalOrders)} />
+              <Stat label={t('profile.statOrders')} value={String(totalOrders)} />
               <View style={styles.statDivider} />
-              <Stat label="Delivered" value={String(delivered)} />
+              <Stat label={t('profile.statDelivered')} value={String(delivered)} />
               <View style={styles.statDivider} />
-              <Stat label="In progress" value={String(active)} />
+              <Stat label={t('profile.statActive')} value={String(active)} />
             </View>
           </LinearGradient>
 
           <View style={styles.quickRow}>
             <QuickAction
               icon="receipt-outline"
-              label="My orders"
+              label={t('profile.quickOrders')}
               onPress={() => router.push('/(tabs)/orders')}
             />
             <QuickAction
               icon="location-outline"
-              label="Addresses"
+              label={t('profile.quickAddresses')}
               badge={addressCount ? String(addressCount) : undefined}
               onPress={() => router.push('/addresses')}
             />
             <QuickAction
               icon="headset-outline"
-              label="Support"
+              label={t('profile.quickSupport')}
               onPress={() => router.push('/help')}
             />
           </View>
 
           <View style={styles.section}>
             <AppText variant="meta" tone="muted" style={styles.sectionLabel}>
-              ACCOUNT
+              {t('profile.account')}
             </AppText>
             <Card padded={false} style={styles.menuCard}>
               <MenuRow
                 icon="person-outline"
-                title="Edit profile"
-                subtitle="Name and phone number"
+                title={t('profile.editProfile')}
+                subtitle={t('profile.editProfileSub')}
                 onPress={() => router.push('/edit-profile')}
               />
               <MenuRow
                 icon="location-outline"
-                title="Saved addresses"
-                subtitle="Home, work, and more"
+                title={t('profile.savedAddresses')}
+                subtitle={t('profile.savedAddressesSub')}
                 rightText={addressCount ? `${addressCount}/10` : undefined}
                 onPress={() => router.push('/addresses')}
               />
               <MenuRow
                 icon="wallet-outline"
-                title="Wallet & rewards"
-                subtitle="Balance, loyalty points, and referrals"
+                title={t('profile.wallet')}
+                subtitle={t('profile.walletSub')}
                 onPress={() => router.push('/wallet')}
               />
               <MenuRow
                 icon="repeat-outline"
-                title="Subscriptions"
-                subtitle="Repeat your regular basket"
+                title={t('profile.subscriptions')}
+                subtitle={t('profile.subscriptionsSub')}
                 onPress={() => router.push('/subscriptions')}
               />
               <MenuRow
                 icon="receipt-outline"
-                title="Order history"
-                subtitle="Past and active deliveries"
+                title={t('profile.orderHistory')}
+                subtitle={t('profile.orderHistorySub')}
                 onPress={() => router.push('/(tabs)/orders')}
                 last
               />
@@ -234,13 +238,13 @@ export default function ProfileScreen() {
 
           <View style={styles.section}>
             <AppText variant="meta" tone="muted" style={styles.sectionLabel}>
-              PREFERENCES
+              {t('profile.preferences')}
             </AppText>
             <Card padded={false} style={styles.menuCard}>
               <MenuRow
                 icon="restaurant-outline"
-                title="Dietary preferences"
-                subtitle="Diet needs, language, and household size"
+                title={t('profile.dietary')}
+                subtitle={t('profile.dietarySub')}
                 onPress={() => router.push('/dietary-preferences')}
               />
               <View style={styles.menuRow}>
@@ -250,12 +254,12 @@ export default function ProfileScreen() {
                 <View style={{ flex: 1, gap: 2 }}>
                   <View style={styles.menuTitleRow}>
                     <AppText variant="bodyMedium" style={{ fontWeight: '600' }}>
-                      Notifications
+                      {t('profile.notifications')}
                     </AppText>
-                    <Badge label="Soon" tone="gray" />
+                    <Badge label={t('profile.soon')} tone="gray" />
                   </View>
                   <AppText variant="caption" tone="muted">
-                    Order updates will arrive here
+                    {t('profile.notificationsSub')}
                   </AppText>
                 </View>
                 <Switch
@@ -271,14 +275,14 @@ export default function ProfileScreen() {
               </View>
               <MenuRow
                 icon="shield-checkmark-outline"
-                title="Privacy"
-                subtitle="How we look after your data"
+                title={t('profile.privacy')}
+                subtitle={t('profile.privacySub')}
                 onPress={showPrivacy}
               />
               <MenuRow
                 icon="information-circle-outline"
-                title="About LocalMart"
-                subtitle="Version, store, and support"
+                title={t('profile.about')}
+                subtitle={t('profile.aboutSub')}
                 onPress={showAbout}
                 last
               />
@@ -287,19 +291,19 @@ export default function ProfileScreen() {
 
           <View style={styles.section}>
             <AppText variant="meta" tone="muted" style={styles.sectionLabel}>
-              SUPPORT
+              {t('profile.support')}
             </AppText>
             <Card padded={false} style={styles.menuCard}>
               <MenuRow
                 icon="chatbubble-ellipses-outline"
-                title="Help & support"
-                subtitle="Answers from our help centre"
+                title={t('profile.help')}
+                subtitle={t('profile.helpSub')}
                 onPress={() => router.push('/help')}
               />
               <MenuRow
                 icon="shield-checkmark-outline"
-                title="Terms & privacy"
-                subtitle="The important bits, in plain language"
+                title={t('profile.terms')}
+                subtitle={t('profile.termsSub')}
                 onPress={showPrivacy}
                 last
               />
@@ -307,7 +311,7 @@ export default function ProfileScreen() {
           </View>
 
           <Button
-            label="Sign out"
+            label={t('profile.signOut')}
             onPress={confirmSignOut}
             variant="secondary"
             icon="log-out-outline"

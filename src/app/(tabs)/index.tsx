@@ -21,7 +21,9 @@ import { BrandMark } from '@/components/ui/BrandMark';
 import { EmptyState, ErrorState, ProductGridSkeleton } from '@/components/ui/States';
 import { colors, radius, shadows } from '@/constants/design';
 import { apiErrorMessage, apiPath, apiRequest, apiRequestPage } from '@/lib/api';
-import { greetingFor, money } from '@/lib/format';
+import { money } from '@/lib/format';
+import { translate } from '@/lib/i18n';
+import { useLanguageStore } from '@/store/language';
 import { aiSmartSearch } from '@/lib/ai';
 import { fetchRecsHome } from '@/lib/recs';
 import type {
@@ -55,11 +57,11 @@ type FlashDeal = {
   };
 };
 
-const CATEGORIES: { key: CategoryFilter; label: string; icon: string }[] = [
-  { key: 'all', label: 'All', icon: 'grid-outline' },
-  { key: 'fruits', label: 'Fruits', icon: 'nutrition-outline' },
-  { key: 'vegetables', label: 'Vegetables', icon: 'leaf-outline' },
-  { key: 'meat', label: 'Meat & fish', icon: 'fish-outline' },
+const CATEGORIES: { key: CategoryFilter; labelKey: string; icon: string }[] = [
+  { key: 'all', labelKey: 'home.categoryAll', icon: 'grid-outline' },
+  { key: 'fruits', labelKey: 'home.categoryFruits', icon: 'nutrition-outline' },
+  { key: 'vegetables', labelKey: 'home.categoryVegetables', icon: 'leaf-outline' },
+  { key: 'meat', labelKey: 'home.categoryMeat', icon: 'fish-outline' },
 ];
 
 const EMPTY_PAGINATION: Pagination = {
@@ -76,6 +78,9 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const user = useAuthStore((state) => state.user);
   const store = useConfigStore((state) => state.store);
+  const language = useLanguageStore((state) => state.language);
+  const t = (key: string, vars?: Record<string, string | number>) =>
+    translate(language, key, vars);
   const loadStore = useConfigStore((state) => state.loadStore);
   const items = useCartStore((state) => state.items);
   const addItem = useCartStore((state) => state.addItem);
@@ -289,9 +294,16 @@ export default function HomeScreen() {
   const hasFilters = !!debouncedQuery || category !== 'all';
   const listHeading = hasFilters
     ? debouncedQuery
-      ? `Results for “${debouncedQuery}”`
-      : CATEGORIES.find((item) => item.key === category)?.label ?? 'Fresh picks'
-    : 'Fresh picks for you';
+      ? t('home.resultsFor', { query: debouncedQuery })
+      : CATEGORIES.find((item) => item.key === category)
+        ? t(CATEGORIES.find((item) => item.key === category)!.labelKey)
+        : t('home.freshPicks')
+    : t('home.freshPicks');
+
+  const hour = new Date().getHours();
+  const greeting = t(
+    hour < 12 ? 'home.goodMorning' : hour < 17 ? 'home.goodAfternoon' : 'home.goodEvening',
+  );
 
   const listHeader = (
     <View>
@@ -311,7 +323,7 @@ export default function HomeScreen() {
                 LocalMart
               </AppText>
               <AppText variant="caption" style={{ color: 'rgba(255,255,255,0.7)' }}>
-                Your neighbourhood market
+                {t('home.tagline')}
               </AppText>
             </View>
           </View>
@@ -341,7 +353,7 @@ export default function HomeScreen() {
           </View>
           <View style={styles.locationText}>
             <AppText variant="caption" style={{ color: 'rgba(255,255,255,0.64)' }}>
-              Deliver to
+              {t('home.deliverTo')}
             </AppText>
             <AppText variant="meta" tone="white" numberOfLines={1} style={{ fontWeight: '700' }}>
               {addressLabel}
@@ -353,10 +365,10 @@ export default function HomeScreen() {
         <View style={styles.greetingRow}>
           <View style={{ flex: 1, gap: 4 }}>
             <AppText variant="title" tone="white" style={styles.greeting}>
-              {greetingFor()}, {user?.name?.split(' ')[0] || 'there'}
+              {greeting}, {user?.name?.split(' ')[0] || 'there'}
             </AppText>
             <AppText variant="body" style={{ color: 'rgba(255,255,255,0.78)' }}>
-              What’s fresh in your neighbourhood today?
+              {t('home.freshToday')}
             </AppText>
           </View>
         </View>
@@ -366,7 +378,7 @@ export default function HomeScreen() {
           <TextInput
             value={query}
             onChangeText={setQuery}
-            placeholder="Search fruits, vegetables, meat…"
+            placeholder={t('home.searchPlaceholder')}
             placeholderTextColor={colors.subtle}
             style={styles.searchInput}
             returnKeyType="search"
@@ -392,7 +404,7 @@ export default function HomeScreen() {
           style={({ pressed }) => [styles.assistantPill, pressed && { opacity: 0.9 }]}
         >
           <Ionicons name="sparkles" size={14} color={colors.primaryDark} />
-          <AppText style={styles.assistantPillText}>Ask the assistant</AppText>
+          <AppText style={styles.assistantPillText}>{t('home.askAssistant')}</AppText>
         </Pressable>
 
         <View style={styles.heroMeta}>
@@ -404,14 +416,16 @@ export default function HomeScreen() {
               ]}
             />
             <AppText variant="caption" style={styles.metaText}>
-              {store.isOpen ? `Open till ${formatHour(store.closeTime)}` : 'Currently closed'}
+              {store.isOpen
+                ? t('common.openTill', { time: formatHour(store.closeTime) })
+                : t('common.closed')}
             </AppText>
           </View>
           <View style={styles.metaDivider} />
           <View style={styles.metaPill}>
             <Ionicons name="bicycle-outline" size={14} color="rgba(255,255,255,0.8)" />
             <AppText variant="caption" style={styles.metaText}>
-              Free delivery over {money(store.freeDeliveryAbove)}
+              {t('common.freeDeliveryOver', { amount: money(store.freeDeliveryAbove) })}
             </AppText>
           </View>
         </View>
@@ -430,10 +444,10 @@ export default function HomeScreen() {
             </View>
             <View style={{ flex: 1, gap: 2 }}>
               <AppText variant="bodyMedium" style={{ fontWeight: '700', color: '#92400E' }}>
-                Farm-fresh, every morning
+                {t('home.promoTitle')}
               </AppText>
               <AppText variant="caption" style={{ color: '#A16207' }}>
-                Handpicked produce from trusted local growers.
+                {t('home.promoBody')}
               </AppText>
             </View>
             <Pressable
@@ -459,7 +473,7 @@ export default function HomeScreen() {
                 key={item.key}
                 accessibilityRole="button"
                 accessibilityState={{ selected: active }}
-                accessibilityLabel={`Browse ${item.label}`}
+                accessibilityLabel={`Browse ${t(item.labelKey)}`}
                 onPress={() => setCategory(item.key)}
                 style={({ pressed }) => [
                   styles.category,
@@ -481,7 +495,7 @@ export default function HomeScreen() {
                     fontWeight: '700',
                   }}
                 >
-                  {item.label}
+                  {t(item.labelKey)}
                 </AppText>
               </Pressable>
             );
@@ -492,7 +506,7 @@ export default function HomeScreen() {
           <View style={styles.weatherBanner}>
             <Ionicons name="rainy" size={16} color="#92400E" />
             <AppText variant="caption" style={{ color: '#92400E', flex: 1 }}>
-              {store.weatherNote || 'Rainy conditions'} · deliveries may take a little longer.
+              {store.weatherNote || 'Rainy conditions'} · {t('home.weatherSuffix')}
             </AppText>
           </View>
         ) : null}
@@ -501,9 +515,9 @@ export default function HomeScreen() {
           <View style={styles.featuredSection}>
             <View style={styles.sectionHeading}>
               <View style={{ gap: 1 }}>
-                <AppText variant="section">Flash deals</AppText>
+                <AppText variant="section">{t('home.flashDeals')}</AppText>
                 <AppText variant="caption" tone="muted">
-                  Marked down to clear — while stock lasts
+                  {t('home.flashDealsSub')}
                 </AppText>
               </View>
               <View style={styles.sparkle}>
@@ -557,9 +571,9 @@ export default function HomeScreen() {
           <View style={styles.featuredSection}>
             <View style={styles.sectionHeading}>
               <View style={{ gap: 1 }}>
-                <AppText variant="section">Handpicked for you</AppText>
+                <AppText variant="section">{t('home.handpicked')}</AppText>
                 <AppText variant="caption" tone="muted">
-                  Small-batch favourites, while they last
+                  {t('home.handpickedSub')}
                 </AppText>
               </View>
               <View style={styles.sparkle}>
@@ -604,21 +618,23 @@ export default function HomeScreen() {
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
                 <Ionicons name="sparkles" size={12} color={colors.primaryDark} />
                 <AppText variant="caption" style={{ color: colors.primaryDark, fontWeight: '700' }}>
-                  Smart matches — closest picks by meaning
+                  {t('home.smartMatches')}
                 </AppText>
               </View>
             ) : (
               <AppText variant="caption" tone="muted">
                 {loading
-                  ? 'Gathering today’s best…'
-                  : `${pagination.total} ${pagination.total === 1 ? 'item' : 'items'} available`}
+                  ? t('home.gathering')
+                  : pagination.total === 1
+                    ? t('common.itemSingular')
+                    : t('home.itemsAvailable', { count: pagination.total })}
               </AppText>
             )}
           </View>
           {hasFilters ? (
             <Pressable onPress={clearFilters} hitSlop={8}>
               <AppText variant="meta" tone="primary" style={{ fontWeight: '700' }}>
-                Clear
+                {t('common.clear')}
               </AppText>
             </Pressable>
           ) : null}
@@ -655,13 +671,11 @@ export default function HomeScreen() {
           ) : (
             <EmptyState
               icon="search-outline"
-              title="No fresh finds here"
+              title={t('home.emptyTitle')}
               description={
-                hasFilters
-                  ? 'Try a different search or browse another category.'
-                  : 'The shelves are being restocked. Check back shortly.'
+                hasFilters ? t('home.emptyFilterBody') : t('home.emptyRestockBody')
               }
-              actionLabel={hasFilters ? 'Clear filters' : undefined}
+              actionLabel={hasFilters ? t('common.clearFilters') : undefined}
               onAction={hasFilters ? clearFilters : undefined}
             />
           )
@@ -695,7 +709,7 @@ export default function HomeScreen() {
             <View style={styles.caughtUp}>
               <Ionicons name="checkmark-circle-outline" size={16} color={colors.subtle} />
               <AppText variant="caption" tone="subtle">
-                You’re all caught up
+                {t('common.allCaughtUp')}
               </AppText>
               <View style={{ height: count > 0 ? 84 : 12 }} />
             </View>
@@ -718,10 +732,11 @@ export default function HomeScreen() {
           </View>
           <View style={{ flex: 1 }}>
             <AppText variant="meta" tone="white" style={{ fontWeight: '700' }}>
-              View cart
+              {t('common.viewCart')}
             </AppText>
             <AppText variant="caption" style={{ color: 'rgba(255,255,255,0.72)' }}>
-              {count} {count === 1 ? 'item' : 'items'} · {money(total)}
+              {count === 1 ? t('common.itemSingular') : t('common.itemsCount', { count })} ·{' '}
+              {money(total)}
             </AppText>
           </View>
           <Ionicons name="arrow-forward" size={20} color={colors.white} />

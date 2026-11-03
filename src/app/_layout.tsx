@@ -7,11 +7,13 @@ import { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ToastHost } from '@/components/ui/ToastHost';
 import { colors } from '@/constants/design';
+import { apiRequest } from '@/lib/api';
 import { registerForPush } from '@/lib/push';
 import { setSessionExpiredHandler } from '@/lib/session';
 import { useAuthStore } from '@/store/auth';
 import { useCartStore } from '@/store/cart';
 import { useConfigStore } from '@/store/config';
+import { applyServerLanguage, useLanguageStore } from '@/store/language';
 
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
@@ -19,10 +21,21 @@ export default function RootLayout() {
   const router = useRouter();
   const user = useAuthStore((state) => state.user);
   const loadStore = useConfigStore((state) => state.loadStore);
+  const hydrateLanguage = useLanguageStore((state) => state.hydrate);
+  const loadStoredAuth = useAuthStore((state) => state.loadStoredAuth);
 
   useEffect(() => {
     void loadStore();
-  }, [loadStore]);
+    void hydrateLanguage();
+    void loadStoredAuth();
+  }, [loadStore, hydrateLanguage, loadStoredAuth]);
+
+  useEffect(() => {
+    if (!user) return;
+    void apiRequest<{ language?: string }>('/auth/me/prefs')
+      .then((prefs) => applyServerLanguage(prefs.language))
+      .catch(() => undefined);
+  }, [user]);
 
   useEffect(() => {
     if (user) {

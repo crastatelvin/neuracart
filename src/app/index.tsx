@@ -22,7 +22,6 @@ export default function AuthGateScreen() {
   const [minimumElapsed, setMinimumElapsed] = useState(false);
 
   useEffect(() => {
-    void loadStoredAuth();
     const timer = setTimeout(() => setMinimumElapsed(true), 500);
     return () => clearTimeout(timer);
   }, [loadStoredAuth]);
