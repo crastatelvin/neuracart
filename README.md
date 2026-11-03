@@ -26,24 +26,24 @@
   <img alt="EN KN HI" src="https://img.shields.io/badge/i18n-EN_%C2%B7_KN_%C2%B7_HI-22C55E">
 </p>
 
-<table align="center">
+<table align="center" width="100%">
   <tr>
     <td align="center" width="50%">
-      <img src="docs/evidence/customer-home-dark.png" width="400" alt="Customer app — live catalogue in dark mode"><br>
+      <img src="docs/evidence/customer-home-dark.png" width="100%" alt="Customer app — live catalogue in dark mode"><br>
       <sub><b>Customer</b> — real catalogue, live stock, AI entry point</sub>
     </td>
     <td align="center" width="50%">
-      <img src="docs/evidence/customer-product-dark.png" width="400" alt="Customer app — product detail with real photography"><br>
+      <img src="docs/evidence/customer-product-dark.png" width="100%" alt="Customer app — product detail with real photography"><br>
       <sub><b>Product</b> — real photography, substitutes, one-tap cart</sub>
     </td>
   </tr>
   <tr>
     <td align="center" width="50%">
-      <img src="docs/evidence/admin-dashboard-dark.png" width="400" alt="Admin panel — live dashboard"><br>
+      <img src="docs/evidence/admin-dashboard-dark.png" width="100%" alt="Admin panel — live dashboard"><br>
       <sub><b>Admin</b> — revenue, live queue, 7-day demand forecast</sub>
     </td>
     <td align="center" width="50%">
-      <img src="docs/evidence/delivery-assignments-dark.png" width="400" alt="Rider app — assignments"><br>
+      <img src="docs/evidence/delivery-assignments-dark.png" width="100%" alt="Rider app — assignments"><br>
       <sub><b>Rider</b> — assignments, earnings, availability</sub>
     </td>
   </tr>
