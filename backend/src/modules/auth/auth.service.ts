@@ -58,7 +58,7 @@ export function safeDeliveryProfile(
   };
 }
 
-async function issueTokens(
+export async function issueTokens(
   user: User,
   family: string = randomUUID(),
 ): Promise<{ accessToken: string; refreshToken: string }> {

@@ -1,4 +1,5 @@
 import type { Request, RequestHandler } from 'express';
+import { AppError } from '../../utils/errors';
 import { sendSuccess } from '../../utils/response';
 import type {
   DeliveryLoginInput,
@@ -9,6 +10,12 @@ import type {
   VerifyOtpInput,
 } from './auth.schemas';
 import { authService } from './auth.service';
+import {
+  buildRedirectUrl,
+  createGoogleAuthUrl,
+  googleConfigured,
+  loginWithGoogle,
+} from './google.service';
 
 function requireUser(req: Request) {
   if (!req.user) {
@@ -142,6 +149,44 @@ export const deliveryLogin: RequestHandler = async (req, res, next) => {
     const { email, password } = req.body as DeliveryLoginInput;
     const result = await authService.deliveryLogin(email, password);
     sendSuccess(res, result, 'Login successful');
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const googleStatus: RequestHandler = (_req, res) => {
+  sendSuccess(res, { configured: googleConfigured() }, 'Google sign-in status');
+};
+
+export const googleStart: RequestHandler = (req, res, next) => {
+  try {
+    const redirect = typeof req.query.redirect === 'string' ? req.query.redirect : null;
+    res.redirect(createGoogleAuthUrl(redirect));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const googleCallback: RequestHandler = async (req, res, next) => {
+  try {
+    const code = typeof req.query.code === 'string' ? req.query.code : '';
+    const state = typeof req.query.state === 'string' ? req.query.state : '';
+    if (!code || !state) {
+      throw new AppError('Missing Google response', 400, 'GOOGLE_BAD_REQUEST');
+    }
+    const result = await loginWithGoogle(code, state);
+    if (!result.redirect) {
+      res
+        .status(200)
+        .type('html')
+        .send(
+          '<!doctype html><meta charset="utf-8"><title>NeuraCart</title>' +
+            '<body style="font-family:system-ui;padding:40px">' +
+            '<h1>Signed in</h1><p>You can close this window and return to the app.</p></body>',
+        );
+      return;
+    }
+    res.redirect(buildRedirectUrl(result.redirect, result));
   } catch (error) {
     next(error);
   }

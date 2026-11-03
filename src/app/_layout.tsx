@@ -1,13 +1,16 @@
 import '../global.css';
 
+import * as Linking from 'expo-linking';
 import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
+import { Platform } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ToastHost } from '@/components/ui/ToastHost';
 import { colors } from '@/constants/design';
 import { apiRequest } from '@/lib/api';
+import { parseOAuthTokens } from '@/lib/oauth';
 import { registerForPush } from '@/lib/push';
 import { setSessionExpiredHandler } from '@/lib/session';
 import { useAuthStore } from '@/store/auth';
@@ -45,6 +48,31 @@ export default function RootLayout() {
       useCartStore.getState().reset();
     }
   }, [user]);
+
+  // Consume the tokens Google sign-in appends to the redirect URL.
+  useEffect(() => {
+    const consume = (url: string | null) => {
+      const tokens = parseOAuthTokens(url);
+      if (!tokens) return;
+      void useAuthStore
+        .getState()
+        .completeOAuth(tokens.accessToken, tokens.refreshToken)
+        .then(() => router.replace('/(tabs)'))
+        .catch(() => undefined);
+    };
+
+    if (Platform.OS === 'web') {
+      consume(window.location.href);
+      if (window.location.search) {
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+      return;
+    }
+
+    void Linking.getInitialURL().then(consume);
+    const subscription = Linking.addEventListener('url', (event) => consume(event.url));
+    return () => subscription.remove();
+  }, [router]);
 
   useEffect(() => {
     setSessionExpiredHandler(() => {

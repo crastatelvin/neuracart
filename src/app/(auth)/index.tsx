@@ -2,8 +2,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
+  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -18,6 +19,7 @@ import { Button } from '@/components/ui/Button';
 import { TextField } from '@/components/ui/TextField';
 import { colors, radius, shadows } from '@/constants/design';
 import { apiErrorMessage } from '@/lib/api';
+import { fetchGoogleStatus, startGoogleSignIn } from '@/lib/oauth';
 import { useAuthStore } from '@/store/auth';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -26,9 +28,34 @@ export default function EmailScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const sendOtp = useAuthStore((state) => state.sendOtp);
+  const completeOAuth = useAuthStore((state) => state.completeOAuth);
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [googleConfigured, setGoogleConfigured] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    void fetchGoogleStatus()
+      .then((status) => setGoogleConfigured(status.configured))
+      .catch(() => setGoogleConfigured(false));
+  }, []);
+
+  async function signInWithGoogle() {
+    if (googleLoading) return;
+    setError(null);
+    setGoogleLoading(true);
+    try {
+      const tokens = await startGoogleSignIn();
+      if (!tokens) return;
+      await completeOAuth(tokens.accessToken, tokens.refreshToken);
+      router.replace('/(tabs)');
+    } catch (caught) {
+      setError(apiErrorMessage(caught));
+    } finally {
+      setGoogleLoading(false);
+    }
+  }
 
   async function submit() {
     const normalized = email.trim().toLowerCase();
@@ -117,6 +144,41 @@ export default function EmailScreen() {
               iconRight="arrow-forward"
               accessibilityLabel="Send one-time code"
             />
+
+            <View style={styles.dividerRow}>
+              <View style={styles.divider} />
+              <AppText variant="caption" tone="subtle">
+                or
+              </AppText>
+              <View style={styles.divider} />
+            </View>
+
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Continue with Google"
+              accessibilityState={{ disabled: googleLoading || googleConfigured === false }}
+              disabled={googleLoading || googleConfigured === false}
+              onPress={() => void signInWithGoogle()}
+              style={({ pressed }) => [
+                styles.googleButton,
+                pressed && { opacity: 0.85 },
+                googleConfigured === false && { opacity: 0.5 },
+              ]}
+            >
+              {googleLoading ? (
+                <ActivityIndicator size="small" color={colors.text} />
+              ) : (
+                <Ionicons name="logo-google" size={18} color={colors.text} />
+              )}
+              <AppText variant="bodyMedium" style={{ fontWeight: '700' }}>
+                Continue with Google
+              </AppText>
+            </Pressable>
+            {googleConfigured === false ? (
+              <AppText variant="caption" tone="subtle" style={{ textAlign: 'center' }}>
+                Add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET to the API .env to enable this.
+              </AppText>
+            ) : null}
           </View>
 
           <Pressable
@@ -159,6 +221,24 @@ export default function EmailScreen() {
 }
 
 const styles = StyleSheet.create({
+  dividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginVertical: 2,
+  },
+  divider: { flex: 1, height: 1, backgroundColor: colors.border },
+  googleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 9,
+    minHeight: 52,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.borderStrong,
+    backgroundColor: colors.card,
+  },
   fill: { flex: 1, backgroundColor: colors.background },
   scroll: { flexGrow: 1, paddingBottom: 28 },
   hero: {
@@ -212,3 +292,4 @@ const styles = StyleSheet.create({
   infoText: { flex: 1 },
   terms: { textAlign: 'center', lineHeight: 16 },
 });
+

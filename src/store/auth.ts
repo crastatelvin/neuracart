@@ -26,6 +26,7 @@ type AuthState = {
   loadStoredAuth: () => Promise<void>;
   sendOtp: (email: string) => Promise<{ devOtp?: string }>;
   verifyOtp: (email: string, code: string) => Promise<void>;
+  completeOAuth: (accessToken: string, refreshToken: string) => Promise<void>;
   refreshSession: () => Promise<boolean>;
   updateProfile: (data: { name?: string; phone?: string }) => Promise<void>;
   signOut: () => Promise<void>;
@@ -131,6 +132,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       isLoading: false,
       bootError: null,
     });
+  },
+
+  completeOAuth: async (accessToken, refreshToken) => {
+    await setSessionTokens({ accessToken, refreshToken });
+    const me = await apiRequest<MeResponse>('/auth/me');
+    const user: User = {
+      id: me.id,
+      email: me.email,
+      name: me.name,
+      phone: me.phone,
+      role: me.role,
+    };
+    await persistUser(user);
+    set({ user, isAuthenticated: true, isLoading: false, bootError: null });
   },
 
   refreshSession: async () => {

@@ -38,6 +38,9 @@ authRoutes.post(
   validateBody(verifyOtpSchema),
   controller.verifyAdminOtp,
 );
+authRoutes.get('/google/status', controller.googleStatus);
+authRoutes.get('/google', controller.googleStart);
+authRoutes.get('/google/callback', controller.googleCallback);
 authRoutes.post(
   '/refresh',
   authRateLimiter,

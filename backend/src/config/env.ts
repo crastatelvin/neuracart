@@ -57,6 +57,12 @@ const envSchema = z
       .default('false')
       .transform((value) => value === 'true'),
 
+    GOOGLE_CLIENT_ID: z.string().default(''),
+    GOOGLE_CLIENT_SECRET: z.string().default(''),
+    GOOGLE_REDIRECT_URL: z
+      .string()
+      .default('http://localhost:8000/api/auth/google/callback'),
+
     RAZORPAY_KEY_ID: z.string().default(''),
     RAZORPAY_KEY_SECRET: z.string().default(''),
     RAZORPAY_WEBHOOK_SECRET: z.string().default(''),
