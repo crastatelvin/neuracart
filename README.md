@@ -104,7 +104,7 @@ Every AI feature shares one pipeline: **signal → context → guardrails → mo
 ### Customer app
 
 - **Auth** — email OTP (hashed, rate-limited, 10-minute expiry) and **Google sign-in** when OAuth credentials are configured. JWT access tokens (15 min) + rotating refresh tokens (7 days) with reuse detection.
-- **Shopping** — category tabs, search, featured rails, product detail, stock awareness, quantity stepper, cart persisted per user.
+- **Shopping** — 38 fruits, vegetables, and meat SKUs with real CC-licensed photography, category tabs, search, featured rails, product detail, stock awareness, quantity stepper, cart persisted per user.
 - **Checkout** — saved addresses, delivery vs store pickup, two-hour slots with capacity, wallet redemption, loyalty points, COD or online payment, order notes.
 - **After the order** — live status timeline, rider tracking map, cancellation windows, reorder, ratings and reviews, invoice-style totals.
 - **Money** — wallet ledger, loyalty tiers, referral code, near-expiry flash deals.
@@ -222,7 +222,7 @@ npm run db:seed
 cd ..
 ```
 
-The seed creates the store, ~30 products, recipes, slots, deals, a manager, a customer, and 10 riders.
+The seed creates the store, **38 products** across fruits, vegetables, and meat, recipes, slots, deals, a manager, a customer, and 10 riders. Every product ships with a real, CC-licensed photograph from Wikimedia Commons (committed under `backend/uploads/seed/`); see [`docs/IMAGE_CREDITS.md`](./docs/IMAGE_CREDITS.md) for attribution.
 
 ### 5. Run all four processes
 
@@ -406,7 +406,7 @@ cd delivery && npm run lint && npx tsc --noEmit
 - **Single store, single city.** Multi-store and multi-warehouse are deliberately out of scope; the schema keeps a `storeId` so it is not a rewrite.
 - **i18n is partial by design.** Tabs, home, profile, and help are translated; deeper screens fall back to English. The catalogue is English.
 - **No Redis.** OAuth state, rate limits, and the SSE fan-out are in-process. Run one API instance; horizontal scaling needs Redis.
-- **Local uploads.** Fine for dev; production should swap to S3-compatible storage.
+- **Local uploads.** Seed photography is committed for offline demos; manager uploads still land on local disk. Production should swap to S3-compatible storage.
 - **Google OAuth needs your credentials.** The code path, state handling, and UI gating are done; the round-trip is untested until keys exist.
 - **AI is optional.** With no `GEMINI_API_KEY`, every feature uses a deterministic fallback. That is intentional, not a stub.
 

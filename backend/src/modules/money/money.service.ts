@@ -56,7 +56,7 @@ export async function ensureReferral(tx: MoneyClient, userId: string) {
 }
 
 function makeReferralCode(userId: string): string {
-  // SUJAN50 style: first 5 of name aren't reliable here; use base32 of uuid.
+  // Referral style: first 5 of name aren't reliable here; use base32 of uuid.
   const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let code = '';
   for (const char of userId.replace(/-/g, '')) {

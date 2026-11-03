@@ -22,7 +22,7 @@ function istDayBounds(now: Date): { start: Date; end: Date } {
 }
 
 /**
- * Generates LM-YYYYMMDD-0001 using today's IST order count.
+ * Generates NC-YYYYMMDD-0001 using today's IST order count.
  * Must be called inside the order-placement transaction; retry on P2002.
  */
 export async function nextOrderNumber(

@@ -54,7 +54,7 @@ The source is a code-along, not a specification. It contains live debugging, inc
 1. Monorepo, env validation, Postgres, Prisma schema, migration, seed.
 2. Logger, response helpers, JWT/OTP/password utils, error handler.
 3. Auth module + RBAC + Resend OTP; verify with curl and a real inbox.
-4. Products module + upload pipeline; seed 19 products.
+4. Products module + upload pipeline; seed 38 products with real photography.
 5. Addresses module + ownership/default rules.
 6. Orders module: pricing, transaction, stock, status machine, history.
 7. Delivery module: assignments, start, complete, earnings.
@@ -372,7 +372,7 @@ Priority: **P0** = launch blocker, **P1** = launch, **P2** = v1.1.
 | FR-P-10 | Order status emails (placed, confirmed, out for delivery, delivered, cancelled). | P1 |
 | FR-P-11 | Daily log files; no secrets/PII. | P0 |
 | FR-P-12 | Health endpoint and graceful shutdown. | P0 |
-| FR-P-13 | Seed script: store, admin, customer, 10 riders, 19 products, 2 orders. | P0 |
+| FR-P-13 | Seed script: store, admin, customer, 10 riders, 38 products with real photography, 2 orders. | P0 |
 | FR-P-14 | OpenAPI/Swagger docs. | P1 |
 | FR-P-15 | Admin stats and rider management endpoints. | P1 |
 | FR-P-16 | Online payment + webhook (v1.1). | P2 |

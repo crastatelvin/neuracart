@@ -34,6 +34,11 @@ const PRODUCTS: ProductSeed[] = [
   { name: 'Oranges (Nagpur)', category: 'FRUITS', unit: '1 kg', price: 90, stock: 30, featured: false },
   { name: 'Grapes (Green)', category: 'FRUITS', unit: '500 g', price: 70, stock: 30, featured: false },
   { name: 'Pomegranate', category: 'FRUITS', unit: '1 kg', price: 160, stock: 20, featured: false },
+  { name: 'Papaya', category: 'FRUITS', unit: '1 pc', price: 55, stock: 25, featured: false },
+  { name: 'Pineapple', category: 'FRUITS', unit: '1 pc', price: 70, stock: 20, featured: false },
+  { name: 'Watermelon', category: 'FRUITS', unit: '1 pc', price: 90, stock: 15, featured: false },
+  { name: 'Lemons', category: 'FRUITS', unit: '250 g', price: 30, stock: 40, featured: false },
+  { name: 'Avocado', category: 'FRUITS', unit: '2 pcs', price: 180, stock: 12, featured: true },
   { name: 'Tomatoes (Hybrid)', category: 'VEGETABLES', unit: '1 kg', price: 40, stock: 50, featured: true },
   { name: 'Onions', category: 'VEGETABLES', unit: '1 kg', price: 35, stock: 60, featured: false },
   { name: 'Potatoes', category: 'VEGETABLES', unit: '1 kg', price: 30, stock: 60, featured: false },
@@ -41,12 +46,26 @@ const PRODUCTS: ProductSeed[] = [
   { name: 'Carrots', category: 'VEGETABLES', unit: '500 g', price: 45, stock: 35, featured: false },
   { name: 'Broccoli', category: 'VEGETABLES', unit: '1 pc', price: 80, stock: 20, featured: false },
   { name: 'Capsicum (Green)', category: 'VEGETABLES', unit: '500 g', price: 40, stock: 30, featured: false },
+  { name: 'Cucumber', category: 'VEGETABLES', unit: '500 g', price: 35, stock: 30, featured: false },
+  { name: 'Cauliflower', category: 'VEGETABLES', unit: '1 pc', price: 45, stock: 25, featured: false },
+  { name: 'Cabbage', category: 'VEGETABLES', unit: '1 pc', price: 35, stock: 25, featured: false },
+  { name: 'Green Peas', category: 'VEGETABLES', unit: '500 g', price: 60, stock: 20, featured: false },
+  { name: 'French Beans', category: 'VEGETABLES', unit: '500 g', price: 50, stock: 20, featured: false },
+  { name: 'Ginger', category: 'VEGETABLES', unit: '250 g', price: 40, stock: 25, featured: false },
+  { name: 'Garlic', category: 'VEGETABLES', unit: '250 g', price: 45, stock: 25, featured: false },
+  { name: 'Green Chillies', category: 'VEGETABLES', unit: '100 g', price: 15, stock: 30, featured: false },
+  { name: 'Button Mushrooms', category: 'VEGETABLES', unit: '200 g', price: 70, stock: 15, featured: false },
   { name: 'Chicken Breast', category: 'MEAT', unit: '500 g', price: 220, stock: 15, featured: true },
   { name: 'Chicken Curry Cut', category: 'MEAT', unit: '1 kg', price: 280, stock: 15, featured: false },
   { name: 'Mutton Curry Cut', category: 'MEAT', unit: '500 g', price: 420, stock: 10, featured: false },
   { name: 'Fish (Rohu)', category: 'MEAT', unit: '1 kg', price: 260, stock: 10, featured: false },
   { name: 'Prawns (Medium)', category: 'MEAT', unit: '500 g', price: 350, stock: 8, featured: false },
   { name: 'Eggs (Brown)', category: 'MEAT', unit: '6 pcs', price: 60, stock: 30, featured: false },
+  { name: 'Chicken Wings', category: 'MEAT', unit: '500 g', price: 200, stock: 12, featured: false },
+  { name: 'Chicken Drumsticks', category: 'MEAT', unit: '500 g', price: 210, stock: 12, featured: false },
+  { name: 'Fish (Pomfret)', category: 'MEAT', unit: '1 kg', price: 480, stock: 6, featured: false },
+  { name: 'Mutton Keema', category: 'MEAT', unit: '500 g', price: 450, stock: 8, featured: false },
+  { name: 'Salmon Fillet', category: 'MEAT', unit: '250 g', price: 520, stock: 6, featured: true },
 ];
 
 const RIDERS = [
@@ -161,7 +180,7 @@ async function createOrders(input: {
   riderUserId: string;
   products: Map<string, { id: string; price: Prisma.Decimal }>;
 }) {
-  const deliveredNumber = 'LM-20261021-0001';
+  const deliveredNumber = 'NC-20261021-0001';
   const deliveredExists = await prisma.order.findUnique({
     where: { orderNumber: deliveredNumber },
   });
@@ -237,7 +256,7 @@ async function createOrders(input: {
     });
   }
 
-  const activeNumber = 'LM-20261022-0001';
+  const activeNumber = 'NC-20261022-0001';
   const activeExists = await prisma.order.findUnique({
     where: { orderNumber: activeNumber },
   });
@@ -338,8 +357,8 @@ async function seedV2(input: {
   });
   await prisma.referralCode.upsert({
     where: { userId: customer.id },
-    create: { userId: customer.id, code: 'SUJAN50' },
-    update: {},
+    create: { userId: customer.id, code: 'NEURA50' },
+    update: { code: 'NEURA50' },
   });
 
   // ——— Recipes ———
@@ -728,7 +747,7 @@ async function main(): Promise<void> {  if (
   console.log('Admin:    admin@neuracart.app');
   console.log('Customer: customer@neuracart.app');
   console.log('Rider:    driver1@neuracart.app / NeuraCart@123');
-  console.log('Products: 19');
+  console.log('Products: 38');
 }
 
 main()

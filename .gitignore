@@ -35,11 +35,13 @@ expo-env.d.ts
 *.mobileprovision
 
 # backend runtime output — logs and uploaded product images are never committed,
-# but the directories are tracked via .gitkeep so a fresh clone can write to them
+# except the curated demo product photography so a fresh clone renders real images
 backend/logs/*
 backend/uploads/*
 !backend/logs/.gitkeep
 !backend/uploads/.gitkeep
+!backend/uploads/seed/
+!backend/uploads/seed/*.webp
 
 # prisma local dev db
 *.db
