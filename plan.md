@@ -507,7 +507,7 @@ If the rider declines or does not accept within 10 minutes (v1.1), the order ret
 | BR-09 | Prices are GST-inclusive; no tax line at checkout. |
 | BR-10 | Stock is validated and decremented atomically at order placement; cancel restores stock. |
 | BR-11 | Max 20 units per product and 50 total units per order. |
-| BR-12 | Order number format: `LM-YYYYMMDD-XXXX` (e.g. `LM-20261022-0007`), unique, IST date. |
+| BR-12 | Order number format: `NC-YYYYMMDD-XXXX` (e.g. `NC-20261022-0007`), unique, IST date. |
 | BR-13 | New orders start `PENDING` with history note “Order is placed”. |
 | BR-14 | Status can only move along the state machine; every change is audited. |
 | BR-15 | Customer sees only their own orders; rider sees only assigned orders; admin sees all. |
@@ -1490,7 +1490,7 @@ Response `201`:
   "message": "Order placed successfully",
   "data": {
     "id": "uuid",
-    "orderNumber": "LM-20261022-0007",
+    "orderNumber": "NC-20261022-0007",
     "status": "pending",
     "paymentStatus": "pending",
     "paymentMethod": "cod",
@@ -1726,7 +1726,7 @@ One argument order only; all controllers use it consistently (the source mixed o
 - Never use `parseFloat` for arithmetic; only for display after server calculation.
 
 **`utils/orderNumber.ts`**
-- `nextOrderNumber(tx)` → `LM-${YYYYMMDD in IST}-${String(seq).padStart(4,'0')}`.
+- `nextOrderNumber(tx)` → `NC-${YYYYMMDD in IST}-${String(seq).padStart(4,'0')}`.
 - Counts today’s orders (IST) inside the placement transaction, adds 1, and formats the number; on unique collision retry up to 3 times. At high volume, replace with a dedicated Postgres sequence or Redis `INCR`.
 
 ### 12.3 Middleware order
