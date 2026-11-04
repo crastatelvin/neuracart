@@ -450,5 +450,5 @@ cd delivery && npm run lint && npx tsc --noEmit
 
 <p align="center">
   <sub>Built as a single-neighbourhood store that happens to think in loops — forecast, substitute, route, answer.</sub><br>
-  <sub>Private project. See <a href="./LICENSE">LICENSE</a>.</sub>
+  <sub>MIT licensed. See <a href="./LICENSE">LICENSE</a>.</sub>
 </p>
