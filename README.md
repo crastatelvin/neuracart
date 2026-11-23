@@ -10,8 +10,6 @@
   </picture>
 </p>
 
-<h1 align="center">NeuraCart</h1>
-
 <p align="center">
   <strong>The AI-native neighbourhood market.</strong><br>
   Forecast the demand. Substitute the gap. Route the rider. Answer the customer — in one continuous loop.
