@@ -1,4 +1,8 @@
 <p align="center">
+  <img alt="NeuraCart logo" src="assets/images/neuracart-logo.png" width="180">
+</p>
+
+<p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/assets/hero-dark.svg">
     <source media="(prefers-color-scheme: light)" srcset="docs/assets/hero-light.svg">
